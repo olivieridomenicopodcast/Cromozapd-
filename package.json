@@ -1,0 +1,12 @@
+{
+  "name": "cromozapd-playtest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cromozapd — versione digitale per playtest (gioco vs AI, hotseat, AI vs AI, simulazioni)",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "rules": "node tools/build-rules.js",
+    "sim": "node tools/sim.js",
+    "serve": "node tools/serve.js"
+  }
+}

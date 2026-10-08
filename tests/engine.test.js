@@ -1,0 +1,354 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const FF = require('./_load.js');
+
+// ── helper ──
+const Z = (c, id) => ({ id: id || 700 + c, z: true, c });
+const N = (v, c, id) => ({ id: id || 600 + v * 4 + c, v, c });
+let uid = 1000;
+
+/* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
+   top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
+function mk(o = {}) {
+  const g = new FF.Game({ seed: 1, rules: o.rules, log: true });
+  FF.drive(g, g.setupGen(), () => null);
+  const s = g.s; let id = 1;
+  const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
+  s.players.forEach((p, i) => {
+    p.hand = hands[i].map(([v, c]) => ({ id: id++, v, c }));
+    p.eff = ((o.eff || [[], [], []])[i]).map((k) => ({ id: uid++, k }));
+    p.personal = 0;
+  });
+  const filler = []; for (let i = 0; i < 40; i++) filler.push({ id: 500 + i, v: 5, c: 3 });
+  const ctr = { id: 450, v: (o.center || [5, 0])[0], c: (o.center || [5, 0])[1] };
+  s.deck = [...filler, ...(o.after || []).slice().reverse(), ctr, ...(o.top || []).slice().reverse()];
+  s.discard = []; s.zapPile = []; s.zapsDrawn = o.zaps || 0; s.pending = []; s.nextCenter = null;
+  s.dominant = o.dom == null ? 3 : o.dom; s.excluded = o.excl == null ? 2 : o.excl; s.dir = o.dir || 1;
+  s.pairPts = [0, 0, 0]; s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  if (o.effDeck) s.effDeck = o.effDeck.map((k) => ({ id: uid++, k }));
+  s.turn = 1; s.over = false;
+  return g;
+}
+// policy scritta a mano; play: {pid:{couple:idx,self:idx,eff:'kind'}}
+function pol(o = {}) {
+  o.log = [];
+  return (g, d) => {
+    o.log.push(d);
+    switch (d.type) {
+      case 'sincero': return !!(o.sincero || {})[d.player];
+      case 'declare': return (o.decl || {})[d.player] || { num: null, mod: null };
+      case 'play': {
+        const P = (o.play || {})[d.player] || { couple: 0, self: 1 };
+        const e = P.eff ? d.eff.find((x) => x.k === P.eff) : null;
+        return { couple: d.hand[P.couple].id, self: d.hand[P.self].id, eff: e ? e.id : null };
+      }
+      case 'xplay': return d.hand[o.x || 0].id;
+      case 'annulla': { const w = (o.annulla || {})[d.player]; const t = w && d.targets.find((x) => x.k === w); return t ? t.idx : null; }
+      case 'effdraw': return !!o.effdraw;
+    }
+    return null;
+  };
+}
+const turn = (g, o = {}) => { FF.drive(g, g.turnGen(), pol(o)); return o; };
+const pts = (g, e = 2) => g.s.pairPts[e];
+
+test('mazzi: 92 carte (80 numeriche + 12 Zapd), ogni colore-valore due volte; Mazzetto Effetti da 20', () => {
+  const d = FF.buildDeck();
+  assert.equal(d.length, 92);
+  assert.equal(d.filter((c) => c.z).length, 12);
+  for (let c = 0; c < 4; c++) {
+    assert.equal(d.filter((x) => x.z && x.c === c).length, 3);
+    for (let v = 1; v <= 10; v++) assert.equal(d.filter((x) => !x.z && x.c === c && x.v === v).length, 2);
+  }
+  assert.equal(new Set(d.map((c) => c.id)).size, 92);
+  const e = FF.buildEffectDeck();
+  assert.equal(e.length, 20);
+  assert.equal(e.filter((x) => x.k === 'reverse').length, 3);
+  assert.equal(e.filter((x) => x.k === 'swap').length, 2);
+});
+
+test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd, escluso iniziale A', () => {
+  const g = new FF.Game({ seed: 7 });
+  FF.drive(g, g.setupGen(), () => null);
+  for (const p of g.s.players) { assert.equal(p.hand.length, 3); assert.ok(p.hand.every((c) => !c.z)); }
+  assert.ok(g.s.dominant >= 0 && g.s.dominant < 4);
+  assert.equal(g.s.zapPile.length, g.s.zapsDrawn);
+  assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 92);
+});
+
+test('stesso seed → stessa partita; replay delle risposte riproduce il risultato', () => {
+  const play = (seed, replay) => {
+    const g = new FF.Game({ seed, log: true, replay });
+    const bots = [FF.RandomBot(seed + 'a'), FF.RandomBot(seed + 'b'), FF.RandomBot(seed + 'c')];
+    const r = FF.drive(g, g.run(), (game, d) => bots[d.player].decide(game, d));
+    return { g, r };
+  };
+  const a = play('det', null), b = play('det', null), c = play('altro', null);
+  assert.deepEqual(a.g.events.map((e) => e.text), b.g.events.map((e) => e.text));
+  assert.notDeepEqual(a.g.events.map((e) => e.text), c.g.events.map((e) => e.text));
+  const rp = new FF.Game({ seed: 'det', log: true, replay: a.g.history });
+  const r2 = FF.drive(rp, rp.run(), () => { throw new Error('non deve chiedere nulla'); });
+  assert.deepEqual(r2, a.r);
+  assert.deepEqual(rp.events.map((e) => e.text), a.g.events.map((e) => e.text));
+});
+
+test('range da V a V+Base con estremi inclusi; la coppia incassa somma + carta dell\'escluso', () => {
+  // centro 5 → 5..15: 6+9 = 15 (estremo alto)
+  let g = mk(); turn(g);
+  assert.equal(pts(g), 6 + 9 + 4); // escluso C gioca la 4
+  // estremo basso: centro 10 → 10..20, 6+4=10
+  g = mk({ center: [10, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[7, 1], [8, 2], [9, 2]]] }); turn(g);
+  assert.equal(pts(g), 6 + 4 + 7);
+});
+
+test('sforo sopra e sotto: la coppia fa 0, la carta dell\'escluso non conta per nessuno, la carta per sé sì', () => {
+  const g = mk({ center: [4, 0] }); // 4..14, 6+9 = 15 → sopra
+  turn(g);
+  assert.equal(pts(g), 0);
+  assert.equal(g.s.contrib.flat().reduce((a, b) => a + b, 0), 0);
+  assert.equal(g.s.players[0].personal, 2); assert.equal(g.s.players[1].personal, 3);
+  const h = mk({ center: [10, 0] }); // 10..20, 6+9 = 15 ok; per testare "sotto" servono carte piccole
+  const g2 = mk({ center: [10, 0], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] });
+  turn(g2);
+  assert.equal(pts(g2), 0); // 3+4 = 7 < 10
+  assert.equal(g2.stats.g.sfora_sotto, 1);
+  turn(h); assert.equal(pts(h), 6 + 9 + 4);
+});
+
+test('colore dominante: se entrambe le carte-coppia lo sono, niente perdita per sforo', () => {
+  const g = mk({ center: [4, 0], dom: 1 }); // 6+9=15 > 14 ma entrambe colore 1 (dominante)
+  turn(g);
+  assert.equal(pts(g), 6 + 9 + 4);
+  assert.equal(g.stats.g.coppia_salvata_dal_colore, 1);
+  // una sola carta del colore dominante: non basta
+  const h = mk({ center: [4, 0], dom: 1, hands: [[[6, 1], [2, 1], [1, 1]], [[9, 2], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] });
+  turn(h); assert.equal(pts(h), 0);
+});
+
+test('il colore della carta dell\'escluso e quello della carta centrale non contano', () => {
+  const g = mk({ center: [4, 1], dom: 2, hands: [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 2], [8, 2], [9, 2]]] });
+  turn(g); assert.equal(pts(g), 0); // carta dell'escluso del colore dominante: nessuna immunità
+});
+
+test('modificatori ±: −n abbassa il minimo, +n alza il massimo (si sommano)', () => {
+  // centro 8 → 8..18; coppia 3+4 = 7 sotto; con −1 il minimo è 7 → dentro
+  let g = mk({ center: [8, 0], eff: [['lo1'], [], []], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'lo1' } } });
+  assert.equal(pts(g), 7 + 4);
+  // centro 5 → 5..15; 8+9 = 17: servono +2
+  const hands = [[[8, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
+  g = mk({ eff: [['hi1'], ['hi1'], []], hands }); turn(g, { play: { 0: { couple: 0, self: 1, eff: 'hi1' }, 1: { couple: 0, self: 1, eff: 'hi1' } } });
+  assert.equal(pts(g), 17 + 4);
+  g = mk({ eff: [['hi1'], [], []], hands }); turn(g, { play: { 0: { couple: 0, self: 1, eff: 'hi1' } } });
+  assert.equal(pts(g), 0); // +1 non basta
+});
+
+test('Zapd da rimpiazzo: si risolve subito, si ripesca fino a 3 carte; i ruoli si fissano a pesca finita', () => {
+  const g = mk({ hands: [[[6, 1], [2, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]], top: [Z(2), N(7, 1)] });
+  const p = turn(g);
+  assert.equal(g.s.zapsDrawn, 1);
+  assert.equal(g.s.dominant, 2);
+  assert.equal(g.s.excluded, 0); // C → A
+  const xp = p.log.find((d) => d.type === 'xplay');
+  assert.equal(xp.player, 0); assert.equal(xp.hand.length, 3);
+  assert.deepEqual(xp.hand.map((c) => c.v), [6, 2, 7]);
+});
+
+test('Zapd come carta centrale: si risolve e si ripesca finché esce una numerica; due Zapd = due passi', () => {
+  let g = mk({ top: [Z(1)] }); turn(g);
+  assert.equal(g.s.excluded, 0); assert.equal(g.s.dominant, 1); assert.equal(g.s.center.v, 5);
+  g = mk({ top: [Z(0), Z(1)] }); turn(g);
+  assert.equal(g.s.excluded, 1); assert.equal(g.s.dominant, 1); assert.equal(g.s.zapsDrawn, 2);
+});
+
+test('Reverse: inverte il verso; la Zapd successiva sposta l\'escluso al contrario', () => {
+  const g = mk({ eff: [['reverse'], [], []] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'reverse' } } });
+  assert.equal(g.s.dir, -1); assert.equal(g.s.excluded, 2);
+  g.s.deck.push(Z(0)); turn(g);
+  assert.equal(g.s.excluded, 1); // C → B (e non → A)
+});
+
+test('Reverse giocato da due attivi: si annullano a vicenda', () => {
+  const g = mk({ eff: [['reverse'], ['reverse'], []] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'reverse' }, 1: { couple: 0, self: 1, eff: 'reverse' } } });
+  assert.equal(g.s.dir, 1);
+});
+
+test('Prossima carta: la cima del mazzo è la centrale del turno dopo; una seconda nello stesso turno non fa nulla', () => {
+  const g = mk({ eff: [['next'], ['next'], []], after: [N(8, 2)] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'next' }, 1: { couple: 0, self: 1, eff: 'next' } } });
+  assert.equal(g.s.nextCenter.v, 8);
+  assert.ok(g.events.some((e) => e.text.includes('già una messa da parte')));
+  turn(g);
+  assert.equal(g.s.center.v, 8); assert.equal(g.s.nextCenter, null);
+});
+
+test('Zapd uscita da Prossima carta: effetti dal turno dopo (colore ed escluso), la partita finisce se era la 12ª', () => {
+  let g = mk({ eff: [['next'], [], []], after: [Z(3), N(8, 2)], dom: 0 });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'next' } } });
+  assert.equal(g.s.zapsDrawn, 1); assert.equal(g.s.dominant, 3); assert.equal(g.s.excluded, 0); assert.equal(g.s.nextCenter.v, 8);
+  assert.ok(g.events.some((e) => e.text.includes('Zapd') && e.text.includes('Prossima carta')));
+  g = mk({ eff: [['next'], [], []], after: [Z(3), N(8, 2)], zaps: 11 });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'next' } } });
+  assert.equal(g.s.over, true);
+});
+
+test('Sincero: i modificatori si dichiarano esatti; quello non corrispondente vale 0', () => {
+  const hands = [[[8, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]]; // 8+9 = 17 su 5..15
+  // A dice +2 e gioca +2 (conta) → max 17 → dentro; B dice +2 ma gioca +3 (vale 0)
+  let g = mk({ hands, eff: [['sincero', 'hi2'], ['hi3'], []] });
+  turn(g, { sincero: { 0: true }, play: { 0: { couple: 0, self: 1, eff: 'hi2' }, 1: { couple: 0, self: 1, eff: 'hi3' } },
+    decl: { 0: { num: 8, mod: { dir: 'hi', n: 2 } }, 1: { num: 9, mod: { dir: 'hi', n: 2 } } } });
+  assert.equal(pts(g), 17 + 4);
+  assert.equal(g.stats.p[1].sincero_mentito, 1);
+  // A mente (dice +1, gioca +2) e B non ha modificatori → +2 vale 0 → sforo
+  g = mk({ hands, eff: [['sincero', 'hi2'], [], []] });
+  turn(g, { sincero: { 0: true }, play: { 0: { couple: 0, self: 1, eff: 'hi2' } }, decl: { 0: { num: 8, mod: { dir: 'hi', size: 'poco' } } } });
+  assert.equal(pts(g), 0);
+  // senza Sincero la dichiarazione non vincola
+  g = mk({ hands, eff: [['hi2'], [], []] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'hi2' } }, decl: { 0: { num: 3, mod: { dir: 'hi', n: 1 } } } });
+  assert.equal(pts(g), 17 + 4);
+  // le dichiarazioni sul modificatore senza Sincero sono vaghe (anche se il bot dà un numero)
+  assert.deepEqual(g.s.decls[0].mod, { dir: 'hi', size: 'poco' });
+});
+
+test('Sincero: la dichiarazione sul modificatore diventa esatta; Sincero non si gioca da chi non lo ha e va in scarto', () => {
+  const g = mk({ eff: [['sincero'], [], []] });
+  const p = turn(g, { sincero: { 0: true, 1: true } });
+  assert.equal(g.s.effDiscard.filter((e) => e.k === 'sincero').length, 1);
+  const decl = p.log.filter((d) => d.type === 'declare');
+  assert.ok(decl.every((d) => d.sincero === true));
+});
+
+test('Scambio forzato: l\'attivo scambia tutte le carte numeriche in mano con l\'escluso (gli effetti no)', () => {
+  const g = mk({ eff: [['swap', 'reverse'], [], []] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'swap' } } });
+  // A: 3−2 giocate = [1]; C (escluso): 3−1 giocata = [8,9] → dopo lo scambio A ha [8,9] e C ha [1]
+  assert.deepEqual(g.s.players[0].hand.map((c) => c.v), [8, 9]);
+  assert.deepEqual(g.s.players[2].hand.map((c) => c.v), [1]);
+  assert.deepEqual(g.s.players[0].eff.map((e) => e.k), ['reverse']);
+});
+
+test('Annulla: neutralizza un effetto in fila rivelato (anche del compagno); non si chiede se non ci sono effetti', () => {
+  const hands = [[[9, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]]; // 18: serve +3
+  let g = mk({ hands, eff: [['hi3'], ['annulla'], []] });
+  let p = turn(g, { play: { 0: { couple: 0, self: 1, eff: 'hi3' } }, annulla: { 1: 'hi3' } });
+  assert.equal(pts(g), 0);
+  assert.equal(g.stats.p[0]['annullato:hi3'], 1);
+  assert.equal(g.s.players[1].eff.length, 0);
+  g = mk({ hands, eff: [['hi3'], ['annulla'], []] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'hi3' } } }); // B può ma non vuole
+  assert.equal(pts(g), 18 + 4);
+  g = mk({ eff: [[], ['annulla'], []] });
+  p = turn(g);
+  assert.equal(p.log.filter((d) => d.type === 'annulla').length, 0);
+});
+
+test('Annulla non può bersagliare Sincero (non è in fila)', () => {
+  const g = mk({ eff: [['sincero', 'hi1'], ['annulla'], []] });
+  const p = turn(g, { sincero: { 0: true }, play: { 0: { couple: 0, self: 1, eff: 'hi1' } } });
+  const d = p.log.find((x) => x.type === 'annulla');
+  assert.deepEqual(d.targets.map((t) => t.k), ['hi1']);
+});
+
+test('l\'escluso può pescare un effetto (max 2 in mano) e non può giocarne; gli attivi no', () => {
+  let g = mk({ effDeck: ['swap', 'next', 'reverse'], eff: [[], [], ['annulla']] });
+  let p = turn(g, { effdraw: true });
+  assert.equal(g.s.players[2].eff.length, 2);
+  assert.equal(g.s.players[0].eff.length, 0);
+  // già a 2: non gli viene nemmeno chiesto
+  g = mk({ effDeck: ['swap', 'next'], eff: [[], [], ['annulla', 'swap']] });
+  p = turn(g, { effdraw: true });
+  assert.equal(p.log.filter((d) => d.type === 'effdraw').length, 0);
+  // l'escluso non riceve la domanda "play" (ha solo xplay)
+  assert.ok(!p.log.some((d) => d.type === 'play' && d.player === 2));
+});
+
+test('giocata non valida: si usano le prime due carte e la cronaca avverte', () => {
+  const g = mk();
+  FF.drive(g, g.turnGen(), (game, d) => (d.type === 'play' ? { couple: 99999, self: 99999 } : d.type === 'xplay' ? d.hand[0].id : d.type === 'declare' ? { num: 99, mod: { dir: 'zz' } } : d.type === 'effdraw' ? false : null));
+  assert.ok(g.events.some((e) => e.k === 'warn'));
+  assert.deepEqual(g.s.decls[0], { num: null, mod: null });
+});
+
+test('fine partita: l\'ultima Zapd chiude il turno in corso; punteggio = personali × Fattore coppie; Fattore salta le coppie a 0', () => {
+  const g = mk({ zaps: 11, top: [Z(0)] });
+  turn(g);
+  assert.equal(g.s.over, true);
+  assert.equal(g.s.excluded, 0); // la Zapd ha spostato l'escluso su A: coppia BC
+  const r = FF.drive(g, g.finish(), () => null);
+  // BC: 6? B gioca la 9, C gioca la 4 → 13 nel range 5..15; A (escluso) gioca la 6 → 19
+  assert.equal(g.s.pairPts[0], 9 + 4 + 6);
+  assert.ok(Math.abs(r.factor[1] - 9 / 19) < 1e-9);
+  assert.ok(Math.abs(r.factor[2] - 4 / 19) < 1e-9);
+  assert.ok(Math.abs(r.factor[0] - 6 / 19) < 1e-9);
+  assert.equal(r.personal[1], 3); assert.equal(r.personal[2], 8);
+  assert.ok(Math.abs(r.scores[2] - 8 * 4 / 19) < 1e-9);
+  assert.equal(r.pairWinner, 0);
+  assert.equal(r.winner, 2); // 8×4/19 = 1.68 > 3×9/19 = 1.42
+});
+
+test('contributi: in ogni coppia i contributi % dei tre giocatori sommano al 100%', () => {
+  const g = new FF.Game({ seed: 'contrib', log: false });
+  const bots = [FF.RandomBot(1), FF.RandomBot(2), FF.RandomBot(3)];
+  FF.drive(g, g.run(), (game, d) => bots[d.player].decide(game, d));
+  for (let e = 0; e < 3; e++) {
+    const tot = g.s.contrib[0][e] + g.s.contrib[1][e] + g.s.contrib[2][e];
+    assert.equal(tot, g.s.pairPts[e]);
+  }
+});
+
+test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, limiti di mano, durata)', () => {
+  let tot = 0;
+  for (let i = 0; i < 300; i++) {
+    const g = new FF.Game({ seed: 'fz' + i, log: false });
+    const bots = [FF.RandomBot('x' + i), FF.RandomBot('y' + i), FF.RandomBot('z' + i)];
+    FF.drive(g, g.run(), (game, d) => {
+      const s = game.s;
+      const ids = [...s.deck, ...s.discard, ...s.zapPile, ...s.players.flatMap((p) => p.hand)].map((c) => c.id);
+      if (s.nextCenter) ids.push(s.nextCenter.id);
+      if (s.center && !s.discard.includes(s.center)) ids.push(s.center.id);
+      assert.equal(ids.length, 92, 'carte numeriche+Zapd: ' + ids.length);
+      assert.equal(new Set(ids).size, 92, 'duplicati');
+      const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
+      assert.equal(eids.length, 20); assert.equal(new Set(eids).size, 20);
+      for (const p of s.players) { assert.ok(p.hand.length <= 3 && p.eff.length <= 2); }
+      assert.ok(s.zapPile.length === s.zapsDrawn);
+      return bots[d.player].decide(game, d);
+    });
+    assert.ok(g.result.turns >= 5 && g.result.turns <= 14, 'turni ' + g.result.turns);
+    assert.equal(g.s.zapsDrawn, 12);
+    tot += g.result.turns;
+  }
+  const avg = tot / 300;
+  assert.ok(avg > 10 && avg < 14, 'durata media ' + avg);
+});
+
+test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, rulebook.js aggiornato', () => {
+  const fs = require('fs'), path = require('path');
+  const md = fs.readFileSync(path.join(__dirname, '..', 'docs', 'REGOLAMENTO.md'), 'utf8');
+  const gen = fs.readFileSync(path.join(__dirname, '..', 'js', 'rulebook.js'), 'utf8');
+  assert.ok(gen.includes(JSON.stringify(md)), 'js/rulebook.js non aggiornato: lancia node tools/build-rules.js');
+  const R = FF.DEFAULT_RULES, E = R.effectCopies;
+  const val = (name) => {
+    const row = md.split('\n').find((l) => l.startsWith('| ' + name));
+    assert.ok(row, name + ' manca nel regolamento (§12)');
+    return row.split('|')[2].replace(/\*/g, '').trim();
+  };
+  assert.equal(val('Base del range'), String(R.base));
+  assert.equal(val('Carte in mano'), String(R.handSize));
+  assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
+  assert.equal(val('Zapd per colore'), String(R.zapPerColor));
+  assert.equal(val('Copie di Reverse'), String(E.reverse));
+  assert.equal(val('Copie di Prossima carta'), String(E.next));
+  assert.equal(val('Copie di Sincero'), String(E.sincero));
+  assert.equal(val('Copie di Scambio forzato'), String(E.swap));
+  assert.equal(val('Copie di Annulla'), String(E.annulla));
+  assert.equal(val('Copie di ogni ±1/2/3'), String(E.lo1));
+  assert.equal(val('Sincero: modificatore sbagliato vale 0'), R.sincereZero ? 'sì' : 'no');
+  assert.ok(md.includes('92 carte') && md.includes('12 carte Zapd'));
+  for (const e of Object.values(FF.EFFECTS).filter((x) => !x.mod)) assert.ok(md.includes('**' + e.n + '**'), e.n + ' manca nel regolamento');
+});
