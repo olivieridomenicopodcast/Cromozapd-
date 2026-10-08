@@ -175,9 +175,10 @@
         s.pending.push(card.c);
         b = this.say('zap', `⚡ Esce una Zapd ${this.col(card.c)} da "Prossima carta" (${s.zapsDrawn}/${this.totalZaps}). Colore dominante e escluso cambieranno dal turno dopo.`, -1, { zap: card.c });
       } else {
-        const from = s.excluded;
+        const from = s.excluded, d0 = s.dir;
         s.dominant = card.c; s.excluded = mod3(s.excluded + s.dir);
-        b = this.say('zap', `⚡ Zapd ${this.col(card.c)} (${s.zapsDrawn}/${this.totalZaps})${who != null ? ' pescata da ' + this.pn(who) : ''}: il colore dominante diventa ${this.col(card.c)} e il gettone escluso passa da ${this.seatName(from)} a ${this.seatName(s.excluded)} (verso ${this.dirTxt(s.dir)}).`, -1, { zap: card.c });
+        if (this.rules.zapFlipsDir) s.dir = -s.dir;
+        b = this.say('zap', `⚡ Zapd ${this.col(card.c)} (${s.zapsDrawn}/${this.totalZaps})${who != null ? ' pescata da ' + this.pn(who) : ''}: il colore dominante diventa ${this.col(card.c)}, il gettone escluso passa da ${this.seatName(from)} a ${this.seatName(s.excluded)} (verso ${this.dirTxt(d0)})${this.rules.zapFlipsDir ? ` e il verso si inverte: ora ${this.dirTxt(s.dir)}` : ''}.`, -1, { zap: card.c });
       }
       if (b) yield b;
     }
@@ -254,6 +255,14 @@
       s.phase = 'draw';
       b = this.say('turn', `━━ Turno ${s.turn} · Zapd uscite ${s.zapsDrawn}/${this.totalZaps} ━━`);
       if (b) yield b;
+
+      // 0) l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
+      if (R.rotateEachTurn && s.turn > 1) {
+        const from = s.excluded; s.excluded = mod3(from + s.dir);
+        this.stat('rotazioni_di_turno', -1);
+        b = this.say('rotate', `🔁 Nuovo turno: il gettone escluso passa da ${this.seatName(from)} a ${this.seatName(s.excluded)} (verso ${this.dirTxt(s.dir)}). Se esce una Zapd avanzerà ancora (e il verso si inverte).`, -1, { from, to: s.excluded });
+        if (b) yield b;
+      }
 
       // 1) pesca: rimpiazzi in ordine A, B, C, poi la carta centrale
       for (let pid = 0; pid < 3; pid++) {
@@ -452,8 +461,8 @@
       // 10) fine turno: la carta centrale va negli scarti, Zapd rimandate, fine partita
       s.discard.push(s.center);
       if (s.pending.length) {
-        for (const c of s.pending) { s.dominant = c; s.excluded = mod3(s.excluded + s.dir); }
-        b = this.say('zap', `⚡ Effetti della Zapd rimandata: colore dominante ${this.col(s.dominant)}, escluso ora ${this.pn(s.excluded)}.`);
+        for (const c of s.pending) { s.dominant = c; s.excluded = mod3(s.excluded + s.dir); if (this.rules.zapFlipsDir) s.dir = -s.dir; }
+        b = this.say('zap', `⚡ Effetti della Zapd rimandata: colore dominante ${this.col(s.dominant)}, escluso ora ${this.pn(s.excluded)}${this.rules.zapFlipsDir ? `, verso ${this.dirTxt(s.dir)}` : ''}.`);
         s.pending = [];
         if (b) yield b;
       }

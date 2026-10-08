@@ -63,7 +63,7 @@
         <div class="centerblock"><div class="clabel">Carta centrale</div>${tab.center ? UI.cardHTML(tab.center, { cls: 'bigcard' }) : '<div class="emptyslot big"></div>'}</div>
         ${rangeBox(g, tab)}
         <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">Se le 2 carte-coppia sono di questo colore: nessuno sforo</div></div>
-        <div class="dirblock"><div class="clabel">Verso</div>${S.dir(s.dir, 'dirbig')}<div class="psub">Prossima Zapd: il gettone passa a <b>${FF.SEATS[nextEx]}</b></div></div>
+        <div class="dirblock"><div class="clabel">Verso</div>${S.dir(s.dir, 'dirbig')}<div class="psub">${g.rules.rotateEachTurn ? `Al prossimo turno il gettone passa a <b>${FF.SEATS[nextEx]}</b>; ogni Zapd lo sposta ancora e inverte il verso` : `Prossima Zapd: il gettone passa a <b>${FF.SEATS[nextEx]}</b>`}</div></div>
         ${s.nextCenter ? `<div class="nextblock"><div class="clabel">Messa da parte</div>${nc}<div class="psub">centrale del turno dopo</div></div>` : ''}
       </div>
       <div class="seats">${[0, 1, 2].map((p) => seatBox(g, p, view)).join('')}</div>`;
@@ -86,7 +86,7 @@
     const sinc = s.sincero != null;
     el.innerHTML = [
       item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
-      item(S.dir(s.dir, 'stico'), 'Verso di rotazione', s.dir > 0 ? '↻ A→B→C' : '↺ A→C→B', true, `L'escluso ora è ${FF.SEATS[ex]}. A ogni Zapd passa a ${FF.SEATS[FF.mod3(ex + s.dir)]}. Reverse inverte il verso.`),
+      item(S.dir(s.dir, 'stico'), 'Verso di rotazione', s.dir > 0 ? '↻ A→B→C' : '↺ A→C→B', true, g.rules.rotateEachTurn ? `L'escluso ora è ${FF.SEATS[ex]}. Passa al giocatore dopo (${FF.SEATS[FF.mod3(ex + s.dir)]}) a ogni nuovo turno e a ogni Zapd; ogni Zapd (e Reverse) inverte il verso.` : `L'escluso ora è ${FF.SEATS[ex]}. A ogni Zapd passa a ${FF.SEATS[FF.mod3(ex + s.dir)]}. Reverse inverte il verso.`),
       item('🗣️', 'Sincero', sinc ? 'ATTIVO' : 'non attivo', sinc, sinc ? `Giocato da ${s.players[s.sincero].name}: i modificatori vanno dichiarati con un numero esatto; chi mente vale 0.` : 'Se qualcuno lo gioca a inizio turno, i due attivi dichiarano il modificatore con un numero esatto; chi poi gioca altro lo vede valere 0.'),
       item('🔮', 'Carta messa da parte', s.nextCenter ? FF.cardName(s.nextCenter) : 'nessuna', !!s.nextCenter, s.nextCenter ? 'Sarà la carta centrale del turno dopo (la pesca centrale viene saltata).' : 'Prossima carta ne mette una da parte: diventa la centrale del turno dopo.'),
       item('⚡', 'Zapd', `${s.zapsDrawn}/${g.totalZaps}`, s.zapsDrawn >= g.totalZaps - 2, s.zapsDrawn >= g.totalZaps ? 'Uscite tutte: è l\'ultimo turno.' : `Ne mancano ${g.totalZaps - s.zapsDrawn}: la partita finisce con l'uscita dell'ultima (si gioca quel turno per intero).`),

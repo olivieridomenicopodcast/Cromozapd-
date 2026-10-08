@@ -37,6 +37,8 @@
     maxValue: 10,
     startExcluded: 0,       // escluso iniziale (0 = A)
     startDir: 1,            // verso iniziale (+1 = A→B→C)
+    zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
+    rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
     sincereZero: true,      // Sincero: il modificatore non corrispondente vale 0
     effectCopies: { reverse: 3, next: 3, sincero: 3, swap: 2, annulla: 3, lo1: 1, lo2: 1, lo3: 1, hi1: 1, hi2: 1, hi3: 1 },
   };

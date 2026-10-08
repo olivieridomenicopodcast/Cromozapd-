@@ -10,7 +10,7 @@
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
     ['base', 'Base del range'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
-    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'],
+    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
     ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
   ];
   UI.rulesFields = function (prefix, values) {
@@ -216,7 +216,7 @@
       else if (ev.k === 'reveal' && d.play) icon = `<span class="aminis">${[d.play.couple, d.play.self].map((c) => `<span class="amini">${S.card(c)}</span>`).join('')}${d.play.eff ? `<span class="amini">${S.effect(d.play.eff.k)}</span>` : ''}</span>`;
       else if (ev.k === 'reveal' && d.card) icon = `<span class="amini">${S.card(d.card)}</span>`;
       else if (ev.k === 'effect' && d.k) icon = `<span class="amini">${S.effect(d.k)}</span>`;
-      else if (ev.k === 'roles') icon = S.token('atoken');
+      else if (ev.k === 'roles' || ev.k === 'rotate') icon = S.token('atoken');
       else if (ev.p >= 0) icon = `<span class="aseat">${S.seat(ev.p)}</span>`;
       else icon = `<span class="aemoji">${ev.k === 'score' ? '📐' : '🃏'}</span>`;
       const text = ev.text.replace(/━+/g, '').trim();

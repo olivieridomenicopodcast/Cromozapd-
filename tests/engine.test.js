@@ -159,7 +159,8 @@ test('Zapd come carta centrale: si risolve e si ripesca finché esce una numeric
   let g = mk({ top: [Z(1)] }); turn(g);
   assert.equal(g.s.excluded, 0); assert.equal(g.s.dominant, 1); assert.equal(g.s.center.v, 5);
   g = mk({ top: [Z(0), Z(1)] }); turn(g);
-  assert.equal(g.s.excluded, 1); assert.equal(g.s.dominant, 1); assert.equal(g.s.zapsDrawn, 2);
+  // la 1ª Zapd fa avanzare C→A e inverte il verso; la 2ª fa tornare A→C e il verso torna com'era
+  assert.equal(g.s.excluded, 2); assert.equal(g.s.dir, 1); assert.equal(g.s.dominant, 1); assert.equal(g.s.zapsDrawn, 2);
 });
 
 test('Reverse: inverte il verso; la Zapd successiva sposta l\'escluso al contrario', () => {
@@ -167,7 +168,8 @@ test('Reverse: inverte il verso; la Zapd successiva sposta l\'escluso al contrar
   turn(g, { play: { 0: { couple: 0, self: 1, eff: 'reverse' } } });
   assert.equal(g.s.dir, -1); assert.equal(g.s.excluded, 2);
   g.s.deck.push(Z(0)); turn(g);
-  assert.equal(g.s.excluded, 1); // C → B (e non → A)
+  assert.equal(g.s.excluded, 1); // C → B (e non → A), poi la Zapd rimette il verso orario
+  assert.equal(g.s.dir, 1);
 });
 
 test('Reverse giocato da due attivi: si annullano a vicenda', () => {
@@ -327,6 +329,47 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
   assert.ok(avg > 10 && avg < 14, 'durata media ' + avg);
 });
 
+test('Zapd: cambia colore, fa avanzare l\'escluso e inverte il verso (prima avanza, poi inverte)', () => {
+  let g = mk({ excl: 0, dir: 1, top: [Z(2)] }); turn(g);
+  assert.equal(g.s.excluded, 1); assert.equal(g.s.dir, -1); assert.equal(g.s.dominant, 2);
+  g = mk({ excl: 0, dir: -1, top: [Z(2)] }); turn(g);
+  assert.equal(g.s.excluded, 2); assert.equal(g.s.dir, 1);
+  g = mk({ excl: 0, dir: 1, top: [Z(2)], rules: { zapFlipsDir: false } }); turn(g);
+  assert.equal(g.s.excluded, 1); assert.equal(g.s.dir, 1);
+  g = mk({ excl: 2, dir: 1, eff: [['next'], [], []], after: [Z(3), N(8, 2)] });
+  turn(g, { play: { 0: { couple: 0, self: 1, eff: 'next' } } });
+  assert.equal(g.s.dir, -1); assert.equal(g.s.excluded, 0); assert.equal(g.s.dominant, 3);
+});
+
+test('rotazione: dal 2° turno l\'escluso avanza di un posto a ogni turno, e ancora a ogni Zapd; nel 1° turno resta A', () => {
+  // turno 1: nessuna rotazione automatica
+  let g = mk({ excl: 2 }); g.s.turn = 1; turn(g);
+  assert.equal(g.s.excluded, 2);
+  // turno 2, nessuna Zapd: C → A
+  g = mk({ excl: 2 }); g.s.turn = 2; turn(g);
+  assert.equal(g.s.excluded, 0);
+  assert.ok(g.events.some((e) => e.k === 'rotate'));
+  // turno 2 con una Zapd in pesca: C → A (turno) → B (Zapd)
+  g = mk({ excl: 2, top: [Z(1)] }); g.s.turn = 2; turn(g);
+  assert.equal(g.s.excluded, 1); assert.equal(g.s.dominant, 1);
+  // col verso inverso: C → B
+  g = mk({ excl: 2, dir: -1 }); g.s.turn = 2; turn(g);
+  assert.equal(g.s.excluded, 1);
+  // regola disattivata: come nella lettura letterale del Design Doc, cambia solo con le Zapd
+  g = mk({ excl: 2, rules: { rotateEachTurn: false } }); g.s.turn = 2; turn(g);
+  assert.equal(g.s.excluded, 2);
+});
+
+test('rotazione: in una partita intera senza Zapd ognuno è escluso a turno (A, B, C, A, …)', () => {
+  const g = new FF.Game({ seed: 'rot', log: true, rules: { zapPerColor: 3 } });
+  const bots = [FF.RandomBot(1), FF.RandomBot(2), FF.RandomBot(3)];
+  const ex = []; g.onEvent = (e) => { if (e.k === 'roles') ex.push(e.d.excluded); };
+  FF.drive(g, g.run(), (game, d) => bots[d.player].decide(game, d));
+  // ad ogni turno l'escluso avanza di almeno un posto: non può restare lo stesso senza che una Zapd lo riporti (3 passi = giro completo)
+  let same = 0; for (let t = 1; t < ex.length; t++) if (ex[t] === ex[t - 1]) same++;
+  assert.ok(same < ex.length * 0.3, 'troppe ripetizioni: ' + same + '/' + ex.length);
+});
+
 test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, rulebook.js aggiornato', () => {
   const fs = require('fs'), path = require('path');
   const md = fs.readFileSync(path.join(__dirname, '..', 'docs', 'REGOLAMENTO.md'), 'utf8');
@@ -349,6 +392,8 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Copie di Annulla'), String(E.annulla));
   assert.equal(val('Copie di ogni ±1/2/3'), String(E.lo1));
   assert.equal(val('Sincero: modificatore sbagliato vale 0'), R.sincereZero ? 'sì' : 'no');
+  assert.equal(val('L\'escluso avanza a ogni turno'), R.rotateEachTurn ? 'sì' : 'no');
+  assert.equal(val('Ogni Zapd inverte il verso'), R.zapFlipsDir ? 'sì' : 'no');
   assert.ok(md.includes('92 carte') && md.includes('12 carte Zapd'));
   for (const e of Object.values(FF.EFFECTS).filter((x) => !x.mod)) assert.ok(md.includes('**' + e.n + '**'), e.n + ' manca nel regolamento');
 });

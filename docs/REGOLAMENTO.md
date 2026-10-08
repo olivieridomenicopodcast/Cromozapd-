@@ -23,6 +23,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 4. Se durante la distribuzione esce una Zapd si risolve come sempre (§6) e si ripesca **[interpretazione]**.
 
 ## 4. Il turno
+0. **Rotazione.** Dal 2° turno il gettone escluso avanza di un posto (§6).
 1. **Pesca.** Chi ha meno di 3 carte numeriche pesca fino a 3 (di norma attivo +2, escluso +1; in ordine A, B, C). Poi si rivela la **carta centrale** (la prossima numerica; se c'è una "Prossima carta" giocata il turno prima, è quella). **[chiarito]** Se esce una Zapd la si risolve subito (§6) e si **ripesca** finché la mano è di 3 carte (o finché esce una numerica, per la centrale). I ruoli del turno si fissano a pesca finita.
 2. **Carta Sincero** (opzionale, §8): un attivo può giocarla scoperta ora.
 3. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§8). **[chiarito]** Il tradimento è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Nell'hotseat si parla anche a voce.
@@ -42,9 +43,10 @@ Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si cont
 - La **carta per sé** vale sempre il suo valore, anche se la coppia sfora.
 - Il **colore della carta centrale** non ha alcun ruolo **[interpretazione: resta aperto, vedi §11]**.
 
-## 6. Zapd, escluso e verso
-- Quando una Zapd viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** e il **gettone escluso passa al giocatore successivo nel verso di rotazione**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
-- Se in un turno escono più Zapd, ognuna si risolve in ordine (l'escluso può avanzare di due posti).
+## 6. Escluso, verso e Zapd
+- **Rotazione a ogni turno [chiarito]**: il gettone escluso **avanza di un posto a ogni nuovo turno** (dal 2° turno; nel 1° l'escluso è A), nel verso di rotazione. **Poi**, se durante la pesca escono Zapd, avanza **ancora** di un posto per ogni Zapd. Quindi nello stesso turno può avanzare di 1, 2, 3… posti.
+- Quando una Zapd viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** e il **gettone escluso avanza di un altro posto nel verso di rotazione** (oltre alla rotazione del turno) **e poi il verso di rotazione si inverte** (da orario ad antiorario o viceversa) **[chiarito]**; l'ordine "prima avanza, poi inverte" è un'**[interpretazione]**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
+- Se in un turno escono più Zapd, ognuna si risolve in ordine, ognuna con il verso che c'è in quel momento (due Zapd di fila: il gettone avanza e poi torna indietro, e il verso torna com'era).
 - **Zapd da "Prossima carta"** **[chiarito]**: si risolve subito ma colore ed escluso valgono **dal turno dopo**; la partita finisce comunque se era la 12ª.
 - **Fine partita**: finisce al termine del turno in cui è uscita la **12ª Zapd** (tutte e 12 sono nel mazzo).
 - Se il mazzo finisse, si rimescolano gli scarti numerici **[interpretazione]**. Con 92 carte e circa 13 turni non dovrebbe succedere (verificato in simulazione).
@@ -62,7 +64,7 @@ Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del su
 
 | Carta | Quando | Cosa fa |
 |---|---|---|
-| **Reverse** | in fila | Inverte il verso di rotazione: la prossima Zapd sposterà l'escluso nell'altra direzione. Due Reverse nello stesso turno si annullano. |
+| **Reverse** | in fila | Inverte il verso di rotazione: da quel momento l'escluso avanza nell'altra direzione (a ogni turno e a ogni Zapd; ogni Zapd lo inverte di nuovo). Due Reverse nello stesso turno si annullano. |
 | **Prossima carta** | in fila | La carta in cima al mazzo viene scoperta e messa da parte: sarà la **carta centrale del turno dopo**. Una seconda "Prossima carta" nello stesso turno non ha effetto **[interpretazione]**. |
 | **−1 / −2 / −3** | in fila | Abbassano il **minimo** del range di questo turno. |
 | **+1 / +2 / +3** | in fila | Alzano il **massimo** del range di questo turno. |
@@ -99,6 +101,8 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Copie di Annulla | **3** |
 | Copie di ogni ±1/2/3 | **1** |
 | Sincero: modificatore sbagliato vale 0 | **sì** |
+| L'escluso avanza a ogni turno | **sì** |
+| Ogni Zapd inverte il verso | **sì** |
 
 ## Appendice: cosa è cambiato rispetto al Design Doc v2 e alla bozza Carte Effetto
 | Punto | Originale | Qui |
@@ -106,6 +110,8 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Modificatore-base (#1) | Carta a sé, in conflitto con la famiglia ±1/2/3 | Assorbito nella famiglia ±1/2/3; niente numeriche con effetto, niente "base = 13" sulla centrale |
 | Zapd da rimpiazzo | Non specificato | Si risolve e si ripesca fino a 3 carte |
 | Zapd da "Prossima carta" | Non specificato | Effetti dal turno dopo |
+| Verso di rotazione | Cambiava solo con Reverse | **Cambia anche a ogni Zapd** (voluto da Niky) |
+| Rotazione dell'escluso | Solo alle Zapd (lettura letterale del Design Doc) | **A ogni turno e a ogni Zapd** (voluto da Niky) |
 | Carta dell'escluso | Ambigua con lo sforo | Fuori dal range e dal colore; 0 se la coppia sfora |
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |

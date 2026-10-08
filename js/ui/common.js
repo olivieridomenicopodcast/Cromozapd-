@@ -93,7 +93,7 @@
       desc = `${e.d}<br><span class="muted">${e.kind === 'fila' ? 'Si gioca in 3ª posizione (in fila), solo da attivo, e si rivela insieme al resto.' : e.kind === 'sincero' ? 'Istantanea: si gioca scoperta a inizio turno, prima della discussione.' : 'Reattiva: si gioca dopo il reveal, solo da attivo.'}</span>`;
     } else if (a === 'z') {
       const c = Number(b); spr = FF.Sprites.card({ z: true, c }); title = `⚡ Zapd ${COLORS[c].n}`;
-      desc = `Quando esce viene <b>risolta subito</b>: ${COLORS[c].i} ${COLORS[c].n} diventa il nuovo <b>colore dominante</b> e il <b>gettone escluso</b> passa al giocatore successivo. Poi si ripesca. La 12ª Zapd chiude la partita.`;
+      desc = `Quando esce viene <b>risolta subito</b>: ${COLORS[c].i} ${COLORS[c].n} diventa il nuovo <b>colore dominante</b> il <b>gettone escluso</b> avanza di un posto e il <b>verso</b> di rotazione si inverte. Poi si ripesca. La 12ª Zapd chiude la partita.`;
     } else {
       const c = Number(b), v = Number(a); spr = FF.Sprites.card({ v, c }); title = `${v} ${COLORS[c].i} ${COLORS[c].n}`;
       desc = `Carta numerica di valore <b>${v}</b>, colore ${COLORS[c].n} (simbolo ${COLORS[c].sym}). Il colore conta solo se è il <b>colore dominante</b>.`;
@@ -116,9 +116,9 @@
     let h = '<div class="lgroup">Colori</div>' + COLORS.map((c, i) => row(S.color(i), `<b>${c.n}</b> ${c.sym}`)).join('');
     h += '<div class="lgroup">Carte e segni</div>';
     h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande.');
-    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante e fa avanzare l\'escluso. 12 in tutto.');
+    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante, fa avanzare l\'escluso di un altro posto e inverte il verso. 12 in tutto.');
     h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno e gioca 1 carta per la coppia degli altri due.');
-    h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C).');
+    h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
     h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia deve stare tra V e V+Base.');
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (la carta dell\'escluso non conta).');
     h += row('🛡️', '<b>Immunità</b>: se le due carte-coppia sono del colore dominante, niente sforo.');
