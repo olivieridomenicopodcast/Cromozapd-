@@ -27,7 +27,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 1. **Pesca.** Chi ha meno di 3 carte numeriche pesca fino a 3 (di norma attivo +2, escluso +1; in ordine A, B, C). Poi si rivela la **carta centrale** (la prossima numerica; se c'è una "Prossima carta" giocata il turno prima, è quella). **[chiarito]** Se esce una Zapd la si risolve subito (§6) e si **ripesca** finché la mano è di 3 carte (o finché esce una numerica, per la centrale). I ruoli del turno si fissano a pesca finita.
 2. **Carta Sincero** (opzionale, §8): un attivo può giocarla scoperta ora.
 3. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§8). **[chiarito]** Il tradimento è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Nell'hotseat si parla anche a voce.
-4. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto** (3ª). L'escluso gioca **1 carta** per la coppia attiva.
+4. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto** (3ª). L'escluso gioca **1 carta** per la coppia attiva: **la sua carta conta nella somma del range** (§5).
 5. **Reveal simultaneo** di tutto.
 6. **Finestra di Annulla** (§8).
 7. **Risoluzione**: effetti (Reverse, Prossima carta, Scambio forzato), range e punti (§5), poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§8).
@@ -35,10 +35,11 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si conta.
 
 ## 5. Range e punti
-- **Range** = da *V* a *V + Base*, dove *V* è il valore della carta centrale e **Base = 7** (default) **[chiarito]**. Gli estremi **sono inclusi**.
-- La **somma delle due carte-per-la-coppia degli attivi** deve stare nel range. **[chiarito]** Il range controlla **solo** quelle due carte, non la carta dell'escluso.
-- **Nel range** → la coppia incassa **somma delle due carte + carta dell'escluso**.
-- **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. **[chiarito]** La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**.
+- **Range** = da *V* a *V + Base*, dove *V* è il valore della carta centrale e **Base = 12** (default) **[chiarito]**. Gli estremi **sono inclusi**.
+- Si controlla la **somma di tre carte**: le **due carte-per-la-coppia degli attivi + la carta dell'escluso** **[chiarito: cambiato da Niky dopo le simulazioni; prima il range controllava solo le due carte degli attivi]**. Quindi la coppia può sforare anche per colpa dell'escluso, che gioca **alla cieca** (non sa cosa giocano i due) ma **ascolta la discussione** **[interpretazione]**. Parametro `xInSum` (se spento, torna la vecchia regola).
+- **Nel range** → la coppia incassa **somma delle tre carte** (le due carte-coppia + la carta dell'escluso).
+- **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**.
+- Con tre carte lo sforo è quasi sempre **per eccesso** (la somma supera il massimo), perché un escluso che gioca una carta alta può far sforare la coppia.
 - **Colore dominante** **[chiarito]**: se **entrambe** le carte-per-la-coppia degli attivi sono del colore dominante, la coppia non perde mai per sforo (incassa come se fosse nel range). **Il colore della carta dell'escluso non conta.**
 - La **carta per sé** vale sempre il suo valore, anche se la coppia sfora.
 - Il **colore della carta centrale** non ha alcun ruolo **[interpretazione: resta aperto, vedi §11]**.
@@ -83,14 +84,17 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 ## 11. Non ancora definito
 - Ruolo dei **colori** oltre al colore dominante (e della carta centrale).
 - Incentivo all'uso di **Annulla**; **Modificatore-base** assorbito nella famiglia ±1/2/3 **[chiarito]**.
-- Base 7 scelta dopo le simulazioni (con 10 il massimo del range non contava quasi mai); da riverificare con i playtest.
+- Base 12 con l'escluso nella somma: scelta dopo le simulazioni (sforo ~15% con giocatori umani che parlano, ~26% con le AI); da riverificare con i playtest.
+- I modificatori **−1/−2/−3** servono poco con la nuova regola (lo sforo è quasi sempre per eccesso): da ripensare.
+- L'escluso **ascolta** la discussione ma non parla: da confermare al playtest.
 - Escluso "sempre a metà": possibile correttivo dopo i playtest.
 - Numero definitivo di copie di ogni effetto.
 
 ## 12. Parametri (valori di partenza)
 | Parametro | Valore |
 |---|---|
-| Base del range | **7** |
+| Base del range | **12** |
+| La carta dell'escluso conta nella somma del range | **sì** |
 | Escluso iniziale | **a sorte** |
 | Carte in mano | **3** |
 | Effetti in mano al massimo | **2** |
@@ -113,10 +117,10 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Zapd da "Prossima carta" | Non specificato | Effetti dal turno dopo |
 | Verso di rotazione | Cambiava solo con Reverse | **Cambia anche a ogni Zapd** (voluto da Niky) |
 | Rotazione dell'escluso | Solo alle Zapd (lettura letterale del Design Doc) | **A ogni turno e a ogni Zapd** (voluto da Niky) |
-| Carta dell'escluso | Ambigua con lo sforo | Fuori dal range e dal colore; 0 se la coppia sfora |
+| Carta dell'escluso | Ambigua con lo sforo | **Conta nella somma del range** (voluto da Niky): può salvare o rovinare la coppia; il colore non conta; 0 se la coppia sfora |
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |
-| Base del range | 10 | **7** (voluto da Niky; con 10 lo sforo in alto era quasi impossibile) |
+| Base del range | 10 | **12** (con l'escluso nella somma: 3 carte invece di 2) |
 | Escluso iniziale | Non specificato (io avevo messo A) | **A sorte**: con A fisso il posto C vinceva il 43% delle partite |
 | Fine del mazzo | Non specificato | Si rimescolano gli scarti (non dovrebbe servire) |
 | Parità | Non specificato | Pareggio |

@@ -29,7 +29,7 @@
   FF.VAGUE = { 1: 'poco', 2: 'medio', 3: 'tanto' };
 
   FF.DEFAULT_RULES = {
-    base: 7,                // ampiezza del range: da V a V+base (deciso da Niky dopo le simulazioni: con 10 il massimo non contava mai)
+    base: 12,               // ampiezza del range: da V a V+base (la somma controllata è di 3 carte; deciso da Niky dopo le simulazioni)
     handSize: 3,            // carte numeriche in mano
     effectHandMax: 2,       // carte-effetto in mano al massimo
     zapPerColor: 3,         // Zapd per colore (totale = 4 × questo = fine partita)
@@ -37,7 +37,7 @@
     maxValue: 10,
     startExcluded: -1,      // escluso iniziale: -1 = a sorte (dal seed), 0 = A, 1 = B, 2 = C
     startDir: 1,            // verso iniziale (+1 = A→B→C)
-    xInSum: false,          // VARIANTE (solo simulazione): la carta dell'escluso conta nella somma controllata dal range
+    xInSum: true,           // la carta dell'escluso conta nella somma controllata dal range (deciso da Niky; false = vecchia regola)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd

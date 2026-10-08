@@ -188,7 +188,8 @@
     L.push('', '## Punteggi medi', '', '| | Personali | Fattore coppie | Punteggio |', '|---|---|---|---|', `| A | ${f1(s.personalA)} | ${pct(s.factorA)} | ${f1(s.scoreA)} |`, `| B (media) | ${f1(s.personalB)} | ${pct(s.factorB)} | ${f1(s.scoreB)} |`,
       '', `Durata media ${f1(s.turns)} turni. Punti squadra totali per partita ${f1(s.pairPtsPerGame)}.`, '');
     L.push('## Come vanno i turni', '', `- Coppia nel range: ${pct(s.rangeRate)} · salvata dal colore dominante: ${pct(s.immuneRate)} · **sforo: ${pct(s.sforoRate)}**`,
-      `- Dichiarazioni con numero tradite: ${pct(s.betrayRate)}`, '');
+      `- Dichiarazioni con numero tradite: ${pct(s.betrayRate)}`,
+      ...(o.rules.xInSum ? [`- La carta dell'escluso ha **salvato** ${((agg.stats.A.escluso_salva_la_coppia || 0) + (agg.stats.B.escluso_salva_la_coppia || 0)) / n > 0 ? (((agg.stats.A.escluso_salva_la_coppia || 0) + (agg.stats.B.escluso_salva_la_coppia || 0)) / n).toFixed(2) : '0'} e **rovinato** ${(((agg.stats.A.escluso_rovina_la_coppia || 0) + (agg.stats.B.escluso_rovina_la_coppia || 0)) / n).toFixed(2)} turni a partita.`] : []), '');
     const per = (k) => (((agg.stats.A[k] || 0) + (agg.stats.B[k] || 0) + (agg.stats.game[k] || 0)) / n);
     L.push('## Eventi medi per partita', '', '| Evento | Media |', '|---|---|');
     const keys = new Set([...Object.keys(agg.stats.A), ...Object.keys(agg.stats.B), ...Object.keys(agg.stats.game)].filter((k) => !k.startsWith('v_')));

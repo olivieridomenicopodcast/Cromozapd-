@@ -119,8 +119,8 @@
     h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante, fa avanzare l\'escluso di un altro posto e inverte il verso. 12 in tutto.');
     h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno e gioca 1 carta per la coppia degli altri due.');
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
-    h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia deve stare tra V e V+Base.');
-    h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (la carta dell\'escluso non conta).');
+    h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia ' + (FF.DEFAULT_RULES.xInSum ? '<b>più la carta dell\'escluso</b> ' : '') + 'deve stare tra V e V+Base.');
+    h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
     h += row('🛡️', '<b>Immunità</b>: se le due carte-coppia sono del colore dominante, niente sforo.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
     h += row('📊', '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');

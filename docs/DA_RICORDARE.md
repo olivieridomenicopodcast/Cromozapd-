@@ -5,7 +5,7 @@
 1. **Modificatori ±1/2/3**: sono solo vantaggi (allargano il range), senza costo d'uso a parte occupare uno dei 2 posti in mano. Misurare se vengono giocati sempre.
 2. **Annulla**: manca ancora un incentivo chiaro a usarlo (soprattutto contro il compagno). Analizzarlo con l'analisi "forzata" degli effetti.
 3. **Immunità del colore dominante**: con carte scelte a caso vale circa il 6% dei turni. Misurare quanto la cercano le AI e quanto pesa.
-4. **Base**: ora **7** (deciso da Niky). Da riverificare nei playtest: con umani che cooperano lo sforo era ~6% (4% in basso, 2% in alto); controllare che la tensione sia quella voluta.
+4. **Base**: ora **12** con la carta dell'escluso nella somma (caso 1, deciso da Niky; prima era 7 senza l'escluso). Da riverificare nei playtest: con umani che cooperano lo sforo era ~6% (4% in basso, 2% in alto); controllare che la tensione sia quella voluta.
 5. **Escluso "sempre a metà"**: possibile correttivo (peso diverso dei contributi da escluso, bonus sopra soglia).
 6. **Ruolo dei colori** oltre al colore dominante (e della carta centrale): non esplorato.
 7. **Numero di copie** di ogni carta-effetto: valori di partenza provvisori (20 carte).
@@ -13,7 +13,7 @@
 9. **Margine del mazzo**: con "Prossima carta" si consumano carte in più; il fuzz controlla che il mazzo regga (finora sì).
 10. **Zapd quasi ogni turno** (circa 0,78 a turno): l'escluso cambia spesso e a volte di due posti; è voluto?
 
-## Cosa hanno mostrato le simulazioni (regole attuali: **Base 7**, l'escluso avanza a ogni turno, ogni Zapd inverte il verso; Difficile contro Difficile, 400 partite)
+## Cosa hanno mostrato le simulazioni (**regole precedenti al caso 1**: **Base 7**, l'escluso avanza a ogni turno, ogni Zapd inverte il verso; Difficile contro Difficile, 400 partite)
 *Dati misurati. Da discutere prima di decidere qualsiasi cosa.*
 11. **Vantaggio di posto (risolto): l'escluso iniziale ora è a sorte.** Con A fisso, C vinceva il 42,8% delle partite (A 28,0%, B 29,3%; attesi 33,3%), anche con AI Facili (39,0%): C passava meno turni da escluso (3,85 contro 4,13 e 4,22). Con l'escluso iniziale a sorte, 900 partite: vittorie 34,0% / 32,8% / 33,2% e turni da escluso 4,05 / 4,05 / 4,09. Verificato con il default a sorte: AI Difficili 30,2% / 34,8% / 35,0% (900 partite, errore ±3%), AI Facili 34,2% / 32,8% / 33,0%.
 12. **La fortuna dell'esclusione è molto calata con la rotazione a ogni turno**: lo stesso escluso due turni di fila nello 0,4% dei turni (prima 43,9%); correlazione punti personali ↔ turni da escluso −0,40 (prima −0,75). Resta una componente di fortuna (le Zapd fanno saltare il gettone).
@@ -68,3 +68,6 @@
 - Il dilemma sacrificio contro egoismo **resta intatto** (stessi numeri). I livelli restano distinti.
 - I modificatori **−n diventano quasi carte morte**: il fallimento è quasi sempre per eccesso e abbassare il minimo non serve.
 - L'escluso AI **rovina più di quanto salvi** (3,35 contro 2,3 a partita): senza informazioni sulla somma delle due carte-coppia gioca per la sua quota. Con umani alla cieca (modello) salva 4,0 e rovina 1,1.
+
+## Stato attuale delle regole (dopo il caso 1)
+Base 12, la carta dell'escluso conta nella somma del range, escluso iniziale a sorte, l'escluso avanza a ogni turno e a ogni Zapd, ogni Zapd inverte il verso. Con queste regole (AI Difficili, 300 partite): sforo 27,8%, la carta dell'escluso salva 2,3 e rovina 3,5 turni a partita. Aperti: modificatori −n quasi inutili, escluso che ascolta ma non parla (da confermare), Annulla.

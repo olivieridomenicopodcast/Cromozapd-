@@ -276,9 +276,9 @@
       } else s.center = yield* this.drawNumeric(false, null);
       if (!s.center) { s.over = true; this.emit('warn', '⚠ Carte finite: partita conclusa.'); return; }
       const ex = s.excluded, act = this.actives();
-      b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${s.center.v} a ${s.center.v + R.base} (Base ${R.base}): la somma delle due carte-per-la-coppia deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
+      b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${s.center.v} a ${s.center.v + R.base} (Base ${R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
-      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia ma non partecipa alla discussione.`, ex, { excluded: ex });
+      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia${R.xInSum ? ': la sua carta conta nella somma del range' : ''}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
       if (b) yield b;
       this.stat('turni', -1);
 
@@ -316,7 +316,7 @@
       const plays = {};
       for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
       const xp = s.players[ex];
-      let xcard = yield* this.ask(this._dec('xplay', ex));
+      let xcard = yield* this.ask(this._dec('xplay', ex, { decls: s.decls.slice() }));
       xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0];
 
       yield* this.afterPlay(plays, xcard);

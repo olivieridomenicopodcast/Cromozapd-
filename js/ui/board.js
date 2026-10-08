@@ -26,7 +26,7 @@
     const mods = sc && (min !== c.v || max !== c.v + g.rules.base) ? ` <span class="modnote">(con i modificatori)</span>` : '';
     let verdict = '';
     if (sc) verdict = `<div class="verdict ${sc.scored ? (sc.inRange ? 'ok' : 'imm') : 'ko'}">Somma ${sc.sum}: ${sc.inRange ? '✔ nel range' : sc.scored ? '🛡 immune (colore dominante)' : '💥 SFORO'}</div>`;
-    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}, Base ${g.rules.base})${mods}</div>${verdict}</div>`;
+    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia${g.rules.xInSum ? ' + la carta dell\'escluso' : ''}</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}, Base ${g.rules.base})${mods}</div>${verdict}</div>`;
   }
 
   function seatBox(g, pid, view) {

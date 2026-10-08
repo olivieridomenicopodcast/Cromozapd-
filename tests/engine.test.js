@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10 }, o.rules), log: true }); // i test di regola usano Base 10 (valore di riferimento delle cifre); il default vero è provato a parte
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -121,14 +121,16 @@ test('variante (solo simulazione) rangeOutside: si incassa solo con la somma FUO
   assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_dentro, 1);
 });
 
-test('Base predefinita 7: il range va da V a V+7 (estremi inclusi) e si cambia dalle varianti', () => {
-  assert.equal(FF.DEFAULT_RULES.base, 7);
+test('regole predefinite: Base 12 e carta dell\'escluso nella somma del range', () => {
+  assert.equal(FF.DEFAULT_RULES.base, 12); assert.equal(FF.DEFAULT_RULES.xInSum, true);
   const g = new FF.Game({ seed: 1, log: true });
-  assert.equal(g.rules.base, 7);
-  // centro 5 → 5..12: somma 12 dentro, 13 sopra
-  const m = (a, b) => mk({ rules: { base: 7 }, center: [5, 0], hands: [[[a, 1], [2, 1], [1, 1]], [[b, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] });
-  let t = m(6, 6); turn(t); assert.equal(pts(t), 12 + 4);
-  t = m(6, 7); turn(t); assert.equal(pts(t), 0); assert.equal(t.stats.g.sfora_sopra, 1);
+  assert.equal(g.rules.base, 12); assert.equal(g.rules.xInSum, true);
+  // centro 5 → 5..17: 6+6 + escluso 4 = 16 dentro; con escluso 7 = 19 sopra → sforo per colpa dell'escluso
+  const m = (xv) => mk({ rules: { base: 12, xInSum: true }, center: [5, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[6, 1], [3, 1], [1, 1]], [[xv, 1], [8, 2], [9, 2]]] });
+  let t = m(4); turn(t); assert.equal(pts(t), 6 + 6 + 4);
+  t = m(7); turn(t); assert.equal(pts(t), 0); assert.equal(t.stats.p[2].escluso_rovina_la_coppia, 1);
+  // il decisione dell'escluso riceve le dichiarazioni dei due
+  const p = turn(m(4), {}); assert.ok(p.log.find((d) => d.type === 'xplay').decls);
 });
 
 test('range da V a V+Base con estremi inclusi; la coppia incassa somma + carta dell\'escluso', () => {
@@ -420,6 +422,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
     return row.split('|')[2].replace(/\*/g, '').trim();
   };
   assert.equal(val('Base del range'), String(R.base));
+  assert.equal(val('La carta dell\'escluso conta nella somma del range'), R.xInSum ? 'sì' : 'no');
   assert.equal(val('Carte in mano'), String(R.handSize));
   assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));

@@ -10,7 +10,7 @@
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
     ['base', 'Base del range'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
-    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
+    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['xInSum', 'La carta dell\'escluso conta nella somma del range'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
     ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
   ];
   UI.rulesFields = function (prefix, values) {
@@ -333,7 +333,7 @@
     }
     ctxLine(d) {
       const g = this.game, lo = d.center.v, hi = d.center.v + d.base, ex = d.excluded;
-      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → range <b>${lo}–${hi}</b> · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
+      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → range <b>${lo}–${hi}</b>${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
     }
 
     sinceroPanel(d) {
@@ -393,7 +393,18 @@
       };
       return new Promise((resolve) => {
         const preview = () => {
-          if (excl) return `<div class="pv">Come escluso giochi <b>1 carta</b> per la coppia ${FF.pairLabel(d.excluded)}. Non sei vincolato dal range e il colore non conta, ma se la coppia sfora la tua carta vale 0 (e non conta nel tuo Fattore coppie).</div>`;
+          const X = R.xInSum;
+          if (excl) {
+            const lo = d.center.v, hi = d.center.v + d.base;
+            const dn = (d.decls || []).map((x, i) => ({ x, i })).filter((o) => o.i !== d.excluded && o.x && o.x.num != null);
+            let extra = '';
+            if (X && dn.length === 2) {
+              const S0 = dn[0].x.num + dn[1].x.num, ok = d.hand.filter((c) => S0 + c.v >= lo && S0 + c.v <= hi).map((c) => c.v);
+              extra = `<div>I due hanno dichiarato ${dn.map((o) => `${FF.SEATS[o.i]} «${o.x.num}»`).join(' e ')} (se dicono la verità la somma è ${S0}): ${ok.length ? `con ${ok.join(', ')} resti nel range ${lo}–${hi}` : `nessuna delle tue carte ti tiene nel range ${lo}–${hi}`}.</div>`;
+            } else if (X) extra = '<div class="muted">Non sai cosa giocheranno i due (carte coperte): puoi fidarti di ciò che hanno dichiarato, ma possono tradire.</div>';
+            return X ? `<div class="pv"><div>Come escluso giochi <b>1 carta</b> per la coppia ${FF.pairLabel(d.excluded)}. <b>La tua carta conta nella somma del range</b> (${lo}–${hi}): puoi aiutare la coppia o farla sforare. Il colore non conta. Se la coppia sfora la tua carta vale 0.</div>${extra}</div>`
+              : `<div class="pv">Come escluso giochi <b>1 carta</b> per la coppia ${FF.pairLabel(d.excluded)}. Non sei vincolato dal range e il colore non conta, ma se la coppia sfora la tua carta vale 0 (e non conta nel tuo Fattore coppie).</div>`;
+          }
           const effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null;
           const m = effc && EFFECTS[effc.k].mod;
           const min = d.center.v - (m && m.dir === 'lo' ? m.n : 0), max = d.center.v + d.base + (m && m.dir === 'hi' ? m.n : 0);
@@ -401,11 +412,18 @@
           let h = '';
           if (cc) {
             const lo = Math.max(1, min - cc.v), hi = Math.min(R.maxValue, max - cc.v);
-            h += lo > hi ? `<div class="bad">Con il ${cc.v} per la coppia nessuna carta (1–${R.maxValue}) del compagno ti tiene nel range ${min}–${max}: ti salva solo il colore dominante.</div>`
+            if (X) {
+              h += `<div>Con il <b>${cc.v}</b> per la coppia, la somma delle altre due carte (compagno + escluso, entrambe coperte) deve essere tra <b>${min - cc.v}</b> e <b>${max - cc.v}</b> per stare nel range ${min}–${max}.</div>`;
+              if (pdecl && pdecl.num != null) {
+                const zl = Math.max(1, min - cc.v - pdecl.num), zh = Math.min(R.maxValue, max - cc.v - pdecl.num);
+                h += zl > zh ? `<div class="bad">Se ${esc(this.pname(partnerId))} gioca il ${pdecl.num} dichiarato, <b>nessuna</b> carta dell'escluso ti tiene nel range (ti salva solo il colore dominante).</div>`
+                  : `<div class="${(zh - zl + 1) >= 5 ? 'good' : 'bad'}">Se ${esc(this.pname(partnerId))} gioca il ${pdecl.num}, l'escluso (alla cieca) deve giocare tra <b>${zl}</b> e <b>${zh}</b>: ${zh - zl + 1} carte su ${R.maxValue}.</div>`;
+              }
+            } else h += lo > hi ? `<div class="bad">Con il ${cc.v} per la coppia nessuna carta (1–${R.maxValue}) del compagno ti tiene nel range ${min}–${max}: ti salva solo il colore dominante.</div>`
               : `<div>Con il <b>${cc.v}</b> per la coppia, il compagno deve giocare tra <b>${lo}</b> e <b>${hi}</b> per stare nel range ${min}–${max}.</div>`;
             h += cc.c === d.dominant ? `<div class="good">🛡 Il tuo ${cc.v} è del colore dominante: se anche il compagno gioca ${COLORS[d.dominant].n}, niente sforo.</div>` : `<div class="muted">Colore ${COLORS[cc.c].n}: non è il dominante (${COLORS[d.dominant].n}).</div>`;
-            if (pdecl && pdecl.num != null) { const sum = cc.v + pdecl.num; h += `<div class="${sum >= min && sum <= max ? 'good' : 'bad'}">${esc(this.pname(partnerId))} ha dichiarato ${pdecl.num}: somma ${sum} → ${sum >= min && sum <= max ? 'dentro il range ✔' : 'FUORI dal range ✘ (se dice la verità)'}.</div>`; }
-            else if (pdecl) h += `<div class="muted">${esc(this.pname(partnerId))} non ha dichiarato nessun numero.</div>`;
+            if (!X && pdecl && pdecl.num != null) { const sum = cc.v + pdecl.num; h += `<div class="${sum >= min && sum <= max ? 'good' : 'bad'}">${esc(this.pname(partnerId))} ha dichiarato ${pdecl.num}: somma ${sum} → ${sum >= min && sum <= max ? 'dentro il range ✔' : 'FUORI dal range ✘ (se dice la verità)'}.</div>`; }
+            else if (pdecl && pdecl.num == null) h += `<div class="muted">${esc(this.pname(partnerId))} non ha dichiarato nessun numero.</div>`;
           }
           if (sel.self != null) h += `<div>⭐ Il ${cardById(sel.self).v} per sé ti dà <b>+${cardById(sel.self).v}</b> punti personali, sempre.</div>`;
           return `<div class="pv">${h || 'Scegli le carte: nel riquadro vedrai cosa succederebbe.'}</div>`;
@@ -439,7 +457,10 @@
             if (!excl) {
               const cc = cardById(sel.couple), effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null, m = effc && EFFECTS[effc.k].mod;
               const mn = d.center.v - (m && m.dir === 'lo' ? m.n : 0), mx = d.center.v + d.base + (m && m.dir === 'hi' ? m.n : 0);
-              if (pdecl && pdecl.num != null && !(cc.v + pdecl.num >= mn && cc.v + pdecl.num <= mx) && cc.c !== d.dominant) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))} la somma è ${cc.v + pdecl.num}, <b>fuori dal range ${mn}–${mx}</b>: la coppia farebbe 0 (se lui dice la verità).`);
+              if (R.xInSum && pdecl && pdecl.num != null && cc.c !== d.dominant) {
+                const zl = Math.max(1, mn - cc.v - pdecl.num), zh = Math.min(R.maxValue, mx - cc.v - pdecl.num), n = Math.max(0, zh - zl + 1);
+                if (n < 4) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))}, solo <b>${n} carte su ${R.maxValue}</b> dell'escluso (tra ${zl} e ${zh}) tengono la coppia nel range ${mn}–${mx}: <b>rischio alto di sforo</b>.`);
+              } else if (!R.xInSum && pdecl && pdecl.num != null && !(cc.v + pdecl.num >= mn && cc.v + pdecl.num <= mx) && cc.c !== d.dominant) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))} la somma è ${cc.v + pdecl.num}, <b>fuori dal range ${mn}–${mx}</b>: la coppia farebbe 0 (se lui dice la verità).`);
               if (m && d.sincero) { const dm = mydecl && mydecl.mod; if (!dm || dm.dir !== m.dir || dm.n !== m.n) warns.push(`Sincero è attivo e hai dichiarato «${esc(FF.modTxt(dm))}», ma giochi ${esc(EFFECTS[effc.k].n)}: <b>quel modificatore varrà 0</b>.`); }
               if (effc && effc.k === 'swap') warns.push(`<b>Scambio forzato</b>: scambi le tue carte in mano con quelle dell'escluso, senza vederle prima.`);
               if (effc && effc.k === 'reverse') warns.push('<b>Reverse</b> inverte il verso: la prossima Zapd sposterà l\'escluso al contrario.');
