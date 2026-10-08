@@ -71,3 +71,20 @@
 
 ## Stato attuale delle regole (dopo il caso 1)
 Base 12, la carta dell'escluso conta nella somma del range, escluso iniziale a sorte, l'escluso avanza a ogni turno e a ogni Zapd, ogni Zapd inverte il verso. Con queste regole (AI Difficili, 300 partite): sforo 27,8%, la carta dell'escluso salva 2,3 e rovina 3,5 turni a partita. Aperti: modificatori −n quasi inutili, escluso che ascolta ma non parla (da confermare), Annulla.
+
+## Modificatori −n/+n: varianti provate solo in simulazione (regole attuali: Base 12, escluso nella somma)
+*Parametri del motore, spenti di default: `modMode` (range | shift | widen), `modScale`, `modTiming` (blind | after), `modFlex`. AI Difficili, 400 partite.*
+**Problema:** lo sforo è quasi sempre per eccesso (sopra 3,4 a partita, sotto 0,1); di quanto si supera il massimo: 1 punto 24%, 2 punti 23%, 3 punti 19%, 4 punti 14%, 5 punti 8%, 6 o più 12% (un −3 rimedia al 66%, un −4 al 79%, un −6 al 93%). I modificatori si giocano coperti, quindi chi li gioca non sa di quanto sfora: li usa come assicurazione.
+| Versione | Modificatori giocati | Salvano la coppia | Dannosi | Sforo finale |
+|---|---|---|---|---|
+| Attuale (−n abbassa il minimo, +n alza il massimo; coperti) | 1,45 | 0,16 | – | 27,0% |
+| Coperti, spostano la somma (±n) | 1,74 | 0,16 | 0,14 | 27,9% |
+| Coperti, spostano la somma, valori ×2 | 1,98 | 0,27 | 0,37 | 29,7% |
+| Coperti, allargano il range da entrambi i lati | 1,79 | 0,30 | – | 26,5% |
+| **Dopo il reveal** (a somma nota), verso fisso | 0,31 | 0,32 | – | 25,2% |
+| Dopo il reveal, verso fisso, valori ×2 | 0,46 | 0,45 | – | 24,0% |
+| **Dopo il reveal, verso a scelta (±n)** | 0,60 | 0,59 | – | 22,9% |
+| Dopo il reveal, ±n a scelta, ×1,5 (±1,5/3/4,5) | 0,70 | 0,69 | – | 21,8% |
+| Dopo il reveal, ±n a scelta, ×2 (±2/4/6) | 0,86 | 0,87 | – | 20,3% |
+- Giocati dopo il reveal, i modificatori diventano **decisivi ogni volta che si giocano** (con meno carte spese): è l'informazione che mancava. Il limite che resta è la disponibilità (si pescano solo da escluso e servono il verso e la taglia giusti): il verso a scelta quasi raddoppia i salvataggi.
+- Se i modificatori si giocano dopo il reveal, **Sincero perde il suo scopo** (dichiarare un modificatore esatto) e va ripensato; Annulla non ha come bersaglio una carta giocata dopo.

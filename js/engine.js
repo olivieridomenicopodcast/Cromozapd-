@@ -403,8 +403,10 @@
             f.zeroed = true; this.stat('sincero_mentito', f.pid);
             b = this.say('effect', `🗣️ ${this.pn(f.pid)} aveva dichiarato «${modTxt(s.decls[f.pid] && s.decls[f.pid].mod)}» ma ha giocato ${e.n}: sotto Sincero quel modificatore vale 0.`, f.pid, { k: f.eff.k });
           } else {
-            if (m.dir === 'lo') sumLo += m.n; else sumHi += m.n;
-            b = this.say('effect', `${e.i} ${this.pn(f.pid)}: ${e.n} → ${m.dir === 'lo' ? 'il minimo del range scende di ' + m.n : 'il massimo del range sale di ' + m.n}.`, f.pid, { k: f.eff.k });
+            const nn = m.n * (R.modScale || 1), md = R.modMode || 'range';
+            if (m.dir === 'lo') sumLo += nn; else sumHi += nn;
+            const what = md === 'shift' ? (m.dir === 'lo' ? `la somma delle tre carte scende di ${nn}` : `la somma delle tre carte sale di ${nn}`) : md === 'widen' ? `il range si allarga di ${nn} da entrambi i lati` : (m.dir === 'lo' ? `il minimo del range scende di ${nn}` : `il massimo del range sale di ${nn}`);
+            b = this.say('effect', `${e.i} ${this.pn(f.pid)}: ${e.n} → ${what}.`, f.pid, { k: f.eff.k });
           }
           if (b) yield b;
         } else if (f.eff.k === 'reverse') {
@@ -430,17 +432,37 @@
 
       // 8) range e punti
       const [a, c2] = act, ca = plays[a].couple, cb = plays[c2].couple;
-      const min = s.center.v - sumLo, max = s.center.v + R.base + sumHi, sumPair = ca.v + cb.v;
-      const sum = R.xInSum ? sumPair + xcard.v : sumPair;                 // somma controllata dal range (variante: con la carta dell'escluso)
+      const mmode = R.modMode || 'range';
+      const min = s.center.v - (mmode === 'range' ? sumLo : mmode === 'widen' ? sumLo + sumHi : 0), max = s.center.v + R.base + (mmode === 'range' ? sumHi : mmode === 'widen' ? sumLo + sumHi : 0), sumPair = ca.v + cb.v;
+      const shift = mmode === 'shift' ? sumHi - sumLo : 0;                 // variante 'shift': i modificatori spostano la somma
+      const sumRaw = R.xInSum ? sumPair + xcard.v : sumPair;              // somma controllata dal range (con la carta dell'escluso)
+      let sum = sumRaw + shift;
       const okFor = (x) => { const w = x >= min && x <= max; return R.rangeOutside ? !w : w; }; // variante: serve stare FUORI dal range
-      const inRange = okFor(sum);
-      if (R.xInSum && okFor(sumPair) !== inRange) this.stat(inRange ? 'escluso_salva_la_coppia' : 'escluso_rovina_la_coppia', ex);
+      let inRange = okFor(sum);
+      if (R.xInSum && okFor(sumPair + shift) !== inRange) this.stat(inRange ? 'escluso_salva_la_coppia' : 'escluso_rovina_la_coppia', ex);
       // quanto contano davvero i modificatori ±: nel range solo grazie a loro, già nel range senza, o fuori comunque
       if (sumLo || sumHi || fila.some((f) => !f.annulled && EFFECTS[f.eff.k].mod)) {
-        const baseW = sum >= s.center.v && sum <= s.center.v + R.base, baseOk = R.rangeOutside ? !baseW : baseW;
-        this.stat(baseOk ? 'modificatore_inutile' : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
+        const baseW = sumRaw >= s.center.v && sumRaw <= s.center.v + R.base, baseOk = R.rangeOutside ? !baseW : baseW;
+        this.stat(baseOk ? (inRange ? 'modificatore_inutile' : 'modificatore_dannoso') : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
       }
       const immune = ca.c === s.dominant && cb.c === s.dominant;
+      // VARIANTE modTiming 'after': dopo il reveal, a somma nota, un attivo può giocare un modificatore per correggere lo sforo
+      if (R.modTiming === 'after' && !inRange && !immune) {
+        for (const pid of [mod3(ex + 1), mod3(ex + 2)]) {
+          const pl = s.players[pid], sc = R.modScale || 1;
+          const opts = pl.eff.filter((e) => EFFECTS[e.k].mod).flatMap((e) => (R.modFlex ? [1, -1] : [EFFECTS[e.k].mod.dir === 'hi' ? 1 : -1]).map((sg) => ({ id: e.id, k: e.k, delta: sg * EFFECTS[e.k].mod.n * sc }))).filter((o) => okFor(sum + o.delta));
+          if (!opts.length) continue;
+          const ans = yield* this.ask(this._dec('correct', pid, { sum, min, max, opts, pts: sumPair + xcard.v }));
+          const o = opts.find((x) => x.id === (ans && typeof ans === 'object' ? ans.id : ans) && (!(ans && typeof ans === 'object') || x.delta === ans.delta));
+          if (o) {
+            const card = this._take(pl.eff, o.id); s.effDiscard.push(card);
+            sum += o.delta; inRange = true; this.stat('correzione_salva', pid); this.stat('effetto_giocato:' + card.k, pid);
+            b = this.say('effect', `🛠️ ${this.pn(pid)} gioca ${FF.effName(card)} dopo il reveal: la somma passa da ${sum - o.delta} a ${sum} e rientra nel range ${min}–${max}.`, pid, { k: card.k });
+            if (b) yield b;
+            break;
+          }
+        }
+      }
       const scored = inRange || immune;
       const pts = scored ? sumPair + xcard.v : 0;
       this.stat(inRange ? 'coppia_nel_range' : (immune ? 'coppia_salvata_dal_colore' : 'coppia_sfora'), -1);
@@ -516,7 +538,7 @@
         this.emit('warn', `⚠ Giocata non valida di ${this.pn(pid)}: uso le prime due carte.`);
         couple = h[0]; self = h[1];
       }
-      const eff = raw.eff != null ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila') : null;
+      const eff = raw.eff != null ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila' && !(this.rules.modTiming === 'after' && EFFECTS[e.k].mod)) : null;
       return { coupleId: couple.id, selfId: self.id, effId: eff ? eff.id : null };
     }
   }
@@ -556,6 +578,7 @@
           case 'xplay': return pick(d.hand).id;
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;
+          case 'correct': return rng() < 0.5 ? (game.rules.modFlex ? { id: d.opts[0].id, delta: d.opts[0].delta } : d.opts[0].id) : null;
         }
         return null;
       },

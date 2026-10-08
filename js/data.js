@@ -39,6 +39,10 @@
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     xInSum: true,           // la carta dell'escluso conta nella somma controllata dal range (deciso da Niky; false = vecchia regola)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
+    modMode: 'range',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
+    modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)
+    modFlex: false,         // VARIANTE (solo simulazione, con modTiming 'after'): il modificatore si usa in entrambi i versi (±n a scelta)
+    modScale: 1,            // VARIANTE (solo simulazione): moltiplica il valore dei modificatori
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
     sincereZero: true,      // Sincero: il modificatore non corrispondente vale 0

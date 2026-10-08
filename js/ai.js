@@ -129,13 +129,14 @@
       return { coupleId: hand[i].id, selfId: hand[j].id, effId: fl.length && rng() < 0.3 ? fl[Math.floor(rng() * fl.length)].id : null };
     }
     let best = null, bv = -Infinity;
-    const effOpts = [null, ...fila(p.eff)];
+    const effOpts = [null, ...fila(p.eff).filter((e) => !(R.modTiming === 'after' && EFFECTS[e.k].mod))];
     for (const c of hand) for (const sf of hand) {
       if (c === sf) continue;
       for (const e of effOpts) {
-        const m = e && EFFECTS[e.k].mod;
-        const lo = c0 - (m && m.dir === 'lo' ? m.n : 0), hi = c0 + R.base + (m && m.dir === 'hi' ? m.n : 0);
-        const pin = pInRange(c.v, lo, hi, partnerNum, trust, R.maxValue, R);
+        const m = e && EFFECTS[e.k].mod, md = R.modMode || 'range', nn = m ? m.n * (R.modScale || 1) : 0;
+        const lo = c0 - (m && md === 'range' && m.dir === 'lo' ? nn : 0) - (m && md === 'widen' ? nn : 0), hi = c0 + R.base + (m && md === 'range' && m.dir === 'hi' ? nn : 0) + (m && md === 'widen' ? nn : 0);
+        const sh = m && md === 'shift' ? (m.dir === 'hi' ? nn : -nn) : 0;
+        const pin = pInRange(c.v + sh, lo, hi, partnerNum, trust, R.maxValue, R);
         const v = pin * 0.33 * (c.v + (partnerNum != null ? partnerNum : 5.5)) + 0.35 * sf.v - (e ? (m ? 0.12 : 0.02) : 0) + rng() * 0.01;
         if (v > bv) { bv = v; best = { coupleId: c.id, selfId: sf.id, effId: e ? e.id : null }; }
       }
@@ -187,7 +188,7 @@
       }
       // candidati: tutte le coppie ordinate di carte × (nessun effetto | ogni effetto in fila diverso)
       const effOpts = [null]; const seen = new Set();
-      for (const e of fila(d.eff)) if (!seen.has(e.k)) { seen.add(e.k); effOpts.push(e); }
+      for (const e of fila(d.eff)) if (!seen.has(e.k) && !(game.rules.modTiming === 'after' && EFFECTS[e.k].mod)) { seen.add(e.k); effOpts.push(e); }
       const cands = [];
       for (const c of hand) for (const sf of hand) if (c !== sf) for (const e of effOpts) cands.push({ c, sf, e });
       const tot = new Array(cands.length).fill(0);
@@ -308,6 +309,17 @@
             return { couple: plan.couple, self: plan.self, eff: plan.eff };
           }
           case 'xplay': return decideXplay(game, d);
+          case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?
+            if (level === 'easy' && rng() < 0.5) return null;
+            const g0 = game.clone(), g1 = game.clone(), s1 = g1.s, ex = d.excluded, lp = s1.lastPlay;
+            const act = [0, 1, 2].filter((i) => i !== ex);
+            s1.pairPts[ex] += d.pts; s1.contrib[act[0]][ex] += lp.plays[act[0]].couple.v; s1.contrib[act[1]][ex] += lp.plays[act[1]].couple.v; s1.contrib[ex][ex] += lp.xcard.v;
+            const left = Math.max(0, Math.min(1, (game.totalZaps - game.s.zapsDrawn) / 12));
+            const gain = evalU(g1, d.player, P) - evalU(g0, d.player, P), cost = (P.holdW || 0.2) * left + 0.1;
+            if (gain <= cost) return null;
+            const best = d.opts.slice().sort((x, y) => Math.abs(x.delta) - Math.abs(y.delta))[0]; // la carta più piccola che basta
+            return game.rules.modFlex ? { id: best.id, delta: best.delta } : best.id;
+          }
           case 'annulla': return decideAnnulla(game, d);
           case 'effdraw': return level === 'easy' ? rng() < 0.5 : true;
         }
