@@ -432,6 +432,11 @@
       const [a, c2] = act, ca = plays[a].couple, cb = plays[c2].couple;
       const min = s.center.v - sumLo, max = s.center.v + R.base + sumHi, sum = ca.v + cb.v;
       const inRange = sum >= min && sum <= max;
+      // quanto contano davvero i modificatori ±: nel range solo grazie a loro, già nel range senza, o fuori comunque
+      if (sumLo || sumHi || fila.some((f) => !f.annulled && EFFECTS[f.eff.k].mod)) {
+        const baseIn = sum >= s.center.v && sum <= s.center.v + R.base;
+        this.stat(baseIn ? 'modificatore_inutile' : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
+      }
       const immune = ca.c === s.dominant && cb.c === s.dominant;
       const scored = inRange || immune;
       const pts = scored ? sum + xcard.v : 0;
