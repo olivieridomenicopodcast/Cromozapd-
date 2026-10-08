@@ -119,7 +119,7 @@
     h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante, fa avanzare l\'escluso di un altro posto e inverte il verso. 12 in tutto.');
     h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno e gioca 1 carta per la coppia degli altri due.');
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
-    h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia ' + (FF.DEFAULT_RULES.xInSum ? '<b>più la carta dell\'escluso</b> ' : '') + 'deve stare tra V e V+Base.');
+    h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia ' + (FF.DEFAULT_RULES.xInSum ? '<b>più la carta dell\'escluso</b> ' : '') + 'deve stare tra Perno−V e Perno+V (perno ' + FF.DEFAULT_RULES.pivot + ').');
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
     h += row('🛡️', '<b>Immunità</b>: se le due carte-coppia sono del colore dominante, niente sforo.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
@@ -127,7 +127,7 @@
     h += '<div class="lgroup">Carte-effetto</div>';
     h += FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].mod || k.endsWith('1')).map((k) => {
       const e = EFFECTS[k];
-      return row(S.effect(k, 'tiny'), e.mod ? '<b>−1/−2/−3 · +1/+2/+3</b>: abbassano il minimo / alzano il massimo del range, in fila.' : `<b>${e.n}</b>: ${e.d}`);
+      return row(S.effect(k, 'tiny'), e.mod ? (FF.DEFAULT_RULES.modMode === 'widen' ? '<b>±1/±2/±3</b>: allargano il range di 2·n da entrambi i lati, in fila (coperti).' : '<b>−1/−2/−3 · +1/+2/+3</b>: abbassano il minimo / alzano il massimo del range, in fila.') : `<b>${e.n}</b>: ${e.d}`);
     }).join('');
     return h;
   };

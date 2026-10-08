@@ -32,7 +32,7 @@ test('simulatore: report Markdown, CSV e JSON esportabili', async () => {
 });
 
 test('simulatore: esperimento sulle regole cambia davvero il parametro', async () => {
-  const rows = await FF.Sim.experiment({ games: 10, seed: 'exp', a: 'easy', b: 'easy', rules: {} }, 'base', [0, 10]);
+  const rows = await FF.Sim.experiment({ games: 10, seed: 'exp', a: 'easy', b: 'easy', rules: { rangeMode: 'base' } }, 'base', [0, 10]);
   assert.equal(rows.length, 2);
   assert.ok(rows[0].s.sforoRate > rows[1].s.sforoRate, 'con Base 0 lo sforo deve essere molto più frequente');
   assert.deepEqual(FF.Sim.setRule({}, 'effectCopies.reverse', 0), { effectCopies: { reverse: 0 } });

@@ -33,7 +33,7 @@
 
   const pairLabel = (e) => [0, 1, 2].filter((i) => i !== e).map((i) => FF.SEATS[i]).join('');
   FF.pairLabel = pairLabel;
-  const modTxt = (m) => (!m ? 'nessuno' : m.n != null ? `${m.dir === 'hi' ? '+' : '−'}${m.n}` : `${m.dir === 'hi' ? 'verso l\'alto' : 'verso il basso'} (${m.size})`);
+  const modTxt = (m) => (!m ? 'nessuno' : m.n != null ? (FF.DEFAULT_RULES.modMode === 'widen' ? `±${m.n}` : `${m.dir === 'hi' ? '+' : '−'}${m.n}`) : (FF.DEFAULT_RULES.modMode === 'widen' ? `allarga il range (${m.size})` : `${m.dir === 'hi' ? 'verso l\'alto' : 'verso il basso'} (${m.size})`));
   FF.modTxt = modTxt;
 
   function newStats() { return { p: [{}, {}, {}], g: {} }; }
@@ -397,7 +397,7 @@
           let m = e.mod, zero = false;
           if (s.sincero != null && this.rules.sincereZero) {
             const d = s.decls[f.pid] && s.decls[f.pid].mod;
-            if (!d || d.dir !== m.dir || d.n !== m.n) zero = true;
+            if (!d || (R.modMode !== 'widen' && d.dir !== m.dir) || d.n !== m.n) zero = true;
           }
           if (zero) {
             f.zeroed = true; this.stat('sincero_mentito', f.pid);
@@ -513,7 +513,7 @@
     _dec(type, pid, extra) {
       const s = this.s, p = s.players[pid];
       return Object.assign({
-        type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base,
+        type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null),
         dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(),
       }, extra || {});
     }

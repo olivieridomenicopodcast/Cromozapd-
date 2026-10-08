@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="−3">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="±3">
       <rect x="2" y="2" width="96" height="136" rx="10" fill="#f6ecd2" stroke="#6b3fa0" stroke-width="4"/>
       <path d="M2 12a10 10 0 0 1 10-10h76a10 10 0 0 1 10 10v26H2z" fill="#6b3fa0"/>
-      <text x="50" y="25" font-size="15.5" font-weight="900" fill="#fff" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">−3</text>
+      <text x="50" y="25" font-size="15.5" font-weight="900" fill="#fff" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">±3</text>
       <text x="50" y="35" font-size="6.5" font-weight="800" fill="#fff" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" letter-spacing="1" opacity="0.9">IN FILA</text>
       <g transform="translate(20 40)"><polygon points="16,54 32,32 22,32 22,6 10,6 10,32 0,32" fill="#d9433b"/><text x="46" y="42" font-size="30" font-weight="900" fill="#9b2a24" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">−3</text></g>
-      <text x="50" y="108" font-size="8.6" fill="#3b2a14" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700">Il minimo del range</text><text x="50" y="118.5" font-size="8.6" fill="#3b2a14" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700">scende di 3</text></svg>
+      <text x="50" y="108" font-size="8.6" fill="#3b2a14" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700">Il range si allarga</text><text x="50" y="118.5" font-size="8.6" fill="#3b2a14" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" font-weight="700">di 6 per lato</text></svg>

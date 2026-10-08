@@ -35,7 +35,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si conta.
 
 ## 5. Range e punti
-- **Range** = da *V* a *V + Base*, dove *V* è il valore della carta centrale e **Base = 12** (default) **[chiarito]**. Gli estremi **sono inclusi**.
+- **Range a perno** **[chiarito: idea di Niky, provata in simulazione]** = da *(Perno − V)* a *(Perno + V)*, dove *V* è il valore della carta centrale e **Perno = 15**. Esempi: V=1 → 14–16; V=3 → 12–18; V=8 → 7–23; V=10 → 5–25. Più la carta centrale è bassa, più il range è stretto (turno difficile); più è alta, più è largo. Gli estremi **sono inclusi**. Si può sforare **sia sopra sia sotto**. (Variante vecchia, ancora nel codice come `rangeMode:'base'`: da *V* a *V + Base*.)
 - Si controlla la **somma di tre carte**: le **due carte-per-la-coppia degli attivi + la carta dell'escluso** **[chiarito: cambiato da Niky dopo le simulazioni; prima il range controllava solo le due carte degli attivi]**. Quindi la coppia può sforare anche per colpa dell'escluso, che gioca **alla cieca** (non sa cosa giocano i due) ma **ascolta la discussione** **[interpretazione]**. Parametro `xInSum` (se spento, torna la vecchia regola).
 - **Nel range** → la coppia incassa **somma delle tre carte** (le due carte-coppia + la carta dell'escluso).
 - **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**.
@@ -67,13 +67,12 @@ Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del su
 |---|---|---|
 | **Reverse** | in fila | Inverte il verso di rotazione: da quel momento l'escluso avanza nell'altra direzione (a ogni turno e a ogni Zapd; ogni Zapd lo inverte di nuovo). Due Reverse nello stesso turno si annullano. |
 | **Prossima carta** | in fila | La carta in cima al mazzo viene scoperta e messa da parte: sarà la **carta centrale del turno dopo**. Una seconda "Prossima carta" nello stesso turno non ha effetto **[interpretazione]**. |
-| **−1 / −2 / −3** | in fila | Abbassano il **minimo** del range di questo turno. |
-| **+1 / +2 / +3** | in fila | Alzano il **massimo** del range di questo turno. |
+| **±1 / ±2 / ±3** (6 carte: 2 per ogni valore) | in fila | **Allargano** il range di questo turno di **n × 2** da entrambi i lati (±1 → minimo −2 e massimo +2; ±2 → ±4; ±3 → ±6) **[chiarito: scelto da Niky dopo le simulazioni]**. Si giocano coperti, prima del reveal. Più modificatori nello stesso turno si sommano. |
 | **Sincero** | istantanea, prima della discussione | Per il turno **entrambi** gli attivi devono dichiarare un **numero esatto** sul proprio modificatore (o "nessuno"). Se al reveal quello giocato non corrisponde a quello dichiarato, **quel modificatore vale 0**. Non si applica alla carta-per-la-coppia. Non si può annullare **[interpretazione]**. |
 | **Scambio forzato** | in fila | Scambi **tutte le tue carte numeriche in mano** con quelle dell'escluso. Gli effetti in mano non si scambiano. Non si può rifiutare. |
 | **Annulla** | reattiva, dopo il reveal | Un attivo la gioca per neutralizzare **un** effetto in fila rivelato in questo turno, anche del compagno. Non annulla Sincero né un altro Annulla. Ogni effetto si annulla una volta; ogni attivo gioca al massimo un Annulla a turno; si chiede in ordine di seduta partendo dopo l'escluso **[interpretazione]**. |
 
-**Vaghezza.** Senza Sincero, sui **modificatori** non si dicono numeri precisi: solo "poco / medio / tanto" e "verso l'alto / verso il basso". Sulla carta-per-la-coppia numerica si possono invece dire numeri precisi.
+**Vaghezza.** Senza Sincero, sui **modificatori** non si dicono numeri precisi: solo "poco / medio / tanto" (la direzione non conta, perché il modificatore allarga da entrambi i lati). Sulla carta-per-la-coppia numerica si possono invece dire numeri precisi.
 
 ## 9. Cosa vede l'app
 Sempre sul tavolo: carta centrale e range del turno, colore dominante, escluso e verso, Zapd uscite (su 12), punti squadra delle 3 coppie, punti personali e Fattore coppie di ognuno, effetti in mano propri. Ogni evento ha un messaggio che spiega **cosa fa e perché**.
@@ -84,8 +83,8 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 ## 11. Non ancora definito
 - Ruolo dei **colori** oltre al colore dominante (e della carta centrale).
 - Incentivo all'uso di **Annulla**; **Modificatore-base** assorbito nella famiglia ±1/2/3 **[chiarito]**.
-- Base 12 con l'escluso nella somma: scelta dopo le simulazioni (sforo ~15% con giocatori umani che parlano, ~26% con le AI); da riverificare con i playtest.
-- I modificatori **−1/−2/−3** servono poco con la nuova regola (lo sforo è quasi sempre per eccesso): da ripensare.
+- Perno 15 con l'escluso nella somma: scelta dopo le simulazioni (sforo ~22% con le AI, equilibrato sotto/sopra); da riverificare con i playtest. Con la carta centrale 9–10 il range è quasi sempre rispettato (93–96%): da osservare se quei turni sono noiosi.
+- I modificatori ±n (allargano ×2) hanno effetto decisivo circa 0,25 volte a partita: da osservare al playtest.
 - L'escluso **ascolta** la discussione ma non parla: da confermare al playtest.
 - Escluso "sempre a metà": possibile correttivo dopo i playtest.
 - Numero definitivo di copie di ogni effetto.
@@ -93,7 +92,8 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 ## 12. Parametri (valori di partenza)
 | Parametro | Valore |
 |---|---|
-| Base del range | **12** |
+| Perno del range (range = perno ± V) | **15** |
+| Modificatori ±n: allargano il range di n × | **2** |
 | La carta dell'escluso conta nella somma del range | **sì** |
 | Escluso iniziale | **a sorte** |
 | Carte in mano | **3** |
@@ -120,7 +120,8 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Carta dell'escluso | Ambigua con lo sforo | **Conta nella somma del range** (voluto da Niky): può salvare o rovinare la coppia; il colore non conta; 0 se la coppia sfora |
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |
-| Base del range | 10 | **12** (con l'escluso nella somma: 3 carte invece di 2) |
+| Base del range | 10 | **Range a perno: 15 − V … 15 + V** (con l'escluso nella somma: 3 carte invece di 2; sforo anche sotto) |
+| Modificatori −n / +n | Abbassano il minimo / alzano il massimo | **±n allargano il range di 2n per lato** (sotto la regola della somma a 3 carte, −n serviva pochissimo) |
 | Escluso iniziale | Non specificato (io avevo messo A) | **A sorte**: con A fisso il posto C vinceva il 43% delle partite |
 | Fine del mazzo | Non specificato | Si rimescolano gli scarti (non dovrebbe servire) |
 | Parità | Non specificato | Pareggio |

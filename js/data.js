@@ -21,9 +21,15 @@
     swap: { id: 'swap', kind: 'fila', n: 'Scambio forzato', i: '🔁', s: 'Scambi la tua mano con quella dell\'escluso', d: 'Scambi le tue carte numeriche in mano con quelle dell\'escluso.' },
     annulla: { id: 'annulla', kind: 'annulla', n: 'Annulla', i: '🚫', s: 'Reattiva: annulla un effetto rivelato', d: 'Neutralizza un effetto in fila rivelato in questo turno.' },
   };
+  const WIDEN = true; // regola di default: i modificatori allargano il range da entrambi i lati, di n × modScale (vedi DEFAULT_RULES)
   for (const n of [1, 2, 3]) {
-    FF.EFFECTS['lo' + n] = { id: 'lo' + n, kind: 'fila', mod: { dir: 'lo', n }, n: '−' + n, i: '⬇️', s: 'Il minimo del range scende di ' + n, d: 'Abbassa di ' + n + ' il minimo del range di questo turno.' };
-    FF.EFFECTS['hi' + n] = { id: 'hi' + n, kind: 'fila', mod: { dir: 'hi', n }, n: '+' + n, i: '⬆️', s: 'Il massimo del range sale di ' + n, d: 'Alza di ' + n + ' il massimo del range di questo turno.' };
+    const w = n * 2;
+    FF.EFFECTS['lo' + n] = WIDEN
+      ? { id: 'lo' + n, kind: 'fila', mod: { dir: 'lo', n }, n: '±' + n, i: '↔️', s: 'Il range si allarga di ' + w + ' per lato', d: 'Allarga il range di questo turno di ' + w + ' da entrambi i lati (minimo −' + w + ', massimo +' + w + ').' }
+      : { id: 'lo' + n, kind: 'fila', mod: { dir: 'lo', n }, n: '−' + n, i: '⬇️', s: 'Il minimo del range scende di ' + n, d: 'Abbassa di ' + n + ' il minimo del range di questo turno.' };
+    FF.EFFECTS['hi' + n] = WIDEN
+      ? { id: 'hi' + n, kind: 'fila', mod: { dir: 'hi', n }, n: '±' + n, i: '↔️', s: 'Il range si allarga di ' + w + ' per lato', d: 'Allarga il range di questo turno di ' + w + ' da entrambi i lati (minimo −' + w + ', massimo +' + w + ').' }
+      : { id: 'hi' + n, kind: 'fila', mod: { dir: 'hi', n }, n: '+' + n, i: '⬆️', s: 'Il massimo del range sale di ' + n, d: 'Alza di ' + n + ' il massimo del range di questo turno.' };
   }
   FF.EFFECT_IDS = Object.keys(FF.EFFECTS);
   FF.VAGUE = { 1: 'poco', 2: 'medio', 3: 'tanto' };
@@ -39,12 +45,12 @@
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     xInSum: true,           // la carta dell'escluso conta nella somma controllata dal range (deciso da Niky; false = vecchia regola)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
-    rangeMode: 'base',      // VARIANTE (solo simulazione): 'base' = da V a V+Base; 'pivot' = da pivot−V a pivot+V (più larga quanto più alta è la carta centrale)
-    pivot: 10,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
-    modMode: 'range',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
+    rangeMode: 'pivot',      // VARIANTE (solo simulazione): 'base' = da V a V+Base; 'pivot' = da pivot−V a pivot+V (più larga quanto più alta è la carta centrale)
+    pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
+    modMode: 'widen',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
     modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)
     modFlex: false,         // VARIANTE (solo simulazione, con modTiming 'after'): il modificatore si usa in entrambi i versi (±n a scelta)
-    modScale: 1,            // VARIANTE (solo simulazione): moltiplica il valore dei modificatori
+    modScale: 2,            // VARIANTE (solo simulazione): moltiplica il valore dei modificatori
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
     sincereZero: true,      // Sincero: il modificatore non corrispondente vale 0
@@ -68,6 +74,11 @@
     return deck;
   };
   // estremi del range di base per una carta centrale di valore v
+  // range effettivo di un turno con un eventuale modificatore m = {dir, n} (stesse regole del motore)
+  FF.rangeFor = (rules, v, m) => {
+    const [a, b] = FF.rangeBase(rules, v), nn = m ? m.n * (rules.modScale || 1) : 0, md = rules.modMode || 'range';
+    return [a - (md === 'widen' ? nn : md === 'range' && m && m.dir === 'lo' ? nn : 0), b + (md === 'widen' ? nn : md === 'range' && m && m.dir === 'hi' ? nn : 0)];
+  };
   FF.rangeBase = (rules, v) => (rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : [v, v + rules.base]);
   FF.cardName = (c) => (c.z ? `⚡Zapd ${FF.COLORS[c.c].i}` : `${c.v}${FF.COLORS[c.c].i}`);
   FF.effName = (e) => `${FF.EFFECTS[e.k].i} ${FF.EFFECTS[e.k].n}`;

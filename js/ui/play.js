@@ -9,7 +9,7 @@
 
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
-    ['base', 'Base del range'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
+    ['pivot', 'Perno del range (range = perno ± V)'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
     ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['xInSum', 'La carta dell\'escluso conta nella somma del range'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
     ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
   ];
@@ -332,7 +332,7 @@
         <div class="lbl">I tuoi effetti (${d.eff.length}/${this.game.rules.effectHandMax})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
     }
     ctxLine(d) {
-      const g = this.game, lo = d.center.v, hi = d.center.v + d.base, ex = d.excluded;
+      const g = this.game, [lo, hi] = FF.rangeBase(g.rules, d.center.v), ex = d.excluded;
       return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → range <b>${lo}–${hi}</b>${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
     }
 
@@ -349,12 +349,12 @@
     }
 
     declarePanel(d) {
-      const g = this.game, max = g.rules.maxValue;
+      const g = this.game, max = g.rules.maxValue, R = g.rules;
       let num = null, mod = null;
       const partner = d.partnerDecl, pn = this.pname(d.partner);
       const modOpts = d.sincero
-        ? [[1, 'lo'], [2, 'lo'], [3, 'lo'], [1, 'hi'], [2, 'hi'], [3, 'hi']].map(([n, dir]) => ({ key: dir + n, label: `${dir === 'hi' ? '⬆ +' : '⬇ −'}${n}`, val: { dir, n } }))
-        : ['lo', 'hi'].flatMap((dir) => [1, 2, 3].map((n) => ({ key: dir + n, label: `${dir === 'hi' ? '⬆ verso l\'alto' : '⬇ verso il basso'} · ${VAGUE[n]}`, val: { dir, size: VAGUE[n] } })));
+        ? (R.modMode === 'widen' ? [[1, 'lo'], [2, 'lo'], [3, 'lo']] : [[1, 'lo'], [2, 'lo'], [3, 'lo'], [1, 'hi'], [2, 'hi'], [3, 'hi']]).map(([n, dir]) => ({ key: dir + n, label: R.modMode === 'widen' ? `↔ ±${n}` : `${dir === 'hi' ? '⬆ +' : '⬇ −'}${n}`, val: { dir, n } }))
+        : (R.modMode === 'widen' ? ['lo'] : ['lo', 'hi']).flatMap((dir) => [1, 2, 3].map((n) => ({ key: dir + n, label: R.modMode === 'widen' ? `↔ allarga · ${VAGUE[n]}` : `${dir === 'hi' ? '⬆ verso l\'alto' : '⬇ verso il basso'} · ${VAGUE[n]}`, val: { dir, size: VAGUE[n] } })));
       const hasMod = d.eff.some((e) => EFFECTS[e.k].mod);
       return new Promise((resolve) => {
         const render = () => {
@@ -395,7 +395,7 @@
         const preview = () => {
           const X = R.xInSum;
           if (excl) {
-            const lo = d.center.v, hi = d.center.v + d.base;
+            const [lo, hi] = FF.rangeBase(R, d.center.v);
             const dn = (d.decls || []).map((x, i) => ({ x, i })).filter((o) => o.i !== d.excluded && o.x && o.x.num != null);
             let extra = '';
             if (X && dn.length === 2) {
@@ -407,7 +407,7 @@
           }
           const effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null;
           const m = effc && EFFECTS[effc.k].mod;
-          const min = d.center.v - (m && m.dir === 'lo' ? m.n : 0), max = d.center.v + d.base + (m && m.dir === 'hi' ? m.n : 0);
+          const [min, max] = FF.rangeFor(R, d.center.v, m);
           const cc = sel.couple != null ? cardById(sel.couple) : null;
           let h = '';
           if (cc) {
@@ -456,12 +456,12 @@
             const warns = [];
             if (!excl) {
               const cc = cardById(sel.couple), effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null, m = effc && EFFECTS[effc.k].mod;
-              const mn = d.center.v - (m && m.dir === 'lo' ? m.n : 0), mx = d.center.v + d.base + (m && m.dir === 'hi' ? m.n : 0);
+              const [mn, mx] = FF.rangeFor(R, d.center.v, m);
               if (R.xInSum && pdecl && pdecl.num != null && cc.c !== d.dominant) {
                 const zl = Math.max(1, mn - cc.v - pdecl.num), zh = Math.min(R.maxValue, mx - cc.v - pdecl.num), n = Math.max(0, zh - zl + 1);
                 if (n < 4) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))}, solo <b>${n} carte su ${R.maxValue}</b> dell'escluso (tra ${zl} e ${zh}) tengono la coppia nel range ${mn}–${mx}: <b>rischio alto di sforo</b>.`);
               } else if (!R.xInSum && pdecl && pdecl.num != null && !(cc.v + pdecl.num >= mn && cc.v + pdecl.num <= mx) && cc.c !== d.dominant) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))} la somma è ${cc.v + pdecl.num}, <b>fuori dal range ${mn}–${mx}</b>: la coppia farebbe 0 (se lui dice la verità).`);
-              if (m && d.sincero) { const dm = mydecl && mydecl.mod; if (!dm || dm.dir !== m.dir || dm.n !== m.n) warns.push(`Sincero è attivo e hai dichiarato «${esc(FF.modTxt(dm))}», ma giochi ${esc(EFFECTS[effc.k].n)}: <b>quel modificatore varrà 0</b>.`); }
+              if (m && d.sincero) { const dm = mydecl && mydecl.mod; if (!dm || (R.modMode !== 'widen' && dm.dir !== m.dir) || dm.n !== m.n) warns.push(`Sincero è attivo e hai dichiarato «${esc(FF.modTxt(dm))}», ma giochi ${esc(EFFECTS[effc.k].n)}: <b>quel modificatore varrà 0</b>.`); }
               if (effc && effc.k === 'swap') warns.push(`<b>Scambio forzato</b>: scambi le tue carte in mano con quelle dell'escluso, senza vederle prima.`);
               if (effc && effc.k === 'reverse') warns.push('<b>Reverse</b> inverte il verso: la prossima Zapd sposterà l\'escluso al contrario.');
             }

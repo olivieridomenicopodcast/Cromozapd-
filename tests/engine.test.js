@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1 }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -121,10 +121,14 @@ test('variante (solo simulazione) rangeOutside: si incassa solo con la somma FUO
   assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_dentro, 1);
 });
 
-test('regole predefinite: Base 12 e carta dell\'escluso nella somma del range', () => {
-  assert.equal(FF.DEFAULT_RULES.base, 12); assert.equal(FF.DEFAULT_RULES.xInSum, true);
-  const g = new FF.Game({ seed: 1, log: true });
-  assert.equal(g.rules.base, 12); assert.equal(g.rules.xInSum, true);
+test('regole predefinite: range a perno 15, modificatori che allargano ×2, carta dell\'escluso nella somma', () => {
+  assert.equal(FF.DEFAULT_RULES.rangeMode, 'pivot'); assert.equal(FF.DEFAULT_RULES.pivot, 15); assert.equal(FF.DEFAULT_RULES.xInSum, true);
+  assert.equal(FF.DEFAULT_RULES.modMode, 'widen'); assert.equal(FF.DEFAULT_RULES.modScale, 2);
+  const g = new FF.Game({ seed: 1, log: true }), R = g.rules;
+  assert.deepEqual(FF.rangeBase(R, 3), [12, 18]); assert.deepEqual(FF.rangeBase(R, 8), [7, 23]); assert.deepEqual(FF.rangeBase(R, 1), [14, 16]);
+  assert.deepEqual(FF.rangeFor(R, 3, { dir: 'lo', n: 2 }), [8, 22]); assert.deepEqual(FF.rangeFor(R, 3, { dir: 'hi', n: 1 }), [10, 20]);
+  assert.equal(g.rules.xInSum, true);
+  assert.equal(FF.DEFAULT_RULES.base, 12);
   // centro 5 → 5..17: 6+6 + escluso 4 = 16 dentro; con escluso 7 = 19 sopra → sforo per colpa dell'escluso
   const m = (xv) => mk({ rules: { base: 12, xInSum: true }, center: [5, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[6, 1], [3, 1], [1, 1]], [[xv, 1], [8, 2], [9, 2]]] });
   let t = m(4); turn(t); assert.equal(pts(t), 6 + 6 + 4);
@@ -421,7 +425,8 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
     assert.ok(row, name + ' manca nel regolamento (§12)');
     return row.split('|')[2].replace(/\*/g, '').trim();
   };
-  assert.equal(val('Base del range'), String(R.base));
+  assert.equal(val('Perno del range (range = perno ± V)'), String(R.pivot));
+  assert.equal(val('Modificatori ±n: allargano il range di n ×'), String(R.modScale));
   assert.equal(val('La carta dell\'escluso conta nella somma del range'), R.xInSum ? 'sì' : 'no');
   assert.equal(val('Carte in mano'), String(R.handSize));
   assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));

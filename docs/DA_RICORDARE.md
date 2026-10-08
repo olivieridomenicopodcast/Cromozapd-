@@ -105,3 +105,8 @@ Idea di Niky: range = [perno−V, perno+V] invece di [V, V+Base]. Misure con 3 I
 - Gli sfori diventano a due lati: risolve il problema "non si sfora mai sotto".
 - Difficoltà molto variabile con la carta centrale (2 carte, perno 10, coppia a caso): V1 27%, V2 43%, V3 57%, V4 69%, V5 79%, V6 87%, V7 93%, V8 97%, V9-10 ~100%. Con V≥8 (~30% dei turni) il range è quasi gratis.
 - Modificatori ±n giocati alla cieca: con il perno diventano utili in entrambe le direzioni (decisivi 0,23/partita ×1, 0,34 ×2; "allarga ×2" 0,56), comunque modesti.
+
+## Regole adottate (scelta di Niky): range a perno 15 + modificatori "allarga ×2"
+- Range = [15−V, 15+V], con la carta dell'escluso nella somma. Modificatori ±1/±2/±3 (6 carte): allargano di 2n per lato, coperti, prima del reveal.
+- Valutazione (hard×3, 300 partite): sforo 18,1% (sotto 1,11 / sopra 1,26 a partita), escluso salva 4,55 / rovina 0,68, modificatori decisivi 0,51 / inutili 0,88 / non bastano 0,12, posti 31,7/38,0/30,3%, egoista vince 19,1%, difficile vs media 38,9%, media vs facile 45,8%.
+- Da osservare al playtest: turni con carta centrale 9–10 (range quasi sempre rispettato: 93–96%); Annulla ancora quasi mai giocata (0,08/partita); la direzione dei modificatori non esiste più (dichiarazioni "poco/medio/tanto").
