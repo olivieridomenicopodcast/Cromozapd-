@@ -3,7 +3,7 @@
 Versione digitale per il playtest del gioco di carte **Cromozapd** (3 giocatori, coppie a rotazione, doppio punteggio).
 Nessuna build: apri `index.html` (o `npm run serve` → http://localhost:8080). PWA installabile, funziona offline.
 
-**Stato: AI a tre livelli, simulatore e interfaccia completi** (prima versione da provare).
+**Stato: AI a tre livelli, simulatore e interfaccia completi** (prima versione da provare). Rotazione: l'escluso avanza a ogni turno e a ogni Zapd; ogni Zapd inverte anche il verso.
 
 ## Modalità
 - 🤖 **Contro l'AI** — tu e due AI (livelli da scegliere per ogni posto), con 💡 suggerimento dell'AI e anteprima delle conseguenze.
