@@ -79,7 +79,7 @@
     const [a, b] = FF.rangeBase(rules, v), nn = m ? m.n * (rules.modScale || 1) : 0, md = rules.modMode || 'range';
     return [a - (md === 'widen' ? nn : md === 'range' && m && m.dir === 'lo' ? nn : 0), b + (md === 'widen' ? nn : md === 'range' && m && m.dir === 'hi' ? nn : 0)];
   };
-  FF.rangeBase = (rules, v) => (rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : [v, v + rules.base]);
+  FF.rangeBase = (rules, v) => (rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : rules.rangeMode === 'double' ? [v, 2 * v] : [v, v + rules.base]);
   FF.cardName = (c) => (c.z ? `⚡Zapd ${FF.COLORS[c.c].i}` : `${c.v}${FF.COLORS[c.c].i}`);
   FF.effName = (e) => `${FF.EFFECTS[e.k].i} ${FF.EFFECTS[e.k].n}`;
 })(typeof window !== 'undefined' ? window : globalThis);
