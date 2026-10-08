@@ -110,3 +110,14 @@ Idea di Niky: range = [perno−V, perno+V] invece di [V, V+Base]. Misure con 3 I
 - Range = [15−V, 15+V], con la carta dell'escluso nella somma. Modificatori ±1/±2/±3 (6 carte): allargano di 2n per lato, coperti, prima del reveal.
 - Valutazione (hard×3, 300 partite): sforo 18,1% (sotto 1,11 / sopra 1,26 a partita), escluso salva 4,55 / rovina 0,68, modificatori decisivi 0,51 / inutili 0,88 / non bastano 0,12, posti 31,7/38,0/30,3%, egoista vince 19,1%, difficile vs media 38,9%, media vs facile 45,8%.
 - Da osservare al playtest: turni con carta centrale 9–10 (range quasi sempre rispettato: 93–96%); Annulla ancora quasi mai giocata (0,08/partita); la direzione dei modificatori non esiste più (dichiarazioni "poco/medio/tanto").
+
+## Annulla tolta dal mazzo (decisione di Niky)
+Mazzo effetti ora 17 carte (copie di Annulla = 0; il codice resta, si può riattivare dal parametro).
+
+## Turni a carta centrale alta (3 IA difficili, 300 partite, range perno 15)
+| Carta centrale | Turni | In range | Margine medio sotto il massimo | Somma al limite (≤3 dal max) | Carta-coppia media | Carta-escluso media | Carta per sé media |
+|---|---|---|---|---|---|---|---|
+| 1–3 | 1076 | 58,1% | 3,1 | 35% | 4,04 | 7,05 | 6,82 |
+| 4–7 | 1492 | 86,7% | 5,4 | 27% | 4,27 | 7,12 | 6,49 |
+| 8–10 | 1115 | 98,2% | 8,5 | 11% | 4,31 | 7,28 | 6,38 |
+Le IA giocano la stessa carta-coppia (~4,3) anche nei turni "gratis": non sfruttano il margine; resta da capire se è una debolezza dell'IA o se conviene davvero (i punti di coppia contano solo come quota nel Fattore).

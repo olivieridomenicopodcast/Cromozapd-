@@ -11,7 +11,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 
 ## 2. Componenti
 - **Mazzo principale: 92 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **12 carte Zapd** (3 per colore). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**.
-- **Mazzetto Effetti**, separato, solo funzione (nessun valore numerico): vedi §8. Composizione di partenza **[interpretazione]**: 20 carte (§12).
+- **Mazzetto Effetti**, separato, solo funzione (nessun valore numerico): vedi §8. Composizione di partenza **[interpretazione]**: 17 carte (§12).
 - **Carta centrale**: la carta numerica scoperta che definisce il range del turno.
 - **Gettone escluso** (uno solo) e **carte identità** con la freccia del verso di rotazione. Nell'app sono mostrati sul tavolo.
 - **Colore dominante** (la "briscola"): indicato sul tavolo.
@@ -29,8 +29,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 3. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§8). **[chiarito]** Il tradimento è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Nell'hotseat si parla anche a voce.
 4. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto** (3ª). L'escluso gioca **1 carta** per la coppia attiva: **la sua carta conta nella somma del range** (§5).
 5. **Reveal simultaneo** di tutto.
-6. **Finestra di Annulla** (§8).
-7. **Risoluzione**: effetti (Reverse, Prossima carta, Scambio forzato), range e punti (§5), poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§8).
+6. **Risoluzione**: effetti (Reverse, Prossima carta, Scambio forzato), range e punti (§5), poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§8).
 
 Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si conta.
 
@@ -61,7 +60,7 @@ Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si cont
 - **Vincitore di coppia**: la coppia con più punti squadra. **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
 
 ## 8. Mazzetto Effetti
-Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti si giocano da **attivo**, in 3ª posizione (salvo Sincero e Annulla). Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco.
+Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti si giocano da **attivo**, in 3ª posizione (salvo Sincero). Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco.
 
 | Carta | Quando | Cosa fa |
 |---|---|---|
@@ -70,7 +69,6 @@ Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del su
 | **±1 / ±2 / ±3** (6 carte: 2 per ogni valore) | in fila | **Allargano** il range di questo turno di **n × 2** da entrambi i lati (±1 → minimo −2 e massimo +2; ±2 → ±4; ±3 → ±6) **[chiarito: scelto da Niky dopo le simulazioni]**. Si giocano coperti, prima del reveal. Più modificatori nello stesso turno si sommano. |
 | **Sincero** | istantanea, prima della discussione | Per il turno **entrambi** gli attivi devono dichiarare un **numero esatto** sul proprio modificatore (o "nessuno"). Se al reveal quello giocato non corrisponde a quello dichiarato, **quel modificatore vale 0**. Non si applica alla carta-per-la-coppia. Non si può annullare **[interpretazione]**. |
 | **Scambio forzato** | in fila | Scambi **tutte le tue carte numeriche in mano** con quelle dell'escluso. Gli effetti in mano non si scambiano. Non si può rifiutare. |
-| **Annulla** | reattiva, dopo il reveal | Un attivo la gioca per neutralizzare **un** effetto in fila rivelato in questo turno, anche del compagno. Non annulla Sincero né un altro Annulla. Ogni effetto si annulla una volta; ogni attivo gioca al massimo un Annulla a turno; si chiede in ordine di seduta partendo dopo l'escluso **[interpretazione]**. |
 
 **Vaghezza.** Senza Sincero, sui **modificatori** non si dicono numeri precisi: solo "poco / medio / tanto" (la direzione non conta, perché il modificatore allarga da entrambi i lati). Sulla carta-per-la-coppia numerica si possono invece dire numeri precisi.
 
@@ -82,7 +80,7 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 
 ## 11. Non ancora definito
 - Ruolo dei **colori** oltre al colore dominante (e della carta centrale).
-- Incentivo all'uso di **Annulla**; **Modificatore-base** assorbito nella famiglia ±1/2/3 **[chiarito]**.
+- **Annulla** è stata **tolta dal mazzo** (decisione di Niky: quasi mai giocata nelle simulazioni, ~0,1 a partita). Il codice c'è ancora (parametro `Copie di Annulla` = 0). **Modificatore-base** assorbito nella famiglia ±1/2/3 **[chiarito]**.
 - Perno 15 con l'escluso nella somma: scelta dopo le simulazioni (sforo ~22% con le AI, equilibrato sotto/sopra); da riverificare con i playtest. Con la carta centrale 9–10 il range è quasi sempre rispettato (93–96%): da osservare se quei turni sono noiosi.
 - I modificatori ±n (allargano ×2) hanno effetto decisivo circa 0,25 volte a partita: da osservare al playtest.
 - L'escluso **ascolta** la discussione ma non parla: da confermare al playtest.
@@ -103,7 +101,7 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Copie di Prossima carta | **3** |
 | Copie di Sincero | **3** |
 | Copie di Scambio forzato | **2** |
-| Copie di Annulla | **3** |
+| Copie di Annulla | **0** |
 | Copie di ogni ±1/2/3 | **1** |
 | Sincero: modificatore sbagliato vale 0 | **sì** |
 | L'escluso avanza a ogni turno | **sì** |

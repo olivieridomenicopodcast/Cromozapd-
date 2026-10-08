@@ -475,7 +475,7 @@
       }
       this.stat('punti_coppia', -1, pts);
       const why = R.rangeOutside ? (inRange ? `${sum} è fuori dalla zona vietata ${min}–${max}` : immune ? `${sum} è dentro la zona vietata ${min}–${max}, ma` + ` entrambe le carte sono del colore dominante: niente perdita` : `${sum} è DENTRO la zona vietata ${min}–${max} → SFORO`) : inRange ? `${sum} è dentro il range ${min}–${max}` : immune ? `${sum} è fuori dal range ${min}–${max}, ma entrambe le carte sono del colore dominante (${this.col(s.dominant)}): niente perdita` : `${sum} è ${sum < min ? 'sotto' : 'sopra'} il range ${min}–${max} → SFORO`;
-      b = this.say('score', `📐 Coppia ${pairLabel(ex)}: ${ca.v} + ${cb.v}${R.xInSum ? ` + ${xcard.v} (escluso)` : ''} = ${sum}; ${why}. ${scored ? `La coppia incassa ${sumPair} + ${xcard.v} (escluso) = ${pts} (totale coppia ${s.pairPts[ex]}).` : `La coppia incassa 0 e la carta dell'escluso (${xcard.v}) non conta.`}`, -1, { sum, min, max, scored, pts, inRange });
+      b = this.say('score', `📐 Coppia ${pairLabel(ex)}: ${ca.v} + ${cb.v}${R.xInSum ? ` + ${xcard.v} (escluso)` : ''} = ${sum}; ${why}. ${scored ? `La coppia incassa ${sumPair} + ${xcard.v} (escluso) = ${pts} (totale coppia ${s.pairPts[ex]}).` : `La coppia incassa 0 e la carta dell'escluso (${xcard.v}) non conta.`}`, -1, { sum, min, max, scored, pts, inRange, cv: [ca.v, cb.v], xv: xcard.v, selfs: act.map((pid) => plays[pid].self.v) });
       if (b) yield b;
       b = this.say('score', `⭐ Carte per sé: ${act.map((pid) => `${this.pn(pid)} +${plays[pid].self.v}`).join(' · ')} (contano sempre).`);
       if (b) yield b;

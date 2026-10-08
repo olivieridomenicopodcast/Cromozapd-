@@ -53,7 +53,7 @@ function pol(o = {}) {
 const turn = (g, o = {}) => { FF.drive(g, g.turnGen(), pol(o)); return o; };
 const pts = (g, e = 2) => g.s.pairPts[e];
 
-test('mazzi: 92 carte (80 numeriche + 12 Zapd), ogni colore-valore due volte; Mazzetto Effetti da 20', () => {
+test('mazzi: 92 carte (80 numeriche + 12 Zapd), ogni colore-valore due volte; Mazzetto Effetti da 17', () => {
   const d = FF.buildDeck();
   assert.equal(d.length, 92);
   assert.equal(d.filter((c) => c.z).length, 12);
@@ -63,7 +63,7 @@ test('mazzi: 92 carte (80 numeriche + 12 Zapd), ogni colore-valore due volte; Ma
   }
   assert.equal(new Set(d.map((c) => c.id)).size, 92);
   const e = FF.buildEffectDeck();
-  assert.equal(e.length, 20);
+  assert.equal(e.length, 17);
   assert.equal(e.filter((x) => x.k === 'reverse').length, 3);
   assert.equal(e.filter((x) => x.k === 'swap').length, 2);
 });
@@ -360,7 +360,7 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
       assert.equal(ids.length, 92, 'carte numeriche+Zapd: ' + ids.length);
       assert.equal(new Set(ids).size, 92, 'duplicati');
       const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
-      assert.equal(eids.length, 20); assert.equal(new Set(eids).size, 20);
+      assert.equal(eids.length, 17); assert.equal(new Set(eids).size, 17);
       for (const p of s.players) { assert.ok(p.hand.length <= 3 && p.eff.length <= 2); }
       assert.ok(s.zapPile.length === s.zapsDrawn);
       return bots[d.player].decide(game, d);
