@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="Zapd Blu">
+      <rect x="2" y="2" width="96" height="136" rx="10" fill="#1d1b2e" stroke="#2f6fd1" stroke-width="5"/>
+      <rect x="10" y="10" width="80" height="120" rx="6" fill="none" stroke="#2f6fd1" stroke-width="1.5" opacity="0.7"/>
+      <polygon points="58.7,20.5 26.8,69.8 47.1,69.8 38.4,107.5 73.2,52.4 52.9,52.4" fill="#ffd84a" stroke="#fff3b0" stroke-width="2.9" stroke-linejoin="round"/>
+      <text x="50" y="118" font-size="17" font-weight="900" fill="#fff" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" letter-spacing="2">ZAPD</text>
+      <polygon points="18,12 26,26.4 10,26.4" fill="#2f6fd1" stroke="#fff" stroke-width="0.96" stroke-linejoin="round"/><polygon points="82,12 90,26.4 74,26.4" fill="#2f6fd1" stroke="#fff" stroke-width="0.96" stroke-linejoin="round"/></svg>

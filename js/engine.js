@@ -268,12 +268,14 @@
       const ex = s.excluded, act = this.actives();
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${s.center.v} a ${s.center.v + R.base} (Base ${R.base}): la somma delle due carte-per-la-coppia deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
-      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia ma non partecipa alla discussione.`, ex);
+      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia ma non partecipa alla discussione.`, ex, { excluded: ex });
       if (b) yield b;
       this.stat('turni', -1);
 
       // 2) Sincero (istantanea, prima della discussione)
       s.phase = 'discuss';
+      b = this.say('phase', '🗨️ Fase 2 — Discussione di coppia: solo i due attivi, con una dichiarazione non vincolante (si può tradire).', -1, { phase: 'discuss' });
+      if (b) yield b;
       for (const pid of act) {
         const p = s.players[pid]; const card = p.eff.find((e) => e.k === 'sincero');
         if (!card || s.sincero != null) continue;
@@ -281,7 +283,7 @@
         if (use) {
           p.eff.splice(p.eff.indexOf(card), 1); s.effDiscard.push(card); s.sincero = pid;
           this.stat('effetto_giocato:sincero', pid);
-          b = this.say('effect', `🗣️ ${this.pn(pid)} gioca SINCERO: in questo turno entrambi gli attivi dichiarano un numero esatto sul proprio modificatore; chi poi gioca un modificatore diverso da quello dichiarato lo vedrà valere 0.`, pid);
+          b = this.say('effect', `🗣️ ${this.pn(pid)} gioca SINCERO: in questo turno entrambi gli attivi dichiarano un numero esatto sul proprio modificatore; chi poi gioca un modificatore diverso da quello dichiarato lo vedrà valere 0.`, pid, { k: 'sincero' });
           if (b) yield b;
         }
       }
@@ -299,14 +301,18 @@
 
       // 4) gioco coperto (simultaneo: nessuno vede le scelte altrui)
       s.phase = 'play';
+      b = this.say('phase', '🂠 Fase 3 — Gioco coperto: ogni attivo sceglie carta per la coppia, carta per sé ed eventuale effetto; l\'escluso gioca 1 carta.', -1, { phase: 'play' });
+      if (b) yield b;
       const plays = {};
-      for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid)));
+      for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
       const xp = s.players[ex];
       let xcard = yield* this.ask(this._dec('xplay', ex));
       xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0];
 
       // 5) reveal
       s.phase = 'reveal';
+      b = this.say('phase', '🔎 Fase 4 — Reveal: si scoprono tutte le carte insieme.', -1, { phase: 'reveal' });
+      if (b) yield b;
       const fila = [];
       for (const pid of act) {
         const p = s.players[pid], pl = plays[pid];
@@ -318,7 +324,7 @@
         if (pl.eff) this.stat('effetto_giocato:' + pl.eff.k, pid);
       }
       this._take(xp.hand, xcard.id); s.discard.push(xcard);
-      b = this.say('reveal', `🔎 ${this.pn(ex)} (escluso) rivela: ${FF.cardName(xcard)} per la coppia ${pairLabel(ex)}.`, ex);
+      b = this.say('reveal', `🔎 ${this.pn(ex)} (escluso) rivela: ${FF.cardName(xcard)} per la coppia ${pairLabel(ex)}.`, ex, { card: xcard, x: true });
       if (b) yield b;
       s.lastPlay = { plays, xcard, fila };
 
@@ -334,13 +340,15 @@
           fila[t.idx].annulled = true;
           p.eff.splice(p.eff.indexOf(card), 1); s.effDiscard.push(card);
           this.stat('effetto_giocato:annulla', pid); this.stat('annullato:' + fila[t.idx].eff.k, fila[t.idx].pid);
-          b = this.say('effect', `🚫 ${this.pn(pid)} gioca ANNULLA su ${FF.effName(fila[t.idx].eff)} di ${this.pn(fila[t.idx].pid)}: quell'effetto non ha alcun effetto.`, pid);
+          b = this.say('effect', `🚫 ${this.pn(pid)} gioca ANNULLA su ${FF.effName(fila[t.idx].eff)} di ${this.pn(fila[t.idx].pid)}: quell'effetto non ha alcun effetto.`, pid, { k: 'annulla', target: fila[t.idx].eff.k });
           if (b) yield b;
         }
       }
 
       // 7) effetti
       s.phase = 'resolve';
+      b = this.say('phase', '⚖️ Fase 5 — Risoluzione: effetti, range, colore dominante e punti.', -1, { phase: 'resolve' });
+      if (b) yield b;
       let sumLo = 0, sumHi = 0;
       for (const f of fila) {
         if (f.annulled) continue;
@@ -353,29 +361,29 @@
           }
           if (zero) {
             f.zeroed = true; this.stat('sincero_mentito', f.pid);
-            b = this.say('effect', `🗣️ ${this.pn(f.pid)} aveva dichiarato «${modTxt(s.decls[f.pid] && s.decls[f.pid].mod)}» ma ha giocato ${e.n}: sotto Sincero quel modificatore vale 0.`, f.pid);
+            b = this.say('effect', `🗣️ ${this.pn(f.pid)} aveva dichiarato «${modTxt(s.decls[f.pid] && s.decls[f.pid].mod)}» ma ha giocato ${e.n}: sotto Sincero quel modificatore vale 0.`, f.pid, { k: f.eff.k });
           } else {
             if (m.dir === 'lo') sumLo += m.n; else sumHi += m.n;
-            b = this.say('effect', `${e.i} ${this.pn(f.pid)}: ${e.n} → ${m.dir === 'lo' ? 'il minimo del range scende di ' + m.n : 'il massimo del range sale di ' + m.n}.`, f.pid);
+            b = this.say('effect', `${e.i} ${this.pn(f.pid)}: ${e.n} → ${m.dir === 'lo' ? 'il minimo del range scende di ' + m.n : 'il massimo del range sale di ' + m.n}.`, f.pid, { k: f.eff.k });
           }
           if (b) yield b;
         } else if (f.eff.k === 'reverse') {
           s.dir = -s.dir;
-          b = this.say('effect', `🔄 ${this.pn(f.pid)} gioca REVERSE: il verso di rotazione ora è ${this.dirTxt(s.dir)}. La prossima Zapd sposterà l'escluso nell'altra direzione.`, f.pid);
+          b = this.say('effect', `🔄 ${this.pn(f.pid)} gioca REVERSE: il verso di rotazione ora è ${this.dirTxt(s.dir)}. La prossima Zapd sposterà l'escluso nell'altra direzione.`, f.pid, { k: 'reverse' });
           if (b) yield b;
         } else if (f.eff.k === 'next') {
           if (s.nextCenter) {
-            b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA, ma ce n'è già una messa da parte: nessun effetto.`, f.pid);
+            b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA, ma ce n'è già una messa da parte: nessun effetto.`, f.pid, { k: 'next' });
           } else {
             const c = yield* this.drawNumeric(true, null);
             s.nextCenter = c;
-            b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA: ${c ? FF.cardName(c) : 'nessuna carta'} è messa da parte, scoperta, e sarà la carta centrale del turno dopo.`, f.pid);
+            b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA: ${c ? FF.cardName(c) : 'nessuna carta'} è messa da parte, scoperta, e sarà la carta centrale del turno dopo.`, f.pid, { k: 'next', card: c });
           }
           if (b) yield b;
         } else if (f.eff.k === 'swap') {
           const p = s.players[f.pid], x = s.players[ex];
           const t = p.hand; p.hand = x.hand; x.hand = t;
-          b = this.say('effect', `🔁 ${this.pn(f.pid)} gioca SCAMBIO FORZATO: scambia le sue ${x.hand.length} carte numeriche in mano con le ${p.hand.length} di ${this.pn(ex)} (che non può rifiutare).`, f.pid);
+          b = this.say('effect', `🔁 ${this.pn(f.pid)} gioca SCAMBIO FORZATO: scambia le sue ${x.hand.length} carte numeriche in mano con le ${p.hand.length} di ${this.pn(ex)} (che non può rifiutare).`, f.pid, { k: 'swap' });
           if (b) yield b;
         }
       }

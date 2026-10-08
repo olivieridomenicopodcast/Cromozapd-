@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="6 Verde">
+        <rect x="2" y="2" width="96" height="136" rx="10" fill="#fffaf0" stroke="#2e9d57" stroke-width="4"/>
+        <rect x="9" y="9" width="82" height="122" rx="6" fill="#2e9d57" opacity="0.13"/>
+        <rect x="21.84" y="41.84" width="56.32" height="56.32" rx="5.76" opacity="0.28" fill="#2e9d57"/>
+        <text x="50" y="86" font-size="62" font-weight="900" fill="#146132" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" stroke="#fffaf0" stroke-width="3" paint-order="stroke">6</text>
+        <text x="14" y="30" font-size="21" font-weight="900" fill="#146132" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">6</text><rect x="7.84" y="35.84" width="12.32" height="12.32" rx="1.26" fill="#2e9d57"/>
+        <g transform="rotate(180 50 70)"><text x="14" y="30" font-size="21" font-weight="900" fill="#146132" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">6</text><rect x="7.84" y="35.84" width="12.32" height="12.32" rx="1.26" fill="#2e9d57"/></g></svg>

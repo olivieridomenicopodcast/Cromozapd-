@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="Dorso carta">
+    <rect x="2" y="2" width="96" height="136" rx="10" fill="#2c3e6b" stroke="#f2e6c9" stroke-width="4"/>
+    <rect x="11" y="11" width="78" height="118" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.6" opacity="0.8"/>
+    <circle cx="32" cy="48" r="11" fill="#d9433b" stroke="#f2e6c9" stroke-width="1.3199999999999998" stroke-linejoin="round"/><polygon points="68,37 79,56.8 57,56.8" fill="#2f6fd1" stroke="#f2e6c9" stroke-width="1.3199999999999998" stroke-linejoin="round"/><rect x="22.32" y="82.32" width="19.36" height="19.36" rx="1.98" fill="#2e9d57" stroke="#f2e6c9" stroke-width="1.3199999999999998" stroke-linejoin="round"/><polygon points="68.0,79.9 71.2,87.6 79.5,88.3 73.2,93.7 75.1,101.8 68.0,97.4 60.9,101.8 62.8,93.7 56.5,88.3 64.8,87.6" fill="#eab51f" stroke="#f2e6c9" stroke-width="1.3199999999999998" stroke-linejoin="round"/>
+    <polygon points="53.3,53.5 41.2,72.2 48.9,72.2 45.6,86.5 58.8,65.6 51.1,65.6" fill="#ffd84a" stroke="none" stroke-width="1.1" stroke-linejoin="round"/></svg>

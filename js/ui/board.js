@@ -1,0 +1,101 @@
+/* CROMOZAPD — il tavolo: mazzi, carta centrale, posti dei giocatori, punteggi e stati a colpo d'occhio */
+(function (root) {
+  'use strict';
+  const FF = (root.FF = root.FF || {});
+  const UI = FF.UI;
+  const { esc } = UI;
+  const S = FF.Sprites;
+  const { COLORS, EFFECTS } = FF;
+  const PHASES = [['draw', '1 Pesca'], ['discuss', '2 Discussione'], ['play', '3 Gioco coperto'], ['reveal', '4 Reveal'], ['resolve', '5 Risoluzione']];
+
+  const pile = (cls, spr, n, label, sub) => `<div class="pile ${cls}"><div class="pilecards">${spr}<span class="pcount">${n}</span></div><div class="plabel">${label}</div>${sub ? `<div class="psub">${sub}</div>` : ''}</div>`;
+
+  function zapBar(g) {
+    const s = g.s, tot = g.totalZaps; let h = '';
+    for (let i = 0; i < tot; i++) {
+      const z = s.zapPile[i];
+      h += z ? `<span class="zslot on" style="--zc:${S.COL[z.c]}" title="Zapd ${COLORS[z.c].n}">${COLORS[z.c].sym}</span>` : '<span class="zslot" title="Zapd ancora nel mazzo">⚡</span>';
+    }
+    return `<div class="zapbar"><div class="plabel">⚡ Zapd uscite ${s.zapsDrawn}/${tot}</div><div class="zslots">${h}</div></div>`;
+  }
+
+  function rangeBox(g, tab) {
+    const s = g.s, c = tab && tab.center; if (!c) return '<div class="rangebox muted">Il range apparirà con la carta centrale.</div>';
+    const sc = tab && tab.score;
+    const min = sc ? sc.min : c.v, max = sc ? sc.max : c.v + g.rules.base;
+    const mods = sc && (min !== c.v || max !== c.v + g.rules.base) ? ` <span class="modnote">(con i modificatori)</span>` : '';
+    let verdict = '';
+    if (sc) verdict = `<div class="verdict ${sc.scored ? (sc.inRange ? 'ok' : 'imm') : 'ko'}">Somma ${sc.sum}: ${sc.inRange ? '✔ nel range' : sc.scored ? '🛡 immune (colore dominante)' : '💥 SFORO'}</div>`;
+    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}, Base ${g.rules.base})${mods}</div>${verdict}</div>`;
+  }
+
+  function seatBox(g, pid, view) {
+    const s = g.s, p = s.players[pid], ex = s.excluded;
+    const isEx = pid === ex, tab = view.tab || {};
+    const show = view.hands && view.hands.includes(pid);
+    const hand = show ? p.hand.map((c) => UI.cardHTML(c, { cls: 'seatcard' })).join('') : p.hand.map(() => S.back('seatcard')).join('');
+    const eff = show ? p.eff.map((c) => UI.cardHTML(c, { cls: 'seatcard' })).join('') : p.eff.map(() => S.backEffect('seatcard')).join('');
+    const pl = tab.played && tab.played[pid];
+    let played = '';
+    if (pl) played = `<div class="played">${pl.couple ? `<div class="pc"><div class="plab">per la coppia</div>${UI.miniCard(pl.couple)}</div>` : ''}${pl.self ? `<div class="pc"><div class="plab">per sé</div>${UI.miniCard(pl.self)}</div>` : ''}${pl.eff ? `<div class="pc"><div class="plab">effetto</div>${UI.miniCard(pl.eff)}</div>` : ''}</div>`;
+    const kind = p.kind === 'human' ? '👤' : '🤖' + (p.level ? ' ' + FF.LEVELS[p.level] : '');
+    const role = isEx ? `<span class="role ex">${S.token('rtok')} ESCLUSO</span>` : `<span class="role">coppia ${FF.pairLabel(ex)}</span>`;
+    return `<div class="seat s${pid} ${view.active === pid ? 'turn' : ''} ${isEx ? 'isex' : ''}" style="--sc:${S.SEATCOL[pid]}">
+      <div class="shead">${S.seat(pid, 'sbadge')}<div class="sname"><b>${esc(p.name)}</b><span class="skind">${kind}</span></div>${role}</div>
+      <div class="shand"><div class="hlabel">Mano (${p.hand.length})</div><div class="cardsrow">${hand || '<span class="muted small">vuota</span>'}</div></div>
+      <div class="shand"><div class="hlabel">Effetti (${p.eff.length}/${g.rules.effectHandMax})</div><div class="cardsrow">${eff || '<span class="muted small">nessuno</span>'}</div></div>
+      ${played}</div>`;
+  }
+
+  UI.renderTable = function (el, g, view) {
+    view = view || {};
+    const s = g.s, tab = view.tab || {};
+    const nextEx = FF.mod3(s.excluded + s.dir);
+    const nc = s.nextCenter ? UI.miniCard(s.nextCenter) : '';
+    el.innerHTML = `
+      <div class="tbl-top">
+        ${pile('deck', S.back('pilecard'), s.deck.length, 'Mazzo', 'pesca dall\'alto')}
+        ${pile('effpile', S.backEffect('pilecard'), s.effDeck.length, 'Mazzetto Effetti', 'solo l\'escluso pesca')}
+        ${pile('discardp', s.discard.length ? S.card(s.discard[s.discard.length - 1], 'pilecard') : '<div class="emptyslot"></div>', s.discard.length, 'Scarti', 'carte giocate')}
+        ${zapBar(g)}
+      </div>
+      <div class="tbl-mid">
+        <div class="centerblock"><div class="clabel">Carta centrale</div>${tab.center ? UI.cardHTML(tab.center, { cls: 'bigcard' }) : '<div class="emptyslot big"></div>'}</div>
+        ${rangeBox(g, tab)}
+        <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">Se le 2 carte-coppia sono di questo colore: nessuno sforo</div></div>
+        <div class="dirblock"><div class="clabel">Verso</div>${S.dir(s.dir, 'dirbig')}<div class="psub">Prossima Zapd: il gettone passa a <b>${FF.SEATS[nextEx]}</b></div></div>
+        ${s.nextCenter ? `<div class="nextblock"><div class="clabel">Messa da parte</div>${nc}<div class="psub">centrale del turno dopo</div></div>` : ''}
+      </div>
+      <div class="seats">${[0, 1, 2].map((p) => seatBox(g, p, view)).join('')}</div>`;
+  };
+
+  // punteggi e contributi di tutti, sempre visibili
+  UI.renderScores = function (el, g) {
+    const s = g.s;
+    const head = `<tr><th></th>${[0, 1, 2].map((e) => `<th title="Punti della coppia ${FF.pairLabel(e)}">${FF.pairLabel(e)}</th>`).join('')}<th title="Somma delle carte per sé">Pers.</th><th title="Media delle tue quote nelle 3 coppie">Fatt.</th><th title="Personali × Fattore">Punti</th></tr>`;
+    const pairRow = `<tr class="pairrow"><td>Coppia</td>${[0, 1, 2].map((e) => `<td><b>${s.pairPts[e]}</b></td>`).join('')}<td colspan="3" class="muted">squadra</td></tr>`;
+    const rows = [0, 1, 2].map((p) => `<tr class="pr${p}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td>${[0, 1, 2].map((e) => `<td>${s.pairPts[e] ? Math.round(100 * s.contrib[p][e] / s.pairPts[e]) + '%' : '–'}</td>`).join('')}<td>${s.players[p].personal}</td><td>${Math.round(100 * g.factor(p))}%</td><td><b>${g.score(p).toFixed(1)}</b></td></tr>`).join('');
+    el.innerHTML = `<table class="scoretbl"><thead>${head}</thead><tbody>${pairRow}${rows}</tbody></table>
+      <div class="small muted" style="margin-top:6px">Colonne AB / BC / AC: quota di ognuno nei punti di quella coppia (anche da escluso). Punti = personali × Fattore.</div>`;
+  };
+
+  // stati speciali: descritti sempre, anche quando non sono attivi
+  UI.renderStates = function (el, g) {
+    const s = g.s, ex = s.excluded;
+    const item = (ico, title, state, on, desc) => `<div class="state ${on ? 'on' : 'off'}"><div class="sico">${ico}</div><div><div class="stitle">${title} <span class="sbadge2 ${on ? 'on' : ''}">${state}</span></div><div class="sdesc">${desc}</div></div></div>`;
+    const sinc = s.sincero != null;
+    el.innerHTML = [
+      item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
+      item(S.dir(s.dir, 'stico'), 'Verso di rotazione', s.dir > 0 ? '↻ A→B→C' : '↺ A→C→B', true, `L'escluso ora è ${FF.SEATS[ex]}. A ogni Zapd passa a ${FF.SEATS[FF.mod3(ex + s.dir)]}. Reverse inverte il verso.`),
+      item('🗣️', 'Sincero', sinc ? 'ATTIVO' : 'non attivo', sinc, sinc ? `Giocato da ${s.players[s.sincero].name}: i modificatori vanno dichiarati con un numero esatto; chi mente vale 0.` : 'Se qualcuno lo gioca a inizio turno, i due attivi dichiarano il modificatore con un numero esatto; chi poi gioca altro lo vede valere 0.'),
+      item('🔮', 'Carta messa da parte', s.nextCenter ? FF.cardName(s.nextCenter) : 'nessuna', !!s.nextCenter, s.nextCenter ? 'Sarà la carta centrale del turno dopo (la pesca centrale viene saltata).' : 'Prossima carta ne mette una da parte: diventa la centrale del turno dopo.'),
+      item('⚡', 'Zapd', `${s.zapsDrawn}/${g.totalZaps}`, s.zapsDrawn >= g.totalZaps - 2, s.zapsDrawn >= g.totalZaps ? 'Uscite tutte: è l\'ultimo turno.' : `Ne mancano ${g.totalZaps - s.zapsDrawn}: la partita finisce con l'uscita dell'ultima (si gioca quel turno per intero).`),
+    ].join('');
+  };
+
+  UI.renderPhases = function (el, g) {
+    const ph = g.s.phase;
+    const idx = PHASES.findIndex((p) => p[0] === ph || (ph === 'turn_end' && p[0] === 'resolve'));
+    el.innerHTML = PHASES.map((p, i) => `<span class="phchip ${i === idx ? 'now' : i < idx ? 'done' : ''}">${p[1]}</span>`).join('<span class="phsep">›</span>');
+  };
+})(typeof window !== 'undefined' ? window : globalThis);

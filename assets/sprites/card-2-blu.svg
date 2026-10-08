@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="2 Blu">
+        <rect x="2" y="2" width="96" height="136" rx="10" fill="#fffaf0" stroke="#2f6fd1" stroke-width="4"/>
+        <rect x="9" y="9" width="82" height="122" rx="6" fill="#2f6fd1" opacity="0.13"/>
+        <polygon points="50,38 82,95.6 18,95.6" opacity="0.28" fill="#2f6fd1"/>
+        <text x="50" y="86" font-size="62" font-weight="900" fill="#173f86" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" stroke="#fffaf0" stroke-width="3" paint-order="stroke">2</text>
+        <text x="14" y="30" font-size="21" font-weight="900" fill="#173f86" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">2</text><polygon points="14,35 21,47.6 7,47.6" fill="#2f6fd1"/>
+        <g transform="rotate(180 50 70)"><text x="14" y="30" font-size="21" font-weight="900" fill="#173f86" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">2</text><polygon points="14,35 21,47.6 7,47.6" fill="#2f6fd1"/></g></svg>

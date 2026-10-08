@@ -15,15 +15,15 @@
 
   // Carte-effetto. kind: 'fila' (3ª posizione), 'sincero' (istantanea), 'annulla' (reattiva)
   FF.EFFECTS = {
-    reverse: { id: 'reverse', kind: 'fila', n: 'Reverse', i: '🔄', d: 'Inverte il verso di rotazione dell\'escluso.' },
-    next: { id: 'next', kind: 'fila', n: 'Prossima carta', i: '🔮', d: 'La carta in cima al mazzo diventa la carta centrale del turno dopo.' },
-    sincero: { id: 'sincero', kind: 'sincero', n: 'Sincero', i: '🗣️', d: 'Entrambi gli attivi dichiarano il modificatore con un numero esatto; chi mente vale 0.' },
-    swap: { id: 'swap', kind: 'fila', n: 'Scambio forzato', i: '🔁', d: 'Scambi le tue carte numeriche in mano con quelle dell\'escluso.' },
-    annulla: { id: 'annulla', kind: 'annulla', n: 'Annulla', i: '🚫', d: 'Neutralizza un effetto in fila rivelato in questo turno.' },
+    reverse: { id: 'reverse', kind: 'fila', n: 'Reverse', i: '🔄', s: 'Inverte il verso dell\'escluso', d: 'Inverte il verso di rotazione dell\'escluso.' },
+    next: { id: 'next', kind: 'fila', n: 'Prossima carta', i: '🔮', s: 'La cima del mazzo sarà la centrale di domani', d: 'La carta in cima al mazzo diventa la carta centrale del turno dopo.' },
+    sincero: { id: 'sincero', kind: 'sincero', n: 'Sincero', i: '🗣️', s: 'Istantanea: modificatori dichiarati esatti', d: 'Entrambi gli attivi dichiarano il modificatore con un numero esatto; chi mente vale 0.' },
+    swap: { id: 'swap', kind: 'fila', n: 'Scambio forzato', i: '🔁', s: 'Scambi la tua mano con quella dell\'escluso', d: 'Scambi le tue carte numeriche in mano con quelle dell\'escluso.' },
+    annulla: { id: 'annulla', kind: 'annulla', n: 'Annulla', i: '🚫', s: 'Reattiva: annulla un effetto rivelato', d: 'Neutralizza un effetto in fila rivelato in questo turno.' },
   };
   for (const n of [1, 2, 3]) {
-    FF.EFFECTS['lo' + n] = { id: 'lo' + n, kind: 'fila', mod: { dir: 'lo', n }, n: '−' + n, i: '⬇️', d: 'Abbassa di ' + n + ' il minimo del range di questo turno.' };
-    FF.EFFECTS['hi' + n] = { id: 'hi' + n, kind: 'fila', mod: { dir: 'hi', n }, n: '+' + n, i: '⬆️', d: 'Alza di ' + n + ' il massimo del range di questo turno.' };
+    FF.EFFECTS['lo' + n] = { id: 'lo' + n, kind: 'fila', mod: { dir: 'lo', n }, n: '−' + n, i: '⬇️', s: 'Il minimo del range scende di ' + n, d: 'Abbassa di ' + n + ' il minimo del range di questo turno.' };
+    FF.EFFECTS['hi' + n] = { id: 'hi' + n, kind: 'fila', mod: { dir: 'hi', n }, n: '+' + n, i: '⬆️', s: 'Il massimo del range sale di ' + n, d: 'Alza di ' + n + ' il massimo del range di questo turno.' };
   }
   FF.EFFECT_IDS = Object.keys(FF.EFFECTS);
   FF.VAGUE = { 1: 'poco', 2: 'medio', 3: 'tanto' };
