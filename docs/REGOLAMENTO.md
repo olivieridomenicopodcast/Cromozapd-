@@ -35,7 +35,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si conta.
 
 ## 5. Range e punti
-- **Range** = da *V* a *V + Base*, dove *V* è il valore della carta centrale e **Base = 10** (default). Gli estremi **sono inclusi**.
+- **Range** = da *V* a *V + Base*, dove *V* è il valore della carta centrale e **Base = 7** (default) **[chiarito]**. Gli estremi **sono inclusi**.
 - La **somma delle due carte-per-la-coppia degli attivi** deve stare nel range. **[chiarito]** Il range controlla **solo** quelle due carte, non la carta dell'escluso.
 - **Nel range** → la coppia incassa **somma delle due carte + carta dell'escluso**.
 - **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. **[chiarito]** La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**.
@@ -83,14 +83,14 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 ## 11. Non ancora definito
 - Ruolo dei **colori** oltre al colore dominante (e della carta centrale).
 - Incentivo all'uso di **Annulla**; **Modificatore-base** assorbito nella famiglia ±1/2/3 **[chiarito]**.
-- Base di default (10) forse troppo larga: da testare 5–7.
+- Base 7 scelta dopo le simulazioni (con 10 il massimo del range non contava quasi mai); da riverificare con i playtest.
 - Escluso "sempre a metà": possibile correttivo dopo i playtest.
 - Numero definitivo di copie di ogni effetto.
 
 ## 12. Parametri (valori di partenza)
 | Parametro | Valore |
 |---|---|
-| Base del range | **10** |
+| Base del range | **7** |
 | Carte in mano | **3** |
 | Effetti in mano al massimo | **2** |
 | Zapd per colore | **3** |
@@ -115,6 +115,7 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Carta dell'escluso | Ambigua con lo sforo | Fuori dal range e dal colore; 0 se la coppia sfora |
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |
+| Base del range | 10 | **7** (voluto da Niky; con 10 lo sforo in alto era quasi impossibile) |
 | Fine del mazzo | Non specificato | Si rimescolano gli scarti (non dovrebbe servire) |
 | Parità | Non specificato | Pareggio |
 

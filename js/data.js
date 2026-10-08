@@ -29,7 +29,7 @@
   FF.VAGUE = { 1: 'poco', 2: 'medio', 3: 'tanto' };
 
   FF.DEFAULT_RULES = {
-    base: 10,               // ampiezza del range: da V a V+base
+    base: 7,                // ampiezza del range: da V a V+base (deciso da Niky dopo le simulazioni: con 10 il massimo non contava mai)
     handSize: 3,            // carte numeriche in mano
     effectHandMax: 2,       // carte-effetto in mano al massimo
     zapPerColor: 3,         // Zapd per colore (totale = 4 × questo = fine partita)

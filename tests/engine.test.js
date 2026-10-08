@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: o.rules, log: true });
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10 }, o.rules), log: true }); // i test di regola usano Base 10 (valore di riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -91,6 +91,16 @@ test('stesso seed → stessa partita; replay delle risposte riproduce il risulta
   const r2 = FF.drive(rp, rp.run(), () => { throw new Error('non deve chiedere nulla'); });
   assert.deepEqual(r2, a.r);
   assert.deepEqual(rp.events.map((e) => e.text), a.g.events.map((e) => e.text));
+});
+
+test('Base predefinita 7: il range va da V a V+7 (estremi inclusi) e si cambia dalle varianti', () => {
+  assert.equal(FF.DEFAULT_RULES.base, 7);
+  const g = new FF.Game({ seed: 1, log: true });
+  assert.equal(g.rules.base, 7);
+  // centro 5 → 5..12: somma 12 dentro, 13 sopra
+  const m = (a, b) => mk({ rules: { base: 7 }, center: [5, 0], hands: [[[a, 1], [2, 1], [1, 1]], [[b, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] });
+  let t = m(6, 6); turn(t); assert.equal(pts(t), 12 + 4);
+  t = m(6, 7); turn(t); assert.equal(pts(t), 0); assert.equal(t.stats.g.sfora_sopra, 1);
 });
 
 test('range da V a V+Base con estremi inclusi; la coppia incassa somma + carta dell\'escluso', () => {
