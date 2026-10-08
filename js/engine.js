@@ -68,7 +68,7 @@
         deck: t.deck.slice(), discard: t.discard.slice(), zapPile: t.zapPile.slice(), effDeck: t.effDeck.slice(), effDiscard: t.effDiscard.slice(),
         players: t.players.map((p) => Object.assign({}, p, { hand: p.hand.slice(), eff: p.eff.slice() })),
         pending: t.pending.slice(), pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()),
-        decls: t.decls.slice(), lastPlay: null,
+        decls: t.decls.slice(), lastPlay: t.lastPlay ? Object.assign({}, t.lastPlay, { fila: t.lastPlay.fila.map((f) => Object.assign({}, f)) }) : null,
       });
       return g;
     }
@@ -309,6 +309,19 @@
       let xcard = yield* this.ask(this._dec('xplay', ex));
       xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0];
 
+      yield* this.afterPlay(plays, xcard);
+    }
+
+    // reveal, finestra di Annulla e risoluzione: separati per poterli rilanciare su un clone (modello in avanti delle AI)
+    *afterPlay(plays, xcard) {
+      yield* this.reveal(plays, xcard);
+      yield* this.annullaWindow();
+      yield* this.resolvePhase();
+    }
+
+    *reveal(plays, xcard) {
+      const s = this.s, ex = s.excluded, act = this.actives(), xp = s.players[ex];
+      let b;
       // 5) reveal
       s.phase = 'reveal';
       b = this.say('phase', '🔎 Fase 4 — Reveal: si scoprono tutte le carte insieme.', -1, { phase: 'reveal' });
@@ -319,15 +332,27 @@
         pl.couple = this._take(p.hand, pl.coupleId); pl.self = this._take(p.hand, pl.selfId);
         s.discard.push(pl.couple, pl.self);
         if (pl.effId != null) { pl.eff = this._take(p.eff, pl.effId); s.effDiscard.push(pl.eff); fila.push({ pid, eff: pl.eff, annulled: false, zeroed: false }); }
-        b = this.say('reveal', `🔎 ${this.pn(pid)} rivela: per la coppia ${FF.cardName(pl.couple)}, per sé ${FF.cardName(pl.self)}${pl.eff ? ', effetto ' + FF.effName(pl.eff) : ''}.`, pid, { play: pl });
+        const dn = s.decls[pid] && s.decls[pid].num;
+        let betray = '';
+        if (dn != null) {
+          this.stat('dichiarazioni_con_numero', pid);
+          if (dn !== pl.couple.v) { this.stat('tradimenti', pid); betray = ` ⚠ Ha tradito: aveva dichiarato ${dn}.`; }
+        }
+        b = this.say('reveal', `🔎 ${this.pn(pid)} rivela: per la coppia ${FF.cardName(pl.couple)}, per sé ${FF.cardName(pl.self)}${pl.eff ? ', effetto ' + FF.effName(pl.eff) : ''}.${betray}`, pid, { play: pl });
         if (b) yield b;
         if (pl.eff) this.stat('effetto_giocato:' + pl.eff.k, pid);
+        this.stat('v_coppia_' + pl.couple.v, pid); this.stat('v_se_' + pl.self.v, pid);
       }
       this._take(xp.hand, xcard.id); s.discard.push(xcard);
+      this.stat('v_escluso_' + xcard.v, ex);
       b = this.say('reveal', `🔎 ${this.pn(ex)} (escluso) rivela: ${FF.cardName(xcard)} per la coppia ${pairLabel(ex)}.`, ex, { card: xcard, x: true });
       if (b) yield b;
       s.lastPlay = { plays, xcard, fila };
+    }
 
+    *annullaWindow() {
+      const s = this.s, ex = s.excluded, fila = s.lastPlay.fila;
+      let b;
       // 6) finestra di Annulla (si chiede in ordine di seduta partendo dopo l'escluso)
       for (const pid of [mod3(ex + 1), mod3(ex + 2)]) {
         const p = s.players[pid];
@@ -344,7 +369,12 @@
           if (b) yield b;
         }
       }
+    }
 
+    *resolvePhase() {
+      const s = this.s, R = this.rules, ex = s.excluded, act = this.actives(), xp = s.players[ex];
+      const { plays, xcard, fila } = s.lastPlay;
+      let b;
       // 7) effetti
       s.phase = 'resolve';
       b = this.say('phase', '⚖️ Fase 5 — Risoluzione: effetti, range, colore dominante e punti.', -1, { phase: 'resolve' });
