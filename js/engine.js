@@ -430,26 +430,29 @@
 
       // 8) range e punti
       const [a, c2] = act, ca = plays[a].couple, cb = plays[c2].couple;
-      const min = s.center.v - sumLo, max = s.center.v + R.base + sumHi, sum = ca.v + cb.v;
-      const inRange = sum >= min && sum <= max;
+      const min = s.center.v - sumLo, max = s.center.v + R.base + sumHi, sumPair = ca.v + cb.v;
+      const sum = R.xInSum ? sumPair + xcard.v : sumPair;                 // somma controllata dal range (variante: con la carta dell'escluso)
+      const okFor = (x) => { const w = x >= min && x <= max; return R.rangeOutside ? !w : w; }; // variante: serve stare FUORI dal range
+      const inRange = okFor(sum);
+      if (R.xInSum && okFor(sumPair) !== inRange) this.stat(inRange ? 'escluso_salva_la_coppia' : 'escluso_rovina_la_coppia', ex);
       // quanto contano davvero i modificatori ±: nel range solo grazie a loro, già nel range senza, o fuori comunque
       if (sumLo || sumHi || fila.some((f) => !f.annulled && EFFECTS[f.eff.k].mod)) {
-        const baseIn = sum >= s.center.v && sum <= s.center.v + R.base;
-        this.stat(baseIn ? 'modificatore_inutile' : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
+        const baseW = sum >= s.center.v && sum <= s.center.v + R.base, baseOk = R.rangeOutside ? !baseW : baseW;
+        this.stat(baseOk ? 'modificatore_inutile' : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
       }
       const immune = ca.c === s.dominant && cb.c === s.dominant;
       const scored = inRange || immune;
-      const pts = scored ? sum + xcard.v : 0;
+      const pts = scored ? sumPair + xcard.v : 0;
       this.stat(inRange ? 'coppia_nel_range' : (immune ? 'coppia_salvata_dal_colore' : 'coppia_sfora'), -1);
-      if (!inRange) this.stat(sum < min ? 'sfora_sotto' : 'sfora_sopra', -1);
+      if (!inRange) this.stat(R.rangeOutside ? 'sfora_dentro' : (sum < min ? 'sfora_sotto' : 'sfora_sopra'), -1);
       for (const pid of act) s.players[pid].personal += plays[pid].self.v;
       if (scored) {
         s.pairPts[ex] += pts;
         s.contrib[a][ex] += ca.v; s.contrib[c2][ex] += cb.v; s.contrib[ex][ex] += xcard.v;
       }
       this.stat('punti_coppia', -1, pts);
-      const why = inRange ? `${sum} è dentro il range ${min}–${max}` : immune ? `${sum} è fuori dal range ${min}–${max}, ma entrambe le carte sono del colore dominante (${this.col(s.dominant)}): niente perdita` : `${sum} è ${sum < min ? 'sotto' : 'sopra'} il range ${min}–${max} → SFORO`;
-      b = this.say('score', `📐 Coppia ${pairLabel(ex)}: ${ca.v} + ${cb.v} = ${sum}; ${why}. ${scored ? `La coppia incassa ${sum} + ${xcard.v} (escluso) = ${pts} (totale coppia ${s.pairPts[ex]}).` : `La coppia incassa 0 e la carta dell'escluso (${xcard.v}) non conta.`}`, -1, { sum, min, max, scored, pts });
+      const why = R.rangeOutside ? (inRange ? `${sum} è fuori dalla zona vietata ${min}–${max}` : immune ? `${sum} è dentro la zona vietata ${min}–${max}, ma` + ` entrambe le carte sono del colore dominante: niente perdita` : `${sum} è DENTRO la zona vietata ${min}–${max} → SFORO`) : inRange ? `${sum} è dentro il range ${min}–${max}` : immune ? `${sum} è fuori dal range ${min}–${max}, ma entrambe le carte sono del colore dominante (${this.col(s.dominant)}): niente perdita` : `${sum} è ${sum < min ? 'sotto' : 'sopra'} il range ${min}–${max} → SFORO`;
+      b = this.say('score', `📐 Coppia ${pairLabel(ex)}: ${ca.v} + ${cb.v}${R.xInSum ? ` + ${xcard.v} (escluso)` : ''} = ${sum}; ${why}. ${scored ? `La coppia incassa ${sumPair} + ${xcard.v} (escluso) = ${pts} (totale coppia ${s.pairPts[ex]}).` : `La coppia incassa 0 e la carta dell'escluso (${xcard.v}) non conta.`}`, -1, { sum, min, max, scored, pts, inRange });
       if (b) yield b;
       b = this.say('score', `⭐ Carte per sé: ${act.map((pid) => `${this.pn(pid)} +${plays[pid].self.v}`).join(' · ')} (contano sempre).`);
       if (b) yield b;

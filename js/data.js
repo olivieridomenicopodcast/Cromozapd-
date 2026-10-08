@@ -37,6 +37,8 @@
     maxValue: 10,
     startExcluded: -1,      // escluso iniziale: -1 = a sorte (dal seed), 0 = A, 1 = B, 2 = C
     startDir: 1,            // verso iniziale (+1 = A→B→C)
+    xInSum: false,          // VARIANTE (solo simulazione): la carta dell'escluso conta nella somma controllata dal range
+    rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
     sincereZero: true,      // Sincero: il modificatore non corrispondente vale 0

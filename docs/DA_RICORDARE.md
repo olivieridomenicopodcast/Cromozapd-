@@ -27,3 +27,29 @@
     - *Con 0, 2 o 4 effetti in mano al massimo* (600 partite Difficile contro Media): sforo 32,2% → 30,1% → 29,9%; punti squadra 129 → 133 → 134; vantaggio del Difficile 0,51 → 0,89 → 0,87 punti. Gli effetti tolgono circa 2 punti percentuali di sforo e aggiungono pochissimo "abilità"; quattro slot non valgono più di due.
     - Conclusione: gli effetti spostano poco (circa un turno ogni tre partite viene salvato da un modificatore). Annulla manca di incentivo (già noto al punto 2).
 18. **Le AI tradiscono pochissimo** (circa 1% delle dichiarazioni): il tradimento è una cosa da umani.
+
+## Varianti provate solo in simulazione (non nell'app; motore: `xInSum`, `rangeOutside`, spenti di default)
+*Prove chieste da Niky. Comando: `node tools/sim.js --rule xInSum=true --rule base=12` (e `--rule rangeOutside=true --rule base=3`).*
+**Modelli di umano** = "coppia che parla" (il primo dichiara la carta che dà più possibilità al compagno, il secondo la sceglie per entrare nel range, anche sacrificando la sua carta migliore; l'escluso gioca alla cieca). 300 partite. **AI** = Difficile contro Difficile, 300 partite. Base 7 normale come riferimento: umani 6%, AI 28%.
+
+**Caso 1 — la carta dell'escluso conta nella somma controllata dal range** (`xInSum`):
+| Base | Sforo umani che parlano | di cui sopra / sotto | Escluso salva / rovina (a partita) | Sforo AI Difficili |
+|---|---|---|---|---|
+| 7 | 44% | 38% / 6% | 3,8 / 4,0 | 60% |
+| 10 | 24% | 19% / 6% | 4,0 / 2,2 | 40% |
+| 11 | 19% | 13% / 6% | 4,0 / 1,6 | 33% |
+| 12 | 15% | 9% / 6% | 4,0 / 1,1 | 26% |
+| 13 | 12% | 6% / 6% | 4,0 / 0,7 | 22% |
+- Il fallimento si sposta da "in basso" a "in alto" (le tre carte superano il massimo). L'escluso diventa decisivo in circa metà dei turni (salva o rovina 5–6 volte a partita con Base 10).
+- Con l'escluso alla cieca la sua carta è quasi un dado: serve decidere se sente la discussione.
+
+**Caso 2 — la somma deve stare FUORI dal range [V, V+Base]** (`rangeOutside`):
+| Base | Sforo umani che parlano | Sforo umani che NON coordinano | Sforo AI Difficili |
+|---|---|---|---|
+| 2 | 1,4% | 26% | 20% |
+| 3 | 3,1% | 35% | 27% |
+| 5 | 8,8% | 49% | 38% |
+- Con la discussione la coppia sbaglia quasi mai (Base 3: 3%); senza coordinazione sbaglia moltissimo. Anche un compagno che gioca a caso rompe la coppia di rado (5% con Base 3, contro 21% del caso normale con Base 7): i tradimenti pesano poco.
+- Con anche l'escluso nella somma (Base 3 / 5): umani 19% / 30%, l'escluso salva 5,0 / 6,6 volte a partita e rovina 1,3 / 0,4.
+
+**Altro dato:** con Base 10 e range normale un primo giocatore con la carta giusta rende irrilevante la carta del compagno (sforo 0% se si coordinano e il compagno gioca a caso): la Base 10 normale è praticamente sempre soddisfacibile.

@@ -187,7 +187,7 @@
       else if (ev.k === 'reveal' && ev.d) {
         if (ev.d.x) t.played[ev.p] = { couple: ev.d.card };
         else if (ev.d.play) t.played[ev.p] = { couple: ev.d.play.couple, self: ev.d.play.self, eff: ev.d.play.eff };
-      } else if (ev.k === 'score' && ev.d && ev.d.sum != null) t.score = Object.assign({}, ev.d, { inRange: ev.d.sum >= ev.d.min && ev.d.sum <= ev.d.max });
+      } else if (ev.k === 'score' && ev.d && ev.d.sum != null) t.score = Object.assign({ inRange: ev.d.sum >= ev.d.min && ev.d.sum <= ev.d.max }, ev.d);
     }
     rebuildTab() { this.tab = {}; for (const e of this.game.events) this.trackTab(e); }
     renderAll(active) {

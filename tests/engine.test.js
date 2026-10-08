@@ -102,6 +102,25 @@ test('stesso seed → stessa partita; replay delle risposte riproduce il risulta
   assert.deepEqual(rp.events.map((e) => e.text), a.g.events.map((e) => e.text));
 });
 
+test('variante (solo simulazione) xInSum: la carta dell\'escluso conta nella somma controllata dal range', () => {
+  // centro 5, Base 10 → 5..15. Coppia 6+9 = 15 (dentro). Escluso gioca 4: con xInSum la somma è 19 → sforo sopra.
+  let g = mk({ rules: { xInSum: true } }); turn(g);
+  assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_sopra, 1); assert.equal(g.stats.p[2].escluso_rovina_la_coppia, 1);
+  // senza la variante resta com'era
+  g = mk(); turn(g); assert.equal(pts(g), 6 + 9 + 4);
+  // l'escluso può anche salvare: centro 12 non esiste, uso Base 5 → 5..10; coppia 2+3 = 5 sotto? no: 5 è dentro; uso 1+1=2 sotto, con escluso 4 → 6 dentro
+  g = mk({ rules: { xInSum: true, base: 5 }, hands: [[[1, 1], [2, 1], [1, 1]], [[1, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] }); turn(g);
+  assert.equal(pts(g), 1 + 1 + 4); assert.equal(g.stats.p[2].escluso_salva_la_coppia, 1);
+});
+
+test('variante (solo simulazione) rangeOutside: si incassa solo con la somma FUORI dal range [V, V+Base]', () => {
+  // centro 5, Base 3 → zona vietata 5..8
+  let g = mk({ rules: { rangeOutside: true, base: 3 } }); turn(g); // 6+9 = 15: fuori → incassa
+  assert.equal(pts(g), 6 + 9 + 4);
+  g = mk({ rules: { rangeOutside: true, base: 3 }, hands: [[[2, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]] }); turn(g); // 2+4 = 6: dentro → sforo
+  assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_dentro, 1);
+});
+
 test('Base predefinita 7: il range va da V a V+7 (estremi inclusi) e si cambia dalle varianti', () => {
   assert.equal(FF.DEFAULT_RULES.base, 7);
   const g = new FF.Game({ seed: 1, log: true });

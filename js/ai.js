@@ -109,12 +109,15 @@
 
   // ───────────────────────── euristiche (modello degli altri e livello facile) ─────────────────────────
   const fila = (eff) => eff.filter((e) => EFFECTS[e.k].kind === 'fila');
-  function pInRange(v, lo, hi, partnerNum, trust, max) {
-    let uni = 0; for (let w = 1; w <= max; w++) if (v + w >= lo && v + w <= hi) uni++;
-    uni /= max;
+  function pInRange(v, lo, hi, partnerNum, trust, max, R) {
+    const xs = R && R.xInSum ? Array.from({ length: max }, (_, i) => i + 1) : [0]; // carta dell'escluso (variante): sconosciuta, uniforme
+    const ok = (sum) => { const w = sum >= lo && sum <= hi; return R && R.rangeOutside ? !w : w; };
+    let uni = 0, n = 0;
+    for (let w = 1; w <= max; w++) for (const z of xs) { n++; if (ok(v + w + z)) uni++; }
+    uni /= n;
     if (partnerNum == null) return uni;
-    const inDecl = v + partnerNum >= lo && v + partnerNum <= hi ? 1 : 0;
-    return trust * inDecl + (1 - trust) * uni;
+    let d = 0; for (const z of xs) if (ok(v + partnerNum + z)) d++;
+    return trust * (d / xs.length) + (1 - trust) * uni;
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
@@ -132,7 +135,7 @@
       for (const e of effOpts) {
         const m = e && EFFECTS[e.k].mod;
         const lo = c0 - (m && m.dir === 'lo' ? m.n : 0), hi = c0 + R.base + (m && m.dir === 'hi' ? m.n : 0);
-        const pin = pInRange(c.v, lo, hi, partnerNum, trust, R.maxValue);
+        const pin = pInRange(c.v, lo, hi, partnerNum, trust, R.maxValue, R);
         const v = pin * 0.33 * (c.v + (partnerNum != null ? partnerNum : 5.5)) + 0.35 * sf.v - (e ? (m ? 0.12 : 0.02) : 0) + rng() * 0.01;
         if (v > bv) { bv = v; best = { coupleId: c.id, selfId: sf.id, effId: e ? e.id : null }; }
       }
