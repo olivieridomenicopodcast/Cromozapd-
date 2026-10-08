@@ -10,7 +10,7 @@
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
     ['base', 'Base del range'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
-    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
+    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
     ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
   ];
   UI.rulesFields = function (prefix, values) {
@@ -20,7 +20,7 @@
     for (const [k, label] of RULE_FIELDS) {
       const def = FF.DEFAULT_RULES[k];
       if (typeof def === 'boolean') h += `<label for="${prefix}${k}">${label}</label><input type="checkbox" id="${prefix}${k}" data-rule="${k}" ${v[k] ? 'checked' : ''}>`;
-      else h += `<label for="${prefix}${k}">${label} <span class="muted">(std ${def})</span></label><input type="number" id="${prefix}${k}" data-rule="${k}" value="${v[k]}" min="${k === 'startDir' ? -1 : 0}">`;
+      else h += `<label for="${prefix}${k}">${label} <span class="muted">(std ${def})</span></label><input type="number" id="${prefix}${k}" data-rule="${k}" value="${v[k]}" min="${k === 'startDir' || k === 'startExcluded' ? -1 : 0}">`;
     }
     h += '<div class="rg-title">Copie nel Mazzetto Effetti</div>';
     for (const k of FF.EFFECT_IDS) h += `<label for="${prefix}c-${k}">${EFFECTS[k].n} <span class="muted">(std ${FF.DEFAULT_RULES.effectCopies[k]})</span></label><input type="number" id="${prefix}c-${k}" data-copy="${k}" value="${copies[k]}" min="0">`;

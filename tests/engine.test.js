@@ -77,6 +77,15 @@ test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd,
   assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 92);
 });
 
+test('escluso iniziale a sorte: riproducibile dal seed, tutti e tre i posti possibili; con un valore fisso viene rispettato', () => {
+  assert.equal(FF.DEFAULT_RULES.startExcluded, -1);
+  const seen = new Set();
+  for (let i = 0; i < 60; i++) { const g = new FF.Game({ seed: 'start' + i }); seen.add(g.s.excluded); assert.equal(new FF.Game({ seed: 'start' + i }).s.excluded, g.s.excluded); }
+  assert.deepEqual([...seen].sort(), [0, 1, 2]);
+  assert.equal(new FF.Game({ seed: 3, rules: { startExcluded: 1 } }).s.excluded, 1);
+  assert.equal(new FF.Game({ seed: 3, rules: { startExcluded: 2 } }).s.excluded, 2);
+});
+
 test('stesso seed → stessa partita; replay delle risposte riproduce il risultato', () => {
   const play = (seed, replay) => {
     const g = new FF.Game({ seed, log: true, replay });
@@ -402,6 +411,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Copie di Annulla'), String(E.annulla));
   assert.equal(val('Copie di ogni ±1/2/3'), String(E.lo1));
   assert.equal(val('Sincero: modificatore sbagliato vale 0'), R.sincereZero ? 'sì' : 'no');
+  assert.equal(val('Escluso iniziale'), R.startExcluded < 0 ? 'a sorte' : String(R.startExcluded));
   assert.equal(val('L\'escluso avanza a ogni turno'), R.rotateEachTurn ? 'sì' : 'no');
   assert.equal(val('Ogni Zapd inverte il verso'), R.zapFlipsDir ? 'sì' : 'no');
   assert.ok(md.includes('92 carte') && md.includes('12 carte Zapd'));

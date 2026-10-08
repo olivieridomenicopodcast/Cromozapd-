@@ -18,7 +18,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 
 ## 3. Preparazione
 1. Si mescola il mazzo e si pesca finché esce la **prima Zapd**: il suo colore è il **colore dominante di partenza**. Poi si rimescola tutto (Zapd compresa).
-2. Ognuno riceve 3 carte numeriche. L'escluso iniziale è **A** e il verso di rotazione parte **orario** (A→B→C) **[interpretazione]**.
+2. Ognuno riceve 3 carte numeriche. L'**escluso iniziale è estratto a sorte** **[chiarito]** (nell'app dal seed, quindi riproducibile) e il verso di rotazione parte **orario** (A→B→C) **[interpretazione]**.
 3. Il Mazzetto Effetti è mescolato; nessuno parte con carte-effetto.
 4. Se durante la distribuzione esce una Zapd si risolve come sempre (§6) e si ripesca **[interpretazione]**.
 
@@ -44,7 +44,7 @@ Il turno in cui esce la **12ª Zapd** è l'ultimo: si gioca per intero e si cont
 - Il **colore della carta centrale** non ha alcun ruolo **[interpretazione: resta aperto, vedi §11]**.
 
 ## 6. Escluso, verso e Zapd
-- **Rotazione a ogni turno [chiarito]**: il gettone escluso **avanza di un posto a ogni nuovo turno** (dal 2° turno; nel 1° l'escluso è A), nel verso di rotazione. **Poi**, se durante la pesca escono Zapd, avanza **ancora** di un posto per ogni Zapd. Quindi nello stesso turno può avanzare di 1, 2, 3… posti.
+- **Rotazione a ogni turno [chiarito]**: il gettone escluso **avanza di un posto a ogni nuovo turno** (dal 2° turno; nel 1° l'escluso è quello estratto a sorte), nel verso di rotazione. **Poi**, se durante la pesca escono Zapd, avanza **ancora** di un posto per ogni Zapd. Quindi nello stesso turno può avanzare di 1, 2, 3… posti.
 - Quando una Zapd viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** e il **gettone escluso avanza di un altro posto nel verso di rotazione** (oltre alla rotazione del turno) **e poi il verso di rotazione si inverte** (da orario ad antiorario o viceversa) **[chiarito]**; l'ordine "prima avanza, poi inverte" è un'**[interpretazione]**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
 - Se in un turno escono più Zapd, ognuna si risolve in ordine, ognuna con il verso che c'è in quel momento (due Zapd di fila: il gettone avanza e poi torna indietro, e il verso torna com'era).
 - **Zapd da "Prossima carta"** **[chiarito]**: si risolve subito ma colore ed escluso valgono **dal turno dopo**; la partita finisce comunque se era la 12ª.
@@ -91,6 +91,7 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Parametro | Valore |
 |---|---|
 | Base del range | **7** |
+| Escluso iniziale | **a sorte** |
 | Carte in mano | **3** |
 | Effetti in mano al massimo | **2** |
 | Zapd per colore | **3** |
@@ -116,6 +117,7 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |
 | Base del range | 10 | **7** (voluto da Niky; con 10 lo sforo in alto era quasi impossibile) |
+| Escluso iniziale | Non specificato (io avevo messo A) | **A sorte**: con A fisso il posto C vinceva il 43% delle partite |
 | Fine del mazzo | Non specificato | Si rimescolano gli scarti (non dovrebbe servire) |
 | Parità | Non specificato | Pareggio |
 

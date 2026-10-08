@@ -91,7 +91,8 @@
         const p = pl[i] || {};
         return { id: i, name: p.name || FF.SEATS[i], kind: p.kind || 'ai', level: p.level || null, hand: [], eff: [], personal: 0 };
       });
-      s.excluded = this.rules.startExcluded; s.dir = this.rules.startDir;
+      s.excluded = this.rules.startExcluded >= 0 ? this.rules.startExcluded % 3 : this.randInt(3); // a sorte (riproducibile dal seed) se < 0
+      s.startExcluded = s.excluded; s.dir = this.rules.startDir;
       s.zapsDrawn = 0; s.pending = [];
       s.turn = 0; s.phase = 'setup'; s.over = false;
       s.center = null; s.nextCenter = null;
@@ -206,7 +207,7 @@
     // ───────────────────────── partita ─────────────────────────
     *setupGen() {
       const s = this.s;
-      let b = this.say('sys', `🎮 Partita iniziata — seed ${this.cfg.seed}. Colore dominante di partenza: ${this.col(s.dominant)}. Escluso iniziale: ${this.seatName(s.excluded)}, verso ${this.dirTxt(s.dir)}.`);
+      let b = this.say('sys', `🎮 Partita iniziata — seed ${this.cfg.seed}. Colore dominante di partenza: ${this.col(s.dominant)}. Escluso iniziale${this.rules.startExcluded < 0 ? ' (estratto a sorte)' : ''}: ${this.seatName(s.excluded)}, verso ${this.dirTxt(s.dir)}.`);
       if (b) yield b;
       for (let pid = 0; pid < 3; pid++) yield* this.fillHand(pid);
       b = this.say('sys', '🃏 Ogni giocatore ha ricevuto 3 carte.');

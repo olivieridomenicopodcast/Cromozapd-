@@ -35,7 +35,7 @@
     zapPerColor: 3,         // Zapd per colore (totale = 4 × questo = fine partita)
     scales: 2,              // scale da 1 a 10 per colore
     maxValue: 10,
-    startExcluded: 0,       // escluso iniziale (0 = A)
+    startExcluded: -1,      // escluso iniziale: -1 = a sorte (dal seed), 0 = A, 1 = B, 2 = C
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd

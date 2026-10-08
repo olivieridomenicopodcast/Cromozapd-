@@ -106,7 +106,7 @@
       ${tile(pct(s.sforoRate), 'turni con sforo', `nel range ${pct(s.rangeRate)} · colore ${pct(s.immuneRate)}`)}
       ${tile(s.turns.toFixed(1), 'turni per partita', `punti squadra ${s.pairPtsPerGame.toFixed(0)}`)}
       ${tile(pct(s.betrayRate), 'dichiarazioni tradite', '')}</div>
-      <h3>Vantaggio di posto (vittorie individuali)</h3>${bars([0, 1, 2].map((p) => ({ label: FF.SEATS[p] + (p === agg.opts.rules.startExcluded ? ' · escluso iniziale' : ''), v: agg.seatWins[p] / n, color: S_COL[p] })), pct)}
+      <h3>Vantaggio di posto (vittorie individuali)</h3>${bars([0, 1, 2].map((p) => ({ label: FF.SEATS[p] + (agg.opts.rules.startExcluded >= 0 && p === agg.opts.rules.startExcluded ? ' · escluso iniziale' : ''), v: agg.seatWins[p] / n, color: S_COL[p] })), pct)}
       <h3>Andamento dei punteggi nel tempo</h3>${line}
       <div class="rowgrid3"><div><h3>Durata</h3>${bars(turnsH, pct)}</div><div><h3>Distacco 1°–2°</h3>${bars(margH, pct)}</div></div>
       <h3>Carte giocate (valori)</h3><div class="rowgrid3"><div><div class="lbl">per la coppia</div>${valBars('coppia', '#2f6fd1')}</div><div><div class="lbl">per sé</div>${valBars('se', '#e8833a')}</div><div><div class="lbl">escluso</div>${valBars('escluso', '#8a5fd1')}</div></div>

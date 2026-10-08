@@ -184,7 +184,7 @@
       `| A è nella coppia vincente (se uguali: 66,7%) | ${pct(s.aPairWin)} | ${pct(s.aPairWinCI[0])} – ${pct(s.aPairWinCI[1])} |`,
       `| punteggio A − media dei B | ${ci(s.diff)} | |`, '');
     L.push('## Vantaggio di posto', '', '| Posto | Vittorie individuali | Coppia (escluso) vincente |', '|---|---|---|');
-    for (let p = 0; p < 3; p++) L.push(`| ${FF.SEATS[p]}${p === o.rules.startExcluded ? ' (escluso iniziale)' : ''} | ${pct(agg.seatWins[p] / n)} | ${pct(agg.pairWins[p] / n)} (${FF.pairLabel(p)}) |`);
+    for (let p = 0; p < 3; p++) L.push(`| ${FF.SEATS[p]}${o.rules.startExcluded >= 0 && p === o.rules.startExcluded ? ' (escluso iniziale)' : ''} | ${pct(agg.seatWins[p] / n)} | ${pct(agg.pairWins[p] / n)} (${FF.pairLabel(p)}) |`);
     L.push('', '## Punteggi medi', '', '| | Personali | Fattore coppie | Punteggio |', '|---|---|---|---|', `| A | ${f1(s.personalA)} | ${pct(s.factorA)} | ${f1(s.scoreA)} |`, `| B (media) | ${f1(s.personalB)} | ${pct(s.factorB)} | ${f1(s.scoreB)} |`,
       '', `Durata media ${f1(s.turns)} turni. Punti squadra totali per partita ${f1(s.pairPtsPerGame)}.`, '');
     L.push('## Come vanno i turni', '', `- Coppia nel range: ${pct(s.rangeRate)} · salvata dal colore dominante: ${pct(s.immuneRate)} · **sforo: ${pct(s.sforoRate)}**`,
