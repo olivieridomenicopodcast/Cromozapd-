@@ -276,7 +276,7 @@
       } else s.center = yield* this.drawNumeric(false, null);
       if (!s.center) { s.over = true; this.emit('warn', '⚠ Carte finite: partita conclusa.'); return; }
       const ex = s.excluded, act = this.actives();
-      b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${s.center.v} a ${s.center.v + R.base} (Base ${R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
+      b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
       b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia${R.xInSum ? ': la sua carta conta nella somma del range' : ''}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
       if (b) yield b;
@@ -433,7 +433,8 @@
       // 8) range e punti
       const [a, c2] = act, ca = plays[a].couple, cb = plays[c2].couple;
       const mmode = R.modMode || 'range';
-      const min = s.center.v - (mmode === 'range' ? sumLo : mmode === 'widen' ? sumLo + sumHi : 0), max = s.center.v + R.base + (mmode === 'range' ? sumHi : mmode === 'widen' ? sumLo + sumHi : 0), sumPair = ca.v + cb.v;
+      const [rb0, rb1] = FF.rangeBase(R, s.center.v);
+      const min = rb0 - (mmode === 'range' ? sumLo : mmode === 'widen' ? sumLo + sumHi : 0), max = rb1 + (mmode === 'range' ? sumHi : mmode === 'widen' ? sumLo + sumHi : 0), sumPair = ca.v + cb.v;
       const shift = mmode === 'shift' ? sumHi - sumLo : 0;                 // variante 'shift': i modificatori spostano la somma
       const sumRaw = R.xInSum ? sumPair + xcard.v : sumPair;              // somma controllata dal range (con la carta dell'escluso)
       let sum = sumRaw + shift;
@@ -442,7 +443,7 @@
       if (R.xInSum && okFor(sumPair + shift) !== inRange) this.stat(inRange ? 'escluso_salva_la_coppia' : 'escluso_rovina_la_coppia', ex);
       // quanto contano davvero i modificatori ±: nel range solo grazie a loro, già nel range senza, o fuori comunque
       if (sumLo || sumHi || fila.some((f) => !f.annulled && EFFECTS[f.eff.k].mod)) {
-        const baseW = sumRaw >= s.center.v && sumRaw <= s.center.v + R.base, baseOk = R.rangeOutside ? !baseW : baseW;
+        const baseW = sumRaw >= rb0 && sumRaw <= rb1, baseOk = R.rangeOutside ? !baseW : baseW;
         this.stat(baseOk ? (inRange ? 'modificatore_inutile' : 'modificatore_dannoso') : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
       }
       const immune = ca.c === s.dominant && cb.c === s.dominant;

@@ -4,13 +4,13 @@
 'use strict';
 const FF=require('../tests/_load.js');
 const R=JSON.parse(process.argv[2]||'{}'), N=Number(process.argv[3]||400), label=process.argv[4]||'';
-const xb=R.xInSum?5.5:0, out=!!R.rangeOutside;
+const FULL=Object.assign({},FF.DEFAULT_RULES,R); const xb=FULL.xInSum?5.5:0, out=!!FULL.rangeOutside;
 const mean=a=>a.reduce((x,y)=>x+y,0)/(a.length||1), sd=a=>{const m=mean(a);return Math.sqrt(mean(a.map(x=>(x-m)**2)))};
 const corr=(a,b)=>{const ma=mean(a),mb=mean(b);return mean(a.map((x,i)=>(x-ma)*(b[i]-mb)))/(sd(a)*sd(b))};
 function egoist(){ const okS=(s,V,hi)=>{const w=s>=V&&s<=hi;return out?!w:w;};
   return { decide(game,d){ switch(d.type){
-    case 'declare': { const V=d.center.v,h=d.hand.slice().sort((x,y)=>y.v-x.v).slice(1); const t=(V+(V+d.base))/2-xb-5.5; const c=h.sort((x,y)=>Math.abs(x.v-t)-Math.abs(y.v-t))[0]; return {num:c.v,mod:null}; }
-    case 'play': { const V=d.center.v,hi=V+d.base,h=d.hand.slice().sort((x,y)=>y.v-x.v); const p=game.s.decls.find((x,i)=>x&&i!==d.player&&i!==d.excluded); const pn=p&&p.num!=null?p.num:5.5;
+    case 'declare': { const [V,hi0]=FF.rangeBase(FULL,d.center.v),h=d.hand.slice().sort((x,y)=>y.v-x.v).slice(1); const t=(V+hi0)/2-xb-5.5; const c=h.sort((x,y)=>Math.abs(x.v-t)-Math.abs(y.v-t))[0]; return {num:c.v,mod:null}; }
+    case 'play': { const [V,hi]=FF.rangeBase(FULL,d.center.v),h=d.hand.slice().sort((x,y)=>y.v-x.v); const p=game.s.decls.find((x,i)=>x&&i!==d.player&&i!==d.excluded); const pn=p&&p.num!=null?p.num:5.5;
       const rest=h.slice(1); const ok=rest.filter(x=>okS(x.v+pn+xb,V,hi)).sort((x,y)=>x.v-y.v); const c=ok[0]||rest.slice().sort((x,y)=>Math.abs(x.v+pn+xb-(V+hi)/2)-Math.abs(y.v+pn+xb-(V+hi)/2))[0];
       return {couple:c.id,self:h[0].id,eff:null}; }
     case 'xplay': return d.hand.slice().sort((x,y)=>Math.abs(x.v-6)-Math.abs(y.v-6))[0].id;

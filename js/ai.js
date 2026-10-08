@@ -121,7 +121,7 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, c0 = s.center.v;
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, c0 = FF.rangeBase(R, s.center.v)[0], c1 = FF.rangeBase(R, s.center.v)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
@@ -134,7 +134,7 @@
       if (c === sf) continue;
       for (const e of effOpts) {
         const m = e && EFFECTS[e.k].mod, md = R.modMode || 'range', nn = m ? m.n * (R.modScale || 1) : 0;
-        const lo = c0 - (m && md === 'range' && m.dir === 'lo' ? nn : 0) - (m && md === 'widen' ? nn : 0), hi = c0 + R.base + (m && md === 'range' && m.dir === 'hi' ? nn : 0) + (m && md === 'widen' ? nn : 0);
+        const lo = c0 - (m && md === 'range' && m.dir === 'lo' ? nn : 0) - (m && md === 'widen' ? nn : 0), hi = c1 + (m && md === 'range' && m.dir === 'hi' ? nn : 0) + (m && md === 'widen' ? nn : 0);
         const sh = m && md === 'shift' ? (m.dir === 'hi' ? nn : -nn) : 0;
         const pin = pInRange(c.v + sh, lo, hi, partnerNum, trust, R.maxValue, R);
         const v = pin * 0.33 * (c.v + (partnerNum != null ? partnerNum : 5.5)) + 0.35 * sf.v - (e ? (m ? 0.12 : 0.02) : 0) + rng() * 0.01;

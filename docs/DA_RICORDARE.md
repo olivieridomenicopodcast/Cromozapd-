@@ -88,3 +88,20 @@ Base 12, la carta dell'escluso conta nella somma del range, escluso iniziale a s
 | Dopo il reveal, ±n a scelta, ×2 (±2/4/6) | 0,86 | 0,87 | – | 20,3% |
 - Giocati dopo il reveal, i modificatori diventano **decisivi ogni volta che si giocano** (con meno carte spese): è l'informazione che mancava. Il limite che resta è la disponibilità (si pescano solo da escluso e servono il verso e la taglia giusti): il verso a scelta quasi raddoppia i salvataggi.
 - Se i modificatori si giocano dopo il reveal, **Sincero perde il suo scopo** (dichiarare un modificatore esatto) e va ripensato; Annulla non ha come bersaglio una carta giocata dopo.
+
+## Variante range a perno (solo simulazione, `rangeMode:'pivot'`, `pivot`)
+
+Idea di Niky: range = [perno−V, perno+V] invece di [V, V+Base]. Misure con 3 IA difficili, 400 partite.
+
+| Variante | Sforo | Sotto / sopra per partita | Note |
+|---|---|---|---|
+| 2 carte, perno 9 | 14,4% | 1,39 / 0,43 | |
+| 2 carte, perno 10 | ~17,5% | 1,95 / 0,30 | dilemma intatto (egoista 19,8% di vittorie), scala IA intatta |
+| 2 carte, perno 11 | 21,6% | 2,6 / – | |
+| 3 carte (escluso nella somma), perno 10 | 42,3% | sopra 5,4 | troppo duro |
+| 3 carte, perno 14 | 22,7% | 0,94 / 1,99 | |
+| 3 carte, perno 15 | 21,9% | 1,38 / 1,48 | equilibrato, scala IA intatta (difficile vs media 41%) |
+
+- Gli sfori diventano a due lati: risolve il problema "non si sfora mai sotto".
+- Difficoltà molto variabile con la carta centrale (2 carte, perno 10, coppia a caso): V1 27%, V2 43%, V3 57%, V4 69%, V5 79%, V6 87%, V7 93%, V8 97%, V9-10 ~100%. Con V≥8 (~30% dei turni) il range è quasi gratis.
+- Modificatori ±n giocati alla cieca: con il perno diventano utili in entrambe le direzioni (decisivi 0,23/partita ×1, 0,34 ×2; "allarga ×2" 0,56), comunque modesti.

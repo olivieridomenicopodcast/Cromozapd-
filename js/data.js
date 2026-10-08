@@ -39,6 +39,8 @@
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     xInSum: true,           // la carta dell'escluso conta nella somma controllata dal range (deciso da Niky; false = vecchia regola)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
+    rangeMode: 'base',      // VARIANTE (solo simulazione): 'base' = da V a V+Base; 'pivot' = da pivot−V a pivot+V (più larga quanto più alta è la carta centrale)
+    pivot: 10,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
     modMode: 'range',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
     modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)
     modFlex: false,         // VARIANTE (solo simulazione, con modTiming 'after'): il modificatore si usa in entrambi i versi (±n a scelta)
@@ -65,6 +67,8 @@
     for (const k of FF.EFFECT_IDS) for (let i = 0; i < (copies[k] || 0); i++) deck.push({ id: id++, k });
     return deck;
   };
+  // estremi del range di base per una carta centrale di valore v
+  FF.rangeBase = (rules, v) => (rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : [v, v + rules.base]);
   FF.cardName = (c) => (c.z ? `⚡Zapd ${FF.COLORS[c.c].i}` : `${c.v}${FF.COLORS[c.c].i}`);
   FF.effName = (e) => `${FF.EFFECTS[e.k].i} ${FF.EFFECTS[e.k].n}`;
 })(typeof window !== 'undefined' ? window : globalThis);
