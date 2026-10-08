@@ -220,3 +220,17 @@ body { overflow-x: hidden; }
   .centerblock { grid-row: span 1; }
 }
 .scoretbl td:first-child { white-space: nowrap; } .scoretbl { font-size: .86rem; } .scoretbl th, .scoretbl td { padding: 4px 3px; }
+
+/* simulatore */
+.rowgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; } .rowgrid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.chk { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-weight: 700; } .chk input { width: 22px; height: 22px; }
+.card hr { border: 0; border-top: 2px dashed var(--paper2); margin: 18px 0; } .card h3 { margin: 12px 0 6px; font-size: 1.1rem; }
+.progress { height: 14px; background: var(--paper2); border: 2px solid var(--wood); border-radius: 99px; overflow: hidden; margin: 12px 0 4px; } .progress span { display: block; height: 100%; width: 0; background: var(--accent2); transition: width .15s; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+.tile { background: #fffaf0; border: 3px solid var(--wood); border-radius: 12px; padding: 10px 12px; } .tbig { font-size: 1.9rem; font-weight: 900; line-height: 1.1; } .tlab { font-weight: 800; } .tsub { font-size: .8rem; color: var(--muted); }
+.bars { display: flex; flex-direction: column; gap: 5px; } .barrow { display: grid; grid-template-columns: 110px 1fr 62px; gap: 8px; align-items: center; font-size: .9rem; }
+.bt { height: 16px; background: var(--paper2); border-radius: 8px; overflow: hidden; } .bf { display: block; height: 100%; border-radius: 8px; } .bv { text-align: right; font-weight: 800; }
+.linechart { width: 100%; max-width: 640px; background: #fffaf0; border: 2px solid var(--paper2); border-radius: 10px; } .legendline { display: flex; gap: 16px; font-size: .9rem; margin-top: 4px; } .legendline i { display: inline-block; width: 22px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.gtable { width: 100%; border-collapse: collapse; font-size: .88rem; } .gtable th, .gtable td { padding: 5px 6px; border-bottom: 1px solid var(--paper2); text-align: left; white-space: nowrap; }
+.card textarea { width: 100%; }
+@media (max-width: 640px) { .barrow { grid-template-columns: 78px 1fr 54px; } }

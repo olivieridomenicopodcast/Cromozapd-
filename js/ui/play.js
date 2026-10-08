@@ -101,6 +101,10 @@
       this.paused = false; this.cancelled = false; this.waiter = null; this.timer = null;
       cfg.notes = cfg.notes || [];
       this.game = new FF.Game({ seed: cfg.seed, rules: cfg.rules, players: cfg.players, beats: true, log: true, replay: history || [] });
+      if (cfg.forced) { // revisione di una partita con carta-effetto forzata (analisi del simulatore)
+        const g = this.game, orig = g.setupGen.bind(g);
+        g.setupGen = function* () { yield* orig(); g.s.players[cfg.forced.seat].eff.push({ id: 900, k: cfg.forced.k }); };
+      }
       this.ai = cfg.players.map((p, i) => (p.kind === 'ai' ? FF.AI.create(p.level, cfg.seed + 'a' + i) : null));
       this.humans = cfg.players.map((p, i) => (p.kind === 'human' ? i : -1)).filter((i) => i >= 0);
       this.multi = this.humans.length > 1;

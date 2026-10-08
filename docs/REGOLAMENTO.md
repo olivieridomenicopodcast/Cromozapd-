@@ -111,3 +111,11 @@ Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si 
 | Discussione | A voce | Dichiarazione strutturata (numero o "Niente"), tradimento libero, tutto in cronaca |
 | Fine del mazzo | Non specificato | Si rimescolano gli scarti (non dovrebbe servire) |
 | Parità | Non specificato | Pareggio |
+
+## 13. Le AI (solo per il playtest)
+Le AI non fanno parte delle regole, ma conviene saperlo quando si legge la cronaca.
+- **Non vedono** le carte degli altri né l'ordine del mazzo: usano solo la propria mano, gli scarti, le Zapd uscite e le dichiarazioni. Per decidere simulano il turno sul motore di gioco su mani possibili.
+- **Facile**: gioca spesso a caso e può mentire a caso nelle dichiarazioni.
+- **Media**: simula poche mani possibili, qualche errore; è sempre sincera con il compagno.
+- **Difficile**: simula molte mani possibili, si fida delle dichiarazioni, usa gli effetti quando servono e **tradisce solo quando è quasi gratis**: se la carta dichiarata non serve alla coppia (la somma resta nel range anche così) e tenerla in mano le conviene.
+- Nei test (900 partite) la differenza tra i livelli è piccola in punti, perché il gioco lascia poco margine alla scelta delle carte: vedi `docs/DA_RICORDARE.md`.
