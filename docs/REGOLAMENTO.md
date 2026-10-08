@@ -118,4 +118,4 @@ Le AI non fanno parte delle regole, ma conviene saperlo quando si legge la crona
 - **Facile**: gioca spesso a caso e può mentire a caso nelle dichiarazioni.
 - **Media**: simula poche mani possibili, qualche errore; è sempre sincera con il compagno.
 - **Difficile**: simula molte mani possibili, si fida delle dichiarazioni, usa gli effetti quando servono e **tradisce solo quando è quasi gratis**: se la carta dichiarata non serve alla coppia (la somma resta nel range anche così) e tenerla in mano le conviene.
-- Nei test (900 partite) la differenza tra i livelli è piccola in punti, perché il gioco lascia poco margine alla scelta delle carte: vedi `docs/DA_RICORDARE.md`.
+- **Quanto sono diversi** (tornei di 900–1200 partite, posti alternati, intervallo di confidenza 95%): Difficile batte Facile nel 47,7% delle partite (attesi 33,3%; 44,4–50,9%) e Media nel 40,4% (37,3–43,7%); Media batte Facile nel 41,6% (38,4–44,8%). In punti di punteggio: Difficile +1,4 su Media, +2,9 su Facile; Media +1,9 su Facile. Le differenze sono piccole perché il gioco lascia poco margine alla scelta delle carte (vedi `docs/DA_RICORDARE.md`).

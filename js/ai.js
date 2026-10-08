@@ -34,13 +34,15 @@
     for (const c of s.zapPile) known.add(c.id);
     if (s.nextCenter) known.add(s.nextCenter.id);
     if (s.center) known.add(s.center.id);
-    const unknown = shuffle(FF.buildDeck(game.rules).filter((c) => !known.has(c.id)));
+    const unknown = FF.buildDeck(game.rules).filter((c) => !known.has(c.id));
+    // le Zapd non stanno mai in mano (si risolvono appena pescate): le mani ricampionate hanno solo carte numeriche
+    const nums = shuffle(unknown.filter((c) => !c.z)), zaps = unknown.filter((c) => c.z);
     for (const q of [0, 1, 2]) {
       if (q === pid) continue;
       const n = game.s.players[q].hand.length;
-      s.players[q].hand = unknown.splice(0, n);
+      s.players[q].hand = nums.splice(0, n);
     }
-    s.deck = unknown; // il resto è il mazzo, in ordine casuale
+    s.deck = shuffle(nums.concat(zaps)); // il resto è il mazzo, in ordine casuale
     // carte-effetto: note = mie + giocate
     const eknown = new Set();
     for (const e of s.players[pid].eff) eknown.add(e.id);
@@ -73,10 +75,22 @@
     for (let e = 0; e < 3; e++) sum += s.pairPts[e] > 0 ? s.contrib[p][e] / s.pairPts[e] : 1 / 3;
     return sum / 3;
   }
-  const softScore = (g, p) => g.s.players[p].personal * softFactor(g, p);
+  // Punteggio PROIETTATO a fine partita: i punti personali e la quota in ogni coppia si diluiscono con i turni che restano.
+  // (Senza proiezione, una carta alta data alla coppia sembra aumentare il Fattore molto più di quanto farà davvero.)
+  const PROJ = { selfAvg: 6.3, pairPerTurn: 4.1 };
+  function projScore(g, p) {
+    const s = g.s, turnsLeft = Math.max(0, g.totalZaps - s.zapsDrawn) * 1.03 + (s.zapsDrawn >= g.totalZaps ? 0 : 0.5);
+    const Tf = turnsLeft * PROJ.pairPerTurn;
+    let sum = 0;
+    for (let e = 0; e < 3; e++) sum += (s.contrib[p][e] + Tf / 3) / (s.pairPts[e] + Tf || 1);
+    return (s.players[p].personal + turnsLeft * (2 / 3) * PROJ.selfAvg) * (sum / 3);
+  }
+  let useProj = true;
+  const softScore = (g, p) => (useProj ? projScore(g, p) : g.s.players[p].personal * softFactor(g, p));
 
   // valore dello stato per `pid` (più alto = meglio). P = parametri del livello.
   function evalU(g, pid, P) {
+    useProj = P.proj !== false;
     const s = g.s, opp = [0, 1, 2].filter((i) => i !== pid);
     const f = softFactor(g, pid);
     const left = Math.max(0, Math.min(1, (g.totalZaps - s.zapsDrawn) / 12));
@@ -90,7 +104,7 @@
     u += (P.holdW || 0) * left * s.players[pid].eff.length;
     // punti delle coppie di cui faccio parte (titolo di coppia)
     u += 0.03 * (s.pairPts[opp[0]] + s.pairPts[opp[1]] - s.pairPts[pid]);
-    return u;
+    return Number.isFinite(u) ? u : -1e9;
   }
 
   // ───────────────────────── euristiche (modello degli altri e livello facile) ─────────────────────────
@@ -199,6 +213,7 @@
       }
       let order = cands.map((c, i) => ({ c, v: tot[i] / NS + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0) })).sort((a, b) => b.v - a.v);
       let best = order[0];
+      api.lastOrder = order.slice(0, 8).map((o) => `${o.c.c.v}/${o.c.sf.v}${o.c.e ? '+' + o.c.e.k : ''}=${o.v.toFixed(2)}`);
       // tradimento: scostarsi da ciò che ho dichiarato solo se il guadagno supera la soglia
       if (mydecl && mydecl.num != null && hand.some((c) => c.v === mydecl.num)) {
         const honest = order.find((o) => o.c.c.v === mydecl.num);
