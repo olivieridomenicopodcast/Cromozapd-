@@ -121,3 +121,8 @@ Mazzo effetti ora 17 carte (copie di Annulla = 0; il codice resta, si può riatt
 | 4–7 | 1492 | 86,7% | 5,4 | 27% | 4,27 | 7,12 | 6,49 |
 | 8–10 | 1115 | 98,2% | 8,5 | 11% | 4,31 | 7,28 | 6,38 |
 Le IA giocano la stessa carta-coppia (~4,3) anche nei turni "gratis": non sfruttano il margine; resta da capire se è una debolezza dell'IA o se conviene davvero (i punti di coppia contano solo come quota nel Fattore).
+
+## Variante "la carta dell'escluso decide il range" (solo simulazione, `rangeMode:'xcard'`)
+Idea di Niky: dopo la carta centrale V, l'escluso gioca per primo (scoperta) la carta X; range = [V−X, V+X] (minimo 1); gli attivi giocano dopo; la carta dell'escluso conta ancora per i punti della coppia e per il suo Fattore; il range controlla la somma delle 2 carte-coppia.
+Misure (hard×3, 200 partite): sforo 12,2% (sotto 0,15 / sopra 1,52 a partita), punti coppia 161, posti 29,0/35,5/35,5%, egoista vince 18,2%, difficile vs media 41,0%, media vs facile 50,7%, modificatori decisivi 0,96/partita.
+Comportamento delle IA da escluso: giocano quasi sempre carte alte (X=8–10 in ~49% dei turni; X=1 solo ~7%); con X=1 la coppia sta comunque nel range il 62% delle volte (mano di 3 carte + coordinazione). La sabotatura quindi quasi non conviene (l'escluso guadagna quota con carte alte). Sotto si sfora quasi mai (1,2% dei turni).

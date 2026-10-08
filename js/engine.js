@@ -276,6 +276,16 @@
       } else s.center = yield* this.drawNumeric(false, null);
       if (!s.center) { s.over = true; this.emit('warn', '⚠ Carte finite: partita conclusa.'); return; }
       const ex = s.excluded, act = this.actives();
+      const XF = R.rangeMode === 'xcard'; s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
+      if (XF) {
+        b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)}. Il range lo decide la carta dell'escluso: da V−X a V+X. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
+        if (b) yield b;
+        const xd = yield* this.ask(this._dec('xplay', ex, { decls: [], first: true }));
+        const xh = s.players[ex].hand, xi = Math.max(0, xh.findIndex((c) => c.id === xd));
+        s.xFirstCard = xh.splice(xi, 1)[0];
+        const [xr0, xr1] = FF.rangeBase(R, s.center.v, s.xFirstCard.v);
+        b = this.say('center', `🂡 ${this.pn(ex)} (escluso) gioca per primo, scoperto, ${FF.cardName(s.xFirstCard)}: range da ${xr0} a ${xr1}.`, ex, { card: s.xFirstCard, x: true });
+      } else
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
       b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia${R.xInSum ? ': la sua carta conta nella somma del range' : ''}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
@@ -316,8 +326,8 @@
       const plays = {};
       for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
       const xp = s.players[ex];
-      let xcard = yield* this.ask(this._dec('xplay', ex, { decls: s.decls.slice() }));
-      xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0];
+      let xcard = s.xFirstCard;
+      if (!xcard) { xcard = yield* this.ask(this._dec('xplay', ex, { decls: s.decls.slice() })); xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0]; }
 
       yield* this.afterPlay(plays, xcard);
     }
@@ -353,7 +363,7 @@
         if (pl.eff) this.stat('effetto_giocato:' + pl.eff.k, pid);
         this.stat('v_coppia_' + pl.couple.v, pid); this.stat('v_se_' + pl.self.v, pid);
       }
-      this._take(xp.hand, xcard.id); s.discard.push(xcard);
+      if (s.xFirstCard) s.discard.push(xcard); else { this._take(xp.hand, xcard.id); s.discard.push(xcard); }
       this.stat('v_escluso_' + xcard.v, ex);
       b = this.say('reveal', `🔎 ${this.pn(ex)} (escluso) rivela: ${FF.cardName(xcard)} per la coppia ${pairLabel(ex)}.`, ex, { card: xcard, x: true });
       if (b) yield b;
@@ -433,7 +443,7 @@
       // 8) range e punti
       const [a, c2] = act, ca = plays[a].couple, cb = plays[c2].couple;
       const mmode = R.modMode || 'range';
-      const [rb0, rb1] = FF.rangeBase(R, s.center.v);
+      const [rb0, rb1] = FF.rangeBase(R, s.center.v, xcard.v);
       const min = rb0 - (mmode === 'range' ? sumLo : mmode === 'widen' ? sumLo + sumHi : 0), max = rb1 + (mmode === 'range' ? sumHi : mmode === 'widen' ? sumLo + sumHi : 0), sumPair = ca.v + cb.v;
       const shift = mmode === 'shift' ? sumHi - sumLo : 0;                 // variante 'shift': i modificatori spostano la somma
       const sumRaw = R.xInSum ? sumPair + xcard.v : sumPair;              // somma controllata dal range (con la carta dell'escluso)
@@ -513,7 +523,7 @@
     _dec(type, pid, extra) {
       const s = this.s, p = s.players[pid];
       return Object.assign({
-        type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null),
+        type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null, s.xFirstCard ? s.xFirstCard.v : undefined),
         dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(),
       }, extra || {});
     }

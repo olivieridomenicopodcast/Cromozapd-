@@ -34,6 +34,7 @@
     for (const c of s.zapPile) known.add(c.id);
     if (s.nextCenter) known.add(s.nextCenter.id);
     if (s.center) known.add(s.center.id);
+    if (s.xFirstCard) known.add(s.xFirstCard.id);
     const unknown = FF.buildDeck(game.rules).filter((c) => !known.has(c.id));
     // le Zapd non stanno mai in mano (si risolvono appena pescate): le mani ricampionate hanno solo carte numeriche
     const nums = shuffle(unknown.filter((c) => !c.z)), zaps = unknown.filter((c) => c.z);
@@ -121,7 +122,7 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, c0 = FF.rangeBase(R, s.center.v)[0], c1 = FF.rangeBase(R, s.center.v)[1];
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : undefined, c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
@@ -198,8 +199,8 @@
         // gli altri giocano secondo il modello
         const base = {};
         base[partner] = heurPlay(g2, partner, mydecl ? mydecl.num : null, P.trust, rng, 0.05);
-        const xid = heurX(g2, ex, rng, 0.1);
-        const xcard = g2.s.players[ex].hand.find((c) => c.id === xid);
+        const xid = s.xFirstCard ? s.xFirstCard.id : heurX(g2, ex, rng, 0.1);
+        const xcard = s.xFirstCard || g2.s.players[ex].hand.find((c) => c.id === xid);
         if (!base[partner] || !xcard) continue;
         // se il compagno ha dichiarato un numero, con probabilità `trust` gioca davvero quella carta
         if (pnum != null && rng() < P.trust) {
@@ -232,6 +233,25 @@
       if (!hand.length) return null;
       if (P.samples <= 0 || rng() < P.random) return rng() < P.random * 0.5 ? hand[rnd(hand.length)].id : heurX(game, pid, rng, 0);
       const act = [0, 1, 2].filter((i) => i !== ex);
+      if (d.first) {   // variante 'xcard': l'escluso gioca per primo e la sua carta decide il range; gli attivi (non hanno ancora parlato) rispondono con l'euristica
+        const tot = new Array(hand.length).fill(0); let n = 0;
+        for (let k = 0; k < P.samples; k++) {
+          const g2 = AI.determinize(game, pid, rng);
+          hand.forEach((c, i) => {
+            const g3 = g2.clone(); const h3 = g3.s.players[pid].hand;
+            g3.s.xFirstCard = c; h3.splice(h3.findIndex((y) => y.id === c.id), 1);
+            const base = {};
+            for (const q of act) base[q] = heurPlay(g3, q, null, P.trust, rng, 0.05);
+            if (!base[act[0]] || !base[act[1]]) return;
+            tot[i] += simulate(g3, base, c, pid, P);
+          });
+          n++;
+        }
+        if (!n) return hand[0].id;
+        let bi = 0, bv = -Infinity;
+        tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
+        return hand[bi].id;
+      }
       const tot = new Array(hand.length).fill(0); let n = 0;
       for (let k = 0; k < P.samples; k++) {
         const g2 = AI.determinize(game, pid, rng);
