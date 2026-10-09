@@ -288,7 +288,7 @@
       } else
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
-      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. L'escluso gioca 1 carta per la coppia${R.xInSum ? ': la sua carta conta nella somma del range' : ''}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
+      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. ${FF.xFirst(R) ? 'L\'escluso ha già giocato scoperta la carta che decide il range' : 'L\'escluso gioca 1 carta per la coppia' + (R.xInSum ? ': la sua carta conta nella somma del range' : '')}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
       if (b) yield b;
       this.stat('turni', -1);
 
@@ -321,7 +321,7 @@
 
       // 4) gioco coperto (simultaneo: nessuno vede le scelte altrui)
       s.phase = 'play';
-      b = this.say('phase', '🂠 Fase 3 — Gioco coperto: ogni attivo sceglie carta per la coppia, carta per sé ed eventuale effetto; l\'escluso gioca 1 carta.', -1, { phase: 'play' });
+      b = this.say('phase', '🂠 Fase 3 — Gioco coperto: ogni attivo sceglie carta per la coppia, carta per sé ed eventuale effetto; l\'escluso ' + (FF.xFirst(R) ? 'ha già giocato la sua.' : 'gioca 1 carta.'), -1, { phase: 'play' });
       if (b) yield b;
       const plays = {};
       for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
@@ -524,7 +524,7 @@
       const s = this.s, p = s.players[pid];
       return Object.assign({
         type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null, s.xFirstCard ? s.xFirstCard.v : undefined),
-        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(),
+        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(), xcard: s.xFirstCard || null,
       }, extra || {});
     }
 

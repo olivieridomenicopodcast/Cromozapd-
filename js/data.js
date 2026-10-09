@@ -43,9 +43,9 @@
     maxValue: 10,
     startExcluded: -1,      // escluso iniziale: -1 = a sorte (dal seed), 0 = A, 1 = B, 2 = C
     startDir: 1,            // verso iniziale (+1 = A→B→C)
-    xInSum: true,           // la carta dell'escluso conta nella somma controllata dal range (deciso da Niky; false = vecchia regola)
+    xInSum: false,           // variante: la carta dell'escluso conta nella somma controllata dal range (con 'xsum' no: la sua carta decide il range)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
-    rangeMode: 'pivot',      // VARIANTE (solo simulazione): 'base' = da V a V+Base; 'pivot' = da pivot−V a pivot+V (più larga quanto più alta è la carta centrale)
+    rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base
     pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
     modMode: 'widen',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
     modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)

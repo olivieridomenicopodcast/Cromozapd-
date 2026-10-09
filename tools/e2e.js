@@ -35,7 +35,7 @@ fs.mkdirSync(out, { recursive: true });
       const picks = await p.$$('#g-action [data-pick]:not(.used)');
       for (let i = 0; i < 2 && i < picks.length; i++) { const q = await p.$$('#g-action [data-pick]:not(.used)'); await q[0].click(); }
       if (!seen.__hint && await p.$('#p-hint')) { seen.__hint = 1; await click('#p-hint'); await p.waitForTimeout(150); await snap('suggerimento'); }
-      await snap('gioco');
+      if (/decide il range/.test(await p.$eval('#g-action', (e) => e.innerText).catch(() => ''))) await snap('escluso-primo'); else await snap('gioco');
       const eff = await p.$('#g-action [data-eff]:not([disabled])'); if (eff && Math.random() < 0.5) await eff.click();
       await click('#p-ok'); await p.waitForTimeout(40);
       if (await click('.dlg [data-y]')) await p.waitForTimeout(20);

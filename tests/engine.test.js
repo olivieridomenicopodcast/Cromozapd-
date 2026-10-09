@@ -121,20 +121,28 @@ test('variante (solo simulazione) rangeOutside: si incassa solo con la somma FUO
   assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_dentro, 1);
 });
 
-test('regole predefinite: range a perno 15, modificatori che allargano ×2, carta dell\'escluso nella somma', () => {
-  assert.equal(FF.DEFAULT_RULES.rangeMode, 'pivot'); assert.equal(FF.DEFAULT_RULES.pivot, 15); assert.equal(FF.DEFAULT_RULES.xInSum, true);
+test('regole predefinite: range da V a V+X (X = carta dell\'escluso, giocata per prima), modificatori che allargano ×2', () => {
+  assert.equal(FF.DEFAULT_RULES.rangeMode, 'xsum'); assert.equal(FF.DEFAULT_RULES.xInSum, false);
   assert.equal(FF.DEFAULT_RULES.modMode, 'widen'); assert.equal(FF.DEFAULT_RULES.modScale, 2);
   const g = new FF.Game({ seed: 1, log: true }), R = g.rules;
-  assert.deepEqual(FF.rangeBase(R, 3), [12, 18]); assert.deepEqual(FF.rangeBase(R, 8), [7, 23]); assert.deepEqual(FF.rangeBase(R, 1), [14, 16]);
-  assert.deepEqual(FF.rangeFor(R, 3, { dir: 'lo', n: 2 }), [8, 22]); assert.deepEqual(FF.rangeFor(R, 3, { dir: 'hi', n: 1 }), [10, 20]);
-  assert.equal(g.rules.xInSum, true);
-  assert.equal(FF.DEFAULT_RULES.base, 12);
-  // centro 5 → 5..17: 6+6 + escluso 4 = 16 dentro; con escluso 7 = 19 sopra → sforo per colpa dell'escluso
-  const m = (xv) => mk({ rules: { base: 12, xInSum: true }, center: [5, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[6, 1], [3, 1], [1, 1]], [[xv, 1], [8, 2], [9, 2]]] });
-  let t = m(4); turn(t); assert.equal(pts(t), 6 + 6 + 4);
-  t = m(7); turn(t); assert.equal(pts(t), 0); assert.equal(t.stats.p[2].escluso_rovina_la_coppia, 1);
-  // il decisione dell'escluso riceve le dichiarazioni dei due
-  const p = turn(m(4), {}); assert.ok(p.log.find((d) => d.type === 'xplay').decls);
+  assert.deepEqual(FF.rangeBase(R, 6, 7), [6, 13]); assert.deepEqual(FF.rangeBase(R, 3, 1), [3, 4]);
+  assert.deepEqual(FF.rangeFor(R, 6, { dir: 'lo', n: 2 }, 7), [2, 17]); assert.deepEqual(FF.rangeFor(R, 6, { dir: 'hi', n: 1 }, 7), [4, 15]);
+  assert.equal(FF.xFirst(R), true);
+  // l'escluso gioca PER PRIMO, scoperto (prima di ogni dichiarazione): centro 6, X=7 → range 6–13
+  const m = (xi) => mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
+  let t = m(); const p = turn(t, { x: 0 });
+  const order = p.log.map((d) => d.type + (d.first ? '*' : ''));
+  assert.ok(order.indexOf('xplay*') >= 0 && order.indexOf('xplay*') < order.indexOf('declare') && order.indexOf('xplay*') < order.indexOf('play'), order.join(','));
+  assert.equal(order.filter((x) => x.startsWith('xplay')).length, 1, 'l\'escluso gioca una volta sola');
+  assert.equal(t.s.pairPts[2], 3 + 4 + 7, '3+4=7 dentro 6–13: la coppia incassa 7 + la carta dell\'escluso (7)');
+  assert.equal(t.s.players[2].hand.length, 2, 'la carta giocata esce dalla mano subito');
+  // X=1 stringe il range a 6–7: 3+4=7 ancora dentro; 3+1... con X=1 e coppia 3+4 → ok; con X piccola e somma 7 > 7? usiamo X=1 → 6–7
+  t = m(); turn(t, { x: 1 }); assert.equal(t.s.pairPts[2], 7 + 1);
+  t = mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[6, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
+  turn(t, { x: 1 }); assert.equal(t.s.pairPts[2], 0, '6+6=12 fuori da 6–7 (X=1): sforo sopra');
+  t = mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[6, 1], [2, 1], [1, 1]], [[6, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
+  turn(t, { x: 0 }); assert.equal(t.s.pairPts[2], 6 + 6 + 7, '6+6=12 dentro 6–13 con X=7');
+  const g2 = new FF.Game({ seed: 1, log: true }); assert.equal(g2.rules.base, 12);
 });
 
 test('range da V a V+Base con estremi inclusi; la coppia incassa somma + carta dell\'escluso', () => {
@@ -357,6 +365,7 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
       const ids = [...s.deck, ...s.discard, ...s.zapPile, ...s.players.flatMap((p) => p.hand)].map((c) => c.id);
       if (s.nextCenter) ids.push(s.nextCenter.id);
       if (s.center && !s.discard.includes(s.center)) ids.push(s.center.id);
+      if (s.xFirstCard && !s.discard.includes(s.xFirstCard)) ids.push(s.xFirstCard.id);
       assert.equal(ids.length, 92, 'carte numeriche+Zapd: ' + ids.length);
       assert.equal(new Set(ids).size, 92, 'duplicati');
       const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
@@ -425,9 +434,8 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
     assert.ok(row, name + ' manca nel regolamento (§12)');
     return row.split('|')[2].replace(/\*/g, '').trim();
   };
-  assert.equal(val('Perno del range (range = perno ± V)'), String(R.pivot));
+  assert.equal(val('Range'), 'da V a V + X (X = carta dell\'escluso, giocata per prima)'); assert.equal(R.rangeMode, 'xsum');
   assert.equal(val('Modificatori ±n: allargano il range di n ×'), String(R.modScale));
-  assert.equal(val('La carta dell\'escluso conta nella somma del range'), R.xInSum ? 'sì' : 'no');
   assert.equal(val('Carte in mano'), String(R.handSize));
   assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));

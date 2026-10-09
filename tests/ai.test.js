@@ -72,6 +72,7 @@ test('AI: determinize conserva le carte e rispetta le conte (mani, mazzo, effett
       const ids = [...v.s.deck, ...v.s.discard, ...v.s.zapPile, ...v.s.players.flatMap((p) => p.hand)].map((c) => c.id);
       if (v.s.nextCenter) ids.push(v.s.nextCenter.id);
       if (v.s.center && !v.s.discard.includes(v.s.center)) ids.push(v.s.center.id);
+      if (v.s.xFirstCard && !v.s.discard.includes(v.s.xFirstCard)) ids.push(v.s.xFirstCard.id);
       assert.equal(new Set(ids).size, 92); assert.equal(ids.length, 92);
       assert.deepEqual(v.s.players[d.player].hand, game.s.players[d.player].hand);
       assert.ok(v.s.players.every((p) => p.hand.every((c) => !c.z && c.v >= 1)), 'nelle mani non devono esserci Zapd');

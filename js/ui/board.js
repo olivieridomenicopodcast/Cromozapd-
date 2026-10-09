@@ -21,12 +21,13 @@
 
   function rangeBox(g, tab) {
     const s = g.s, c = tab && tab.center; if (!c) return '<div class="rangebox muted">Il range apparirà con la carta centrale.</div>';
-    const sc = tab && tab.score;
-    const [b0, b1] = FF.rangeBase(g.rules, c.v), min = sc ? sc.min : b0, max = sc ? sc.max : b1;
+    const sc = tab && tab.score, xf = FF.xFirst(g.rules), xv = tab && tab.xcard ? tab.xcard.v : undefined;
+    if (xf && xv == null) return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia</div><div class="rnums"><b>${c.v}</b><span class="rline"></span><b>${c.v} + X</b></div><div class="rsub">X = la carta che gioca l'escluso, scoperta, per prima</div></div>`;
+    const [b0, b1] = FF.rangeBase(g.rules, c.v, xv), min = sc ? sc.min : b0, max = sc ? sc.max : b1;
     const mods = sc && (min !== b0 || max !== b1) ? ` <span class="modnote">(con i modificatori)</span>` : '';
     let verdict = '';
     if (sc) verdict = `<div class="verdict ${sc.scored ? (sc.inRange ? 'ok' : 'imm') : 'ko'}">Somma ${sc.sum}: ${sc.inRange ? '✔ nel range' : sc.scored ? '🛡 immune (colore dominante)' : '💥 SFORO'}</div>`;
-    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia${g.rules.xInSum ? ' + la carta dell\'escluso' : ''}</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}, ${g.rules.rangeMode === 'pivot' ? 'centrato su ' + g.rules.pivot : 'Base ' + g.rules.base})${mods}</div>${verdict}</div>`;
+    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia${g.rules.xInSum ? ' + la carta dell\'escluso' : ''}</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}${xf ? ` + X=${xv}` : g.rules.rangeMode === 'pivot' ? ', centrato su ' + g.rules.pivot : ', Base ' + g.rules.base})${mods}</div>${verdict}</div>`;
   }
 
   function seatBox(g, pid, view) {

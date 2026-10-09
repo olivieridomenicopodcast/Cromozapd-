@@ -9,7 +9,7 @@
 
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
-    ['pivot', 'Perno del range (range = perno ± V)'], ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
+    ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
     ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['xInSum', 'La carta dell\'escluso conta nella somma del range'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
     ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
   ];
@@ -85,10 +85,10 @@
   // ───────────────────────── sessione ─────────────────────────
   const WEIGHT = { turn: 0.5, phase: 0.6, sys: 0.5, center: 1.2, zap: 1.3, reveal: 1.4, score: 1.4, effect: 1.3, declare: 1.1, warn: 0.8, end: 1, note: 0, draw: 0.6, roles: 0.9, effdraw: 0.8 };
   const NEXT_TXT = {
-    draw: 'Poi: si rivela la carta centrale e si fissa il range.',
+    draw: 'Poi: si rivela la carta centrale, l\'escluso gioca per primo la sua carta (scoperta) e così si fissa il range.',
     discuss: 'Poi: i due attivi giocano coperte la carta per la coppia, quella per sé ed eventualmente un effetto.',
     play: 'Poi: reveal simultaneo di tutte le carte.',
-    reveal: 'Poi: finestra Annulla, effetti, range e punti.',
+    reveal: 'Poi: effetti, range e punti.',
     resolve: 'Poi: l\'escluso può pescare un effetto e si passa al turno successivo.',
     turn_end: 'Poi: nuovo turno.', setup: 'Poi: primo turno.', end: 'Partita finita.',
   };
@@ -183,7 +183,8 @@
       const t = this.tab;
       if (ev.k === 'turn') { this.tab = { played: {}, center: null, score: null }; return; }
       if (!t.played) t.played = {};
-      if (ev.k === 'center' && ev.d) t.center = ev.d.center;
+      if (ev.k === 'center' && ev.d && ev.d.x) { t.xcard = ev.d.card; t.played[ev.p] = { couple: ev.d.card }; }
+      else if (ev.k === 'center' && ev.d) t.center = ev.d.center;
       else if (ev.k === 'reveal' && ev.d) {
         if (ev.d.x) t.played[ev.p] = { couple: ev.d.card };
         else if (ev.d.play) t.played[ev.p] = { couple: ev.d.play.couple, self: ev.d.play.self, eff: ev.d.play.eff };
@@ -228,7 +229,7 @@
       const n = this.game.s.players[d.player].name;
       return {
         sincero: `${n}: hai la carta Sincero — vuoi giocarla?`, declare: `${n}: dichiara qualcosa al compagno (non è vincolante)`, play: `${n}: scegli le tue carte (coperte)`,
-        xplay: `${n}: sei l'escluso — scegli la carta per la coppia ${FF.pairLabel(d.excluded)}`, annulla: `${n}: vuoi giocare Annulla?`, effdraw: `${n}: vuoi pescare una carta-effetto?`,
+        xplay: d.first ? `${n}: sei l'escluso — gioca per prima la carta che decide il range` : `${n}: sei l'escluso — scegli la carta per la coppia ${FF.pairLabel(d.excluded)}`, annulla: `${n}: vuoi giocare Annulla?`, effdraw: `${n}: vuoi pescare una carta-effetto?`,
       }[d.type] || `Tocca a ${n}`;
     }
     async pace(ev) {
@@ -332,8 +333,9 @@
         <div class="lbl">I tuoi effetti (${d.eff.length}/${this.game.rules.effectHandMax})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
     }
     ctxLine(d) {
-      const g = this.game, [lo, hi] = FF.rangeBase(g.rules, d.center.v), ex = d.excluded;
-      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → range <b>${lo}–${hi}</b>${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
+      const g = this.game, ex = d.excluded, xf = FF.xFirst(g.rules), [lo, hi] = FF.rangeBase(g.rules, d.center.v, d.xcard ? d.xcard.v : undefined);
+      const rtxt = xf && !d.xcard ? `range da <b>${d.center.v}</b> a <b>${d.center.v} + la carta dell'escluso</b>` : `range <b>${lo}–${hi}</b>${xf ? ` (V ${d.center.v} + X ${d.xcard.v})` : ''}`;
+      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → ${rtxt}${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
     }
 
     sinceroPanel(d) {
@@ -394,6 +396,11 @@
       return new Promise((resolve) => {
         const preview = () => {
           const X = R.xInSum;
+          if (excl && d.first) {
+            const cx = sel.couple != null ? cardById(sel.couple) : null;
+            const rows = d.hand.map((c) => `<span class="${cx && cx.id === c.id ? 'good' : ''}">${c.v} → ${d.center.v}–${d.center.v + c.v}</span>`).join(' · ');
+            return `<div class="pv"><div>Come escluso giochi <b>per primo, scoperta</b>, 1 carta: <b>decide il range</b> da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Carta alta = range largo (aiuti la coppia), carta bassa = range stretto (metti i bastoni tra le ruote). La tua carta conta anche per i punti della coppia e per il tuo Fattore, se la coppia non sfora; il colore non conta.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}</div>`;
+          }
           if (excl) {
             const [lo, hi] = FF.rangeBase(R, d.center.v);
             const dn = (d.decls || []).map((x, i) => ({ x, i })).filter((o) => o.i !== d.excluded && o.x && o.x.num != null);
@@ -407,7 +414,7 @@
           }
           const effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null;
           const m = effc && EFFECTS[effc.k].mod;
-          const [min, max] = FF.rangeFor(R, d.center.v, m);
+          const [min, max] = FF.rangeFor(R, d.center.v, m, d.xcard ? d.xcard.v : undefined);
           const cc = sel.couple != null ? cardById(sel.couple) : null;
           let h = '';
           if (cc) {
@@ -434,7 +441,7 @@
           const cards = d.hand.map((c) => `<button class="cardbtn selectable ${used.has(c.id) ? 'used' : ''}" data-pick="${c.id}" aria-label="${esc(FF.cardName(c))}">${S.card(c)}</button>`).join('');
           const effs = d.eff.map((e) => { const why = excl || EFFECTS[e.k].kind !== 'fila' ? effReason(e) : ''; return `<div class="effwrap ${why ? 'off' : ''}"><button class="cardbtn selectable ${sel.eff === e.id ? 'used' : ''}" data-eff="${e.id}" ${why ? 'disabled' : ''}>${S.effect(e.k)}</button>${why ? `<div class="why">${why}</div>` : `<button class="zoomlink" data-zoom="eff:${e.k}">ingrandisci</button>`}</div>`; }).join('') || '<span class="muted">Nessun effetto in mano.</span>';
           const ready = excl ? sel.couple != null : sel.couple != null && sel.self != null;
-          this.setAction(`<h3>${excl ? '🚪' : '🂠'} ${esc(this.pname(me))}: ${excl ? `la tua carta per la coppia ${FF.pairLabel(d.excluded)}` : 'scegli le tue carte (restano coperte fino al reveal)'}</h3>${this.ctxLine(d)}
+          this.setAction(`<h3>${excl ? '🚪' : '🂠'} ${esc(this.pname(me))}: ${excl ? (d.first ? `la tua carta (scoperta) decide il range` : `la tua carta per la coppia ${FF.pairLabel(d.excluded)}`) : 'scegli le tue carte (restano coperte fino al reveal)'}</h3>${this.ctxLine(d)}
             ${!excl && pdecl ? `<div class="infobox">${esc(this.pname(partnerId))} ha dichiarato: ${pdecl.num == null ? 'niente sulla carta' : `«ti gioco il ${pdecl.num}»`}${pdecl.mod ? ` · modificatore: ${esc(FF.modTxt(pdecl.mod))}` : ''}.</div>` : ''}
             <div class="lbl">La tua mano — tocca una carta per metterla nel primo spazio libero</div><div class="cardsrow big">${cards}</div>
             <div class="slots">${slot('couple', excl ? 'Per la coppia' : '1 · Per la coppia', sel.couple != null ? cardById(sel.couple) : null)}${excl ? '' : slot('self', '2 · Per sé', sel.self != null ? cardById(sel.self) : null)}
@@ -456,7 +463,7 @@
             const warns = [];
             if (!excl) {
               const cc = cardById(sel.couple), effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null, m = effc && EFFECTS[effc.k].mod;
-              const [mn, mx] = FF.rangeFor(R, d.center.v, m);
+              const [mn, mx] = FF.rangeFor(R, d.center.v, m, d.xcard ? d.xcard.v : undefined);
               if (R.xInSum && pdecl && pdecl.num != null && cc.c !== d.dominant) {
                 const zl = Math.max(1, mn - cc.v - pdecl.num), zh = Math.min(R.maxValue, mx - cc.v - pdecl.num), n = Math.max(0, zh - zl + 1);
                 if (n < 4) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))}, solo <b>${n} carte su ${R.maxValue}</b> dell'escluso (tra ${zl} e ${zh}) tengono la coppia nel range ${mn}–${mx}: <b>rischio alto di sforo</b>.`);
