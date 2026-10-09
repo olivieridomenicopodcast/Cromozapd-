@@ -605,6 +605,7 @@
 
       // 9) l'escluso può pescare una carta-effetto
       // (nessuna scelta: pescare non costa niente, quindi l'escluso pesca sempre se ha meno di 2 effetti e il mazzetto non è vuoto)
+      if (xp.eff.length >= R.effectHandMax && s.effDeck.length) this.stat('pesca_bloccata_dal_limite', ex);
       if (xp.eff.length < R.effectHandMax && s.effDeck.length) {
         const e = s.effDeck.pop(); xp.eff.push(e); this.stat('effetto_pescato:' + e.k, ex);
         b = this.say('effdraw', `🎴 ${this.pn(ex)} (escluso) pesca una carta-effetto dal Mazzetto (ora ne ha ${xp.eff.length}).`, ex);
