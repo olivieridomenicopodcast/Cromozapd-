@@ -129,11 +129,11 @@
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
-      const fl = s.noEff ? [] : fila(p.eff);
+      const fl = s.noEff ? fila(p.eff).filter((e) => EFFECTS[e.k].mod) : fila(p.eff);
       return { coupleId: hand[i].id, selfId: hand[j].id, effId: fl.length && rng() < 0.3 ? fl[Math.floor(rng() * fl.length)].id : null };
     }
     let best = null, bv = -Infinity;
-    const effOpts = [null, ...(s.noEff ? [] : fila(p.eff).filter((e) => !(R.modTiming === 'after' && EFFECTS[e.k].mod)))];
+    const effOpts = [null, ...fila(p.eff).filter((e) => !(R.modTiming === 'after' && EFFECTS[e.k].mod) && !(s.noEff && !EFFECTS[e.k].mod))];
     for (const c of hand) for (const sf of hand) {
       if (c === sf) continue;
       for (const e of effOpts) {
@@ -196,7 +196,7 @@
       }
       // candidati: tutte le coppie ordinate di carte × (nessun effetto | ogni effetto in fila diverso)
       const effOpts = [null]; const seen = new Set();
-      for (const e of (s.noEff ? [] : fila(d.eff))) if (!seen.has(e.k) && !(game.rules.modTiming === 'after' && EFFECTS[e.k].mod)) { seen.add(e.k); effOpts.push(e); }
+      for (const e of (s.noEff ? fila(d.eff).filter((x) => EFFECTS[x.k].mod) : fila(d.eff))) if (!seen.has(e.k) && !(game.rules.modTiming === 'after' && EFFECTS[e.k].mod)) { seen.add(e.k); effOpts.push(e); }
       const cands = [];
       for (const c of hand) for (const sf of hand) if (c !== sf) for (const e of effOpts) cands.push({ c, sf, e });
       const tot = new Array(cands.length).fill(0);

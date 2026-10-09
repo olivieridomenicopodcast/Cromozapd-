@@ -209,3 +209,4 @@ Sforo 31,7% (sotto 1,91 / sopra 1,98), punti coppia 133,6, posti A/B/C 28,0/38,3
 | Luce | 27,2% | 1,94 / 1,42 | 143 | 0 | 0 | 7,33 | 1,79 | 48,0% |
 | Effetti vietati | 45,3% | 2,06 / 3,54 | 106 | 2,07 | 2,94 | 0 | 0 | 44,8% |
 Lettura: Effetti vietati è di gran lunga la più pesante (sforo +14 punti, punti coppia −30: i modificatori sono la rete di sicurezza); Luce è la più facile; Silenzio peggiora la coordinazione e premia meno l'abilità; Giuramento per le IA è quasi invisibile (non mentono più: 0,21 bugie a partita). Con la regola attiva circa 1 turno su 4 gli effetti si diluiscono.
+Correzione (deciso da Niky): **Effetti vietati lascia giocare i modificatori ±n** (vieta solo Reverse, Prossima carta e Baratto). Misura (sempre attiva, hard×3, 200 partite): sforo 33,2% (era 45,3%), sotto/sopra 1,94 / 2,17, punti coppia 132 (erano 106), bugie 2,44, modificatori decisivi 1,09, abilità 47,5%. Ora è paragonabile a Silenzio.

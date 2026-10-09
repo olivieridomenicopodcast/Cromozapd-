@@ -40,7 +40,7 @@
     silenzio: { id: 'silenzio', n: 'Silenzio', i: '🤫', s: 'Non si parla', d: 'L\'escluso non dichiara nulla e gli attivi non fanno dichiarazioni. La carta dell\'escluso resta coperta fino al reveal: nessuno può tradire, nessuno può fidarsi.' },
     giuramento: { id: 'giuramento', n: 'Giuramento', i: '🤞', s: 'Il tradimento costa doppio', d: 'L\'escluso dichiara un numero e poi gioca coperto: se gioca un numero diverso pesca 2 carte Traditore invece di 1.' },
     luce: { id: 'luce', n: 'Luce', i: '💡', s: 'La carta dell\'escluso è scoperta', d: 'L\'escluso gioca per primo la sua carta, scoperta: il range è noto prima della discussione e nessuno può mentire.' },
-    effetti: { id: 'effetti', n: 'Effetti vietati', i: '🚫', s: 'Niente carte-effetto', d: 'In questo turno nessuno può giocare carte-effetto (Reverse, Prossima carta, ±n, Baratto). Chi è escluso pesca comunque a fine turno.' },
+    effetti: { id: 'effetti', n: 'Effetti vietati', i: '🚫', s: 'Niente Reverse, Prossima carta e Baratto', d: 'In questo turno nessuno può giocare Reverse, Prossima carta o Baratto. I modificatori ±n si possono giocare. Chi è escluso pesca comunque a fine turno.' },
   };
   FF.ruleOf = (R, dominant) => (R.colorRules && R.colorRuleMap ? R.colorRuleMap[dominant] || null : null);
   // come si gioca la carta dell'escluso: 'first' = per prima e scoperta; 'hidden' = dichiara e gioca coperta; null = regola vecchia

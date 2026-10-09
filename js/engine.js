@@ -647,7 +647,7 @@
         this.emit('warn', `⚠ Giocata non valida di ${this.pn(pid)}: uso le prime due carte.`);
         couple = h[0]; self = h[1];
       }
-      const eff = raw.eff != null && !this.s.noEff ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila' && !(this.rules.modTiming === 'after' && EFFECTS[e.k].mod)) : null;
+      const eff = raw.eff != null ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila' && !(this.rules.modTiming === 'after' && EFFECTS[e.k].mod) && !(this.s.noEff && !EFFECTS[e.k].mod)) : null;
       return { coupleId: couple.id, selfId: self.id, effId: eff ? eff.id : null };
     }
   }

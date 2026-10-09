@@ -30,7 +30,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 2. **L'escluso fa la sua mossa** **[chiarito: idea di Niky]**. La carta che gioca, la **X**, decide il range del turno (§5). Di norma **dichiara un numero esatto** (può mentire, §5) e mette la X **coperta**; se è attiva la regola **Luce** la gioca per prima, **scoperta**; se è attiva **Silenzio** non dichiara nulla.
 3. **Effetti istantanei**: chi ha un **Baratto** può giocarlo ora (§9).
 4. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§9). Il tradimento tra attivi è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Con **Silenzio** attivo nessuno dichiara. Nell'hotseat si parla anche a voce.
-5. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto in fila** (3ª; non con **Effetti vietati** attivo).
+5. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto in fila** (3ª; con **Effetti vietati** attivo solo i modificatori).
 6. **Reveal.** Si scoprono le carte coperte degli attivi **e la X dell'escluso**.
 7. **Risoluzione**: effetti in fila (Reverse, Prossima carta, modificatori), range e punti (§5), eventuale carta Traditore, poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§9).
 
@@ -65,7 +65,7 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 | Rosso | **Silenzio** | L'escluso non dichiara e gli attivi non fanno dichiarazioni. La X resta coperta fino al reveal: nessuno può tradire, nessuno può fidarsi. |
 | Blu | **Giuramento** | Come il turno normale, ma chi tradisce pesca **2 carte Traditore** invece di 1. |
 | Verde | **Luce** | L'escluso gioca per primo la sua X, **scoperta**: il range è noto prima della discussione e nessuno può mentire. |
-| Giallo | **Effetti vietati** | In questo turno nessuno gioca carte-effetto (Reverse, Prossima carta, ±n, Baratto). L'escluso pesca comunque a fine turno. |
+| Giallo | **Effetti vietati** | In questo turno nessuno gioca **Reverse, Prossima carta e Baratto**; i **modificatori ±n si possono giocare**. L'escluso pesca comunque a fine turno. |
 
 ## 8. Punteggio finale
 - **Punti squadra** di ogni coppia = somma dei punti incassati (§5).
@@ -76,7 +76,7 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 - **Vincitore di coppia**: la coppia con più punti squadra. **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
 
 ## 9. Mazzetto Effetti (15 carte)
-Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo nessuna carta-effetto si gioca.
+Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
 
 | Carta | Quando | Cosa fa |
 |---|---|---|

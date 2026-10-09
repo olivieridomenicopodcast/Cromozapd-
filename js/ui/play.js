@@ -451,7 +451,7 @@
       const effReason = (e) => {
         const k = EFFECTS[e.k];
         if (excl) return 'L\'escluso non può giocare effetti in questo turno.';
-        if (this.game.s.noEff) return '📜 Regola in vigore: Effetti vietati. In questo turno nessuno gioca carte-effetto.';
+        if (this.game.s.noEff && !k.mod) return '📜 Effetti vietati: in questo turno non si giocano Reverse, Prossima carta e Baratto (i modificatori ± sì).';
         if (k.kind === 'baratto') return 'Il Baratto si gioca subito dopo la carta dell\'escluso: te lo chiederò io, prima della discussione.';
         if (k.kind === 'sincero') return 'Sincero è istantanea: si gioca prima della discussione.';
         if (k.kind === 'annulla') return 'Annulla è reattiva: la potrai giocare dopo il reveal.';
@@ -520,7 +520,7 @@
           const slot = (key, label, c) => `<div class="slot ${c ? 'full' : ''}" data-slot="${key}"><div class="slab">${label}</div>${c ? UI.cardHTML(c, { cls: 'slotcard' }) : '<div class="emptyslot"></div>'}${c ? '<div class="small">tocca per togliere</div>' : ''}</div>`;
           const used = new Set([sel.couple, sel.self]);
           const cards = d.hand.map((c) => `<button class="cardbtn selectable ${used.has(c.id) ? 'used' : ''}" data-pick="${c.id}" aria-label="${esc(FF.cardName(c))}">${S.card(c)}</button>`).join('');
-          const effs = d.eff.map((e) => { const why = excl || this.game.s.noEff || EFFECTS[e.k].kind !== 'fila' ? effReason(e) : ''; return `<div class="effwrap ${why ? 'off' : ''}"><button class="cardbtn selectable ${sel.eff === e.id ? 'used' : ''}" data-eff="${e.id}" ${why ? 'disabled' : ''}>${S.effect(e.k)}</button>${why ? `<div class="why">${why}</div>` : `<button class="zoomlink" data-zoom="eff:${e.k}">ingrandisci</button>`}</div>`; }).join('') || '<span class="muted">Nessun effetto in mano.</span>';
+          const effs = d.eff.map((e) => { const why = excl || (this.game.s.noEff && !EFFECTS[e.k].mod) || EFFECTS[e.k].kind !== 'fila' ? effReason(e) : ''; return `<div class="effwrap ${why ? 'off' : ''}"><button class="cardbtn selectable ${sel.eff === e.id ? 'used' : ''}" data-eff="${e.id}" ${why ? 'disabled' : ''}>${S.effect(e.k)}</button>${why ? `<div class="why">${why}</div>` : `<button class="zoomlink" data-zoom="eff:${e.k}">ingrandisci</button>`}</div>`; }).join('') || '<span class="muted">Nessun effetto in mano.</span>';
           const ready = excl ? sel.couple != null : sel.couple != null && sel.self != null;
           this.setAction(`<h3>${excl ? '🚪' : '🂠'} ${esc(this.pname(me))}: ${excl ? (d.first ? `la tua carta (scoperta) decide il range` : d.early ? `la tua carta (coperta) decide il range` : `la tua carta per la coppia ${FF.pairLabel(d.excluded)}`) : 'scegli le tue carte (restano coperte fino al reveal)'}</h3>${this.ctxLine(d)}
             ${!excl && pdecl ? `<div class="infobox">${esc(this.pname(partnerId))} ha dichiarato: ${pdecl.num == null ? 'niente sulla carta' : `«ti gioco il ${pdecl.num}»`}${pdecl.mod ? ` · modificatore: ${esc(FF.modTxt(pdecl.mod))}` : ''}.</div>` : ''}
