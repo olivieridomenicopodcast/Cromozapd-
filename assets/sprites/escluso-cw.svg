@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="Escluso, verso orario">
+      <rect x="2" y="2" width="96" height="136" rx="10" fill="#f6e2a8" stroke="#8a5a00" stroke-width="5"/>
+      <rect x="10" y="10" width="80" height="120" rx="6" fill="none" stroke="#8a5a00" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="50" y="28" font-size="15" font-weight="900" fill="#5a3a00" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">ESCLUSO</text>
+      <g transform="translate(30 33) scale(0.4)"><circle cx="50" cy="50" r="46" fill="#f2c14e" stroke="#8a5a00" stroke-width="5"/><circle cx="50" cy="38" r="9" fill="#5a3a00"/><path d="M32 66a18 16 0 0 1 36 0z" fill="#5a3a00"/><line x1="22" y1="78" x2="78" y2="22" stroke="#c92a2a" stroke-width="7" stroke-linecap="round"/></g>
+      <g transform="translate(30 74) scale(0.4)"><path d="M22.3 34.0 A32 32 0 1 1 44.4 81.5" fill="none" stroke="#3b2a14" stroke-width="11" stroke-linecap="round"/><polygon points="18.44433363513594,76.9295362059837 48.1107078269838,60.71470835277283 40.77580880233266,102.31298784000849" fill="#3b2a14"/></g>
+      <text x="50" y="120" font-size="8.5" font-weight="900" fill="#3b2a14" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">ORARIO · A→B→C</text>
+      <text x="50" y="127.5" font-size="5.2" font-weight="700" fill="#5a4a30" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif">gira la carta se il verso cambia</text></svg>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140" width="300" height="420" role="img" aria-label="Dorso Mazzetto Traditore">
+    <rect x="2" y="2" width="96" height="136" rx="10" fill="#3b1f1f" stroke="#f2e6c9" stroke-width="4"/>
+    <rect x="11" y="11" width="78" height="118" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.6" opacity="0.8"/>
+    <path d="M30 56c0-14 9-22 20-22s20 8 20 22v14c0 8-4 14-9 17v8H39v-8c-5-3-9-9-9-17z" fill="#f2e6c9"/><circle cx="41" cy="60" r="5" fill="#3b1f1f"/><circle cx="59" cy="60" r="5" fill="#3b1f1f"/><rect x="45" y="94" width="3" height="7" fill="#3b1f1f"/><rect x="52" y="94" width="3" height="7" fill="#3b1f1f"/>
+    <text x="50" y="119" font-size="11" font-weight="800" fill="#f2e6c9" text-anchor="middle" font-family="'Trebuchet MS','Segoe UI',Verdana,sans-serif" letter-spacing="1">TRADITORE</text></svg>

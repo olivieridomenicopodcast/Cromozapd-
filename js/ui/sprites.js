@@ -50,6 +50,10 @@
   function effIcon(k, cx, cy, col) {
     const g = (b) => `<g transform="translate(${cx - 30} ${cy - 30})">${b}</g>`;
     const hi = k.startsWith('hi'), lo = k.startsWith('lo');
+    if ((hi || lo) && FF.EFFECTS[k].n.charAt(0) === '±') {
+      const n = k.slice(2);
+      return g(`<polygon points="0,30 14,18 14,26 46,26 46,18 60,30 46,42 46,34 14,34 14,42" fill="#6b3fa0"/><text x="30" y="58" font-size="22" font-weight="900" fill="#4a2a78" text-anchor="middle" ${FONT}>±${n}</text><text x="30" y="14" font-size="9" font-weight="800" fill="#4a2a78" text-anchor="middle" ${FONT}>range</text>`);
+    }
     if (hi || lo) {
       const n = k.slice(2), up = hi;
       const arrow = up ? '<polygon points="16,6 32,28 22,28 22,54 10,54 10,28 0,28" fill="#2e9d57"/>' : '<polygon points="16,54 32,32 22,32 22,6 10,6 10,32 0,32" fill="#d9433b"/>';
@@ -92,10 +96,10 @@
   def('zapd-cromo', '0 0 100 140', () => `
     <rect x="2" y="2" width="96" height="136" rx="10" fill="#1d1b2e" stroke="#f2e6c9" stroke-width="5"/>
     <rect x="10" y="10" width="80" height="120" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.5" opacity="0.7"/>
-    ${[0, 1, 2, 3].map((c) => sym(c, 26 + (c % 2) * 48, 30 + Math.floor(c / 2) * 80, 10, COL[c], '#fff')).join('')}
-    ${bolt(50, 70, 1.25, '#ffd84a', '#fff3b0')}
-    <text x="50" y="100" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">CROMO</text>
-    <text x="50" y="114" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">ZAPD</text>`, 'Cromozapd');
+    ${[0, 1, 2, 3].map((c) => sym(c, 23 + (c % 2) * 54, c < 2 ? 24 : 119, 8, COL[c], '#fff')).join('')}
+    ${bolt(50, 56, 1.1, '#ffd84a', '#fff3b0')}
+    <text x="50" y="97" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">CROMO</text>
+    <text x="50" y="111" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">ZAPD</text>`, 'Cromozapd');
   def('back', '0 0 100 140', () => `
     <rect x="2" y="2" width="96" height="136" rx="10" fill="#2c3e6b" stroke="#f2e6c9" stroke-width="4"/>
     <rect x="11" y="11" width="78" height="118" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.6" opacity="0.8"/>
@@ -116,7 +120,7 @@
       <text x="50" y="25" font-size="${e.n.length > 12 ? 11 : e.n.length > 10 ? 12.5 : 15.5}" font-weight="900" fill="#fff" text-anchor="middle" ${FONT}>${e.n}</text>
       <text x="50" y="35" font-size="6.5" font-weight="800" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1" opacity="0.9">${kindTxt}</text>
       ${effIcon(k, 50, 70, head)}
-      ${lines(wrap(e.s, 19), 50, 108, 8.6, '#3b2a14', 10.5, 'font-weight="700"')}`, e.n);
+      ${(() => { const w = wrap(e.s, 19); return w.length > 3 ? lines(wrap(e.s, 23), 50, 106, 7.4, '#3b2a14', 9, 'font-weight="700"') : lines(w, 50, 108, 8.6, '#3b2a14', 10.5, 'font-weight="700"'); })()}`, e.n);
   }
   def('token', '0 0 100 100', () => `
     <circle cx="50" cy="50" r="46" fill="#f2c14e" stroke="#8a5a00" stroke-width="5"/>
@@ -128,6 +132,53 @@
   def('dir-ccw', '0 0 100 100', () => circArrow(50, 50, 32, -1, '#3b2a14', 11), 'Verso antiorario');
   def('bolt', '0 0 100 100', () => bolt(50, 50, 1.4, '#ffd84a', '#8a6a00'), 'Zapd');
   for (let c = 0; c < 4; c++) def(`sym-${FF.COLORS[c].id}`, '0 0 100 100', () => sym(c, 50, 50, 38, COL[c], '#3b2a14'), FF.COLORS[c].n);
+
+
+  // ── carte Traditore (0–3), dorso, carte regola di colore e carta Escluso/verso (per la versione stampabile) ──
+  def('back-trait', '0 0 100 140', () => `
+    <rect x="2" y="2" width="96" height="136" rx="10" fill="#3b1f1f" stroke="#f2e6c9" stroke-width="4"/>
+    <rect x="11" y="11" width="78" height="118" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.6" opacity="0.8"/>
+    <path d="M30 56c0-14 9-22 20-22s20 8 20 22v14c0 8-4 14-9 17v8H39v-8c-5-3-9-9-9-17z" fill="#f2e6c9"/><circle cx="41" cy="60" r="5" fill="#3b1f1f"/><circle cx="59" cy="60" r="5" fill="#3b1f1f"/><rect x="45" y="94" width="3" height="7" fill="#3b1f1f"/><rect x="52" y="94" width="3" height="7" fill="#3b1f1f"/>
+    <text x="50" y="119" font-size="11" font-weight="800" fill="#f2e6c9" text-anchor="middle" ${FONT} letter-spacing="1">TRADITORE</text>`, 'Dorso Mazzetto Traditore');
+  for (let n = 0; n <= 3; n++) {
+    def(`trait-${n}`, '0 0 100 140', () => `
+      <rect x="2" y="2" width="96" height="136" rx="10" fill="#f6e3dc" stroke="#7a2a2a" stroke-width="4"/>
+      <path d="M2 12a10 10 0 0 1 10-10h76a10 10 0 0 1 10 10v26H2z" fill="#7a2a2a"/>
+      <text x="50" y="25" font-size="15" font-weight="900" fill="#fff" text-anchor="middle" ${FONT}>Traditore</text>
+      <text x="50" y="35" font-size="6.5" font-weight="800" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1" opacity="0.9">HAI MENTITO</text>
+      <text x="50" y="92" font-size="56" font-weight="900" fill="#7a2a2a" text-anchor="middle" ${FONT} stroke="#f6e3dc" stroke-width="3" paint-order="stroke">${n ? '−' + n : '0'}</text>
+      ${lines(wrap(n ? 'punti personali tolti. La carta resta scoperta davanti a te.' : 'nessuna penalità, ma resta scoperta davanti a te.', 22), 50, 112, 6.8, '#3b2a14', 8.4, 'font-weight="700"')}`, `Traditore −${n}`);
+  }
+  const RULE_TXT = {
+    silenzio: ['Nessuno dichiara niente: né l\'escluso né gli attivi.', 'X coperta fino al reveal.'],
+    carnevale: ['Mentire è gratis: niente carta Traditore se la X è diversa dal dichiarato.', 'Dichiarare non vale niente.'],
+    luce: ['L\'escluso gioca per primo la sua X, SCOPERTA.', 'Range noto prima di parlare: nessuno mente.'],
+    effetti: ['Niente Reverse, Prossima carta e Baratto.', 'I modificatori ±n si possono giocare.'],
+  };
+  for (let c = 0; c < 4; c++) {
+    const r = FF.COLOR_RULES[FF.DEFAULT_RULES.colorRuleMap[c]];
+    const t1 = wrap(RULE_TXT[r.id][0], 26), t2 = wrap(RULE_TXT[r.id][1], 28);
+    def(`rule-${r.id}`, '0 0 100 140', () => `
+      <rect x="2" y="2" width="96" height="136" rx="10" fill="#fffaf0" stroke="${COL[c]}" stroke-width="5"/>
+      <path d="M2 12a10 10 0 0 1 10-10h76a10 10 0 0 1 10 10v30H2z" fill="${COL[c]}"/>
+      <text x="50" y="24" font-size="${r.n.length > 9 ? 12 : 15}" font-weight="900" fill="#fff" text-anchor="middle" ${FONT}>${r.n}</text>
+      <text x="50" y="36" font-size="6.4" font-weight="800" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="0.8">COLORE ${FF.COLORS[c].n.toUpperCase()}</text>
+      ${sym(c, 18, 63, 8, COL[c], DARK[c])}${sym(c, 82, 63, 8, COL[c], DARK[c])}
+      <text x="50" y="70" font-size="26" text-anchor="middle" ${FONT}>${r.i}</text>
+      ${lines(t1, 50, 84, 6.6, '#3b2a14', 8, 'font-weight="800"')}
+      ${lines(t2, 50, 84 + t1.length * 8 + 3, 6, '#5a4a30', 7.2, 'font-weight="600"')}
+      <text x="50" y="133" font-size="5.6" font-weight="700" fill="#7a6a50" text-anchor="middle" ${FONT}>Attiva se la centrale è ${['rossa', 'blu', 'verde', 'gialla'][c]}</text>`, `Regola ${r.n}`);
+  }
+  for (const dir of [1, -1]) {
+    def(dir > 0 ? 'escluso-cw' : 'escluso-ccw', '0 0 100 140', () => `
+      <rect x="2" y="2" width="96" height="136" rx="10" fill="#f6e2a8" stroke="#8a5a00" stroke-width="5"/>
+      <rect x="10" y="10" width="80" height="120" rx="6" fill="none" stroke="#8a5a00" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="50" y="28" font-size="15" font-weight="900" fill="#5a3a00" text-anchor="middle" ${FONT}>ESCLUSO</text>
+      <g transform="translate(30 33) scale(0.4)"><circle cx="50" cy="50" r="46" fill="#f2c14e" stroke="#8a5a00" stroke-width="5"/><circle cx="50" cy="38" r="9" fill="#5a3a00"/><path d="M32 66a18 16 0 0 1 36 0z" fill="#5a3a00"/><line x1="22" y1="78" x2="78" y2="22" stroke="#c92a2a" stroke-width="7" stroke-linecap="round"/></g>
+      <g transform="translate(30 74) scale(0.4)">${circArrow(50, 50, 32, dir, '#3b2a14', 11)}</g>
+      <text x="50" y="120" font-size="8.5" font-weight="900" fill="#3b2a14" text-anchor="middle" ${FONT}>${dir > 0 ? 'ORARIO · A→B→C' : 'ANTIORARIO · A→C→B'}</text>
+      <text x="50" y="127.5" font-size="5.2" font-weight="700" fill="#5a4a30" text-anchor="middle" ${FONT}>gira la carta se il verso cambia</text>`, dir > 0 ? 'Escluso, verso orario' : 'Escluso, verso antiorario');
+  }
 
   // ── API ──
   S.xmlns = 'xmlns="http://www.w3.org/2000/svg"';

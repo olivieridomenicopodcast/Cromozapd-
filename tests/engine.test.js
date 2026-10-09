@@ -539,3 +539,18 @@ test('prima della prima Zapd non c\'è colore dominante e nessuna regola; la pri
   FF.drive(g, g.run(), (game, d) => { if (d.type === 'xdecl' || d.type === 'play') { if (game.s.dominant == null) { sawNone = true; assert.equal(game.s.rule, null); } else sawSome = true; } return bots[d.player].decide(game, d); });
   assert.ok(sawSome, 'prima o poi esce una Zapd e fissa il colore');
 });
+
+test('kit stampabile: 117 carte in 13 fogli da 9, formato poker, retro giusto per ogni mazzo', () => {
+  const path = require('node:path'), fs = require('node:fs');
+  const { execFileSync } = require('node:child_process');
+  execFileSync('node', [path.join(__dirname, '..', 'tools', 'build-print.js'), '--no-pdf'], { stdio: 'pipe' });
+  const dir = path.join(__dirname, '..', 'stampa');
+  const fr = fs.readFileSync(path.join(dir, 'carte-fronte-retro.html'), 'utf8');
+  const so = fs.readFileSync(path.join(dir, 'carte-solo-fronti.html'), 'utf8');
+  assert.equal((fr.match(/class="sheet"/g) || []).length, 26);
+  assert.equal((so.match(/class="sheet"/g) || []).length, 13);
+  assert.equal((so.match(/class="c"/g) || []).length, 117);   // 85 mazzo + 5 regola/escluso + 15 effetti + 12 traditore
+  assert.ok(fr.includes('width: 63.5mm') && fr.includes('height: 88.9mm'));
+  assert.ok(!fr.includes('NaN') && !fr.includes('undefined'));
+  assert.ok(fs.existsSync(path.join(dir, 'tabellone-e-plance.html')));
+});
