@@ -42,7 +42,7 @@
     luce: { id: 'luce', n: 'Luce', i: '💡', s: 'La carta dell\'escluso è scoperta', d: 'L\'escluso gioca per primo la sua carta, scoperta: il range è noto prima della discussione e nessuno può mentire.' },
     effetti: { id: 'effetti', n: 'Effetti vietati', i: '🚫', s: 'Niente Reverse, Prossima carta e Baratto', d: 'In questo turno nessuno può giocare Reverse, Prossima carta o Baratto. I modificatori ±n si possono giocare. Chi è escluso pesca comunque a fine turno.' },
   };
-  FF.ruleOf = (R, dominant) => (R.colorRules && R.colorRuleMap ? R.colorRuleMap[dominant] || null : null);
+  FF.ruleOf = (R, dominant) => (R.colorRules && R.colorRuleMap && dominant != null && dominant >= 0 ? R.colorRuleMap[dominant] || null : null);
   // come si gioca la carta dell'escluso: 'first' = per prima e scoperta; 'hidden' = dichiara e gioca coperta; null = regola vecchia
   FF.xmodeFor = (R, rule) => (R.rangeMode === 'xcard' || R.rangeMode === 'xsum' ? (R.colorRules ? (rule === 'luce' ? 'first' : 'hidden') : (R.xHidden ? 'hidden' : 'first')) : null);
   FF.VAGUE = { 1: 'poco', 2: 'medio', 3: 'tanto' };

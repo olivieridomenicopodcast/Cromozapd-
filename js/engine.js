@@ -82,10 +82,8 @@
       s.discard = []; s.zapPile = [];
       s.effDeck = this._shuffle(FF.buildEffectDeck(this.rules));
       s.effDiscard = [];
-      // colore dominante di partenza: il colore della prima Zapd che esce, poi si rimescola tutto
-      let c = 0;
-      for (let i = s.deck.length - 1; i >= 0; i--) if (s.deck[i].z && !s.deck[i].cromo) { c = s.deck[i].c; break; }
-      s.dominant = c;
+      // all'inizio NON c'è colore dominante (e quindi nessuna regola) finché non esce la prima Zapd colorata o la Cromozapd
+      s.dominant = null;
       this._shuffle(s.deck);
       const pl = cfg.players || [];
       s.players = [0, 1, 2].map((i) => {
@@ -120,7 +118,7 @@
     seatName(pid) { return FF.SEATS[pid]; }
     actives() { return [0, 1, 2].filter((i) => i !== this.s.excluded); }
     dirTxt(d) { return d > 0 ? '↻ A→B→C' : '↺ A→C→B'; }
-    col(c) { return `${COLORS[c].i} ${COLORS[c].n}`; }
+    col(c) { return c == null || c < 0 ? '⚪ nessuno' : `${COLORS[c].i} ${COLORS[c].n}`; }
 
     stat(name, pid, n) {
       if (!this.statsOn) return;
@@ -215,7 +213,7 @@
       b = this.say('zap', `🤝 CROMOZAPD: tutti passano la propria mano al giocatore successivo (verso ${this.dirTxt(s.dir)}). Le carte-effetto restano a chi le ha.`, -1, { cromoPass: true });
       if (b) yield b;
       const pick = yield* this.ask(this._dec('colorpick', cp.who, {}));
-      const col = Number.isInteger(pick) && pick >= 0 && pick < 4 ? pick : s.dominant;
+      const col = Number.isInteger(pick) && pick >= 0 && pick < 4 ? pick : (s.dominant != null ? s.dominant : 0);
       s.dominant = col;
       const rl = FF.COLOR_RULES[FF.ruleOf(this.rules, col)];
       b = this.say('zap', `🌈 ${this.pn(cp.who)} sceglie il colore dominante: ${this.col(col)}${rl ? ` → la regola è ${rl.i} ${rl.n} (${rl.s}); si attiva nei turni in cui la carta centrale è ${this.col(col)}` : ''}.`, cp.who, { color: col });
@@ -245,7 +243,7 @@
     // ───────────────────────── partita ─────────────────────────
     *setupGen() {
       const s = this.s;
-      let b = this.say('sys', `🎮 Partita iniziata — seed ${this.cfg.seed}. Colore dominante di partenza: ${this.col(s.dominant)}. Escluso iniziale${this.rules.startExcluded < 0 ? ' (estratto a sorte)' : ''}: ${this.seatName(s.excluded)}, verso ${this.dirTxt(s.dir)}.`);
+      let b = this.say('sys', `🎮 Partita iniziata — seed ${this.cfg.seed}. Nessun colore dominante finché non esce la prima Zapd. Escluso iniziale${this.rules.startExcluded < 0 ? ' (estratto a sorte)' : ''}: ${this.seatName(s.excluded)}, verso ${this.dirTxt(s.dir)}.`);
       if (b) yield b;
       for (let pid = 0; pid < 3; pid++) yield* this.fillHand(pid);
       b = this.say('sys', '🃏 Ogni giocatore ha ricevuto 3 carte.');
@@ -325,6 +323,9 @@
         const rl = FF.COLOR_RULES[s.ruleLatent];
         if (s.rule) { this.stat('regola_attiva:' + s.rule, -1); b = this.say('rule', `📜 La carta centrale è ${this.col(s.center.c)}, come il colore dominante: si attiva la regola ${rl.i} ${rl.n} — ${rl.d}`, -1, { rule: s.rule }); }
         else { this.stat('regola_non_attiva', -1); b = this.say('rule', `📜 La regola del colore dominante ${this.col(s.dominant)} è ${rl.i} ${rl.n}, ma la carta centrale è ${this.col(s.center.c)}: in questo turno nessuna regola.`, -1, { rule: null, latent: s.ruleLatent }); }
+        if (b) yield b;
+      } else if (R.colorRules) {
+        b = this.say('rule', '📜 Non c\'è ancora nessun colore dominante (non è uscita nessuna Zapd): in questo turno nessuna regola.', -1, { rule: null, latent: null });
         if (b) yield b;
       }
       const XF = s.xmode === 'first'; s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
@@ -603,13 +604,11 @@
       if (b) yield b;
 
       // 9) l'escluso può pescare una carta-effetto
+      // (nessuna scelta: pescare non costa niente, quindi l'escluso pesca sempre se ha meno di 2 effetti e il mazzetto non è vuoto)
       if (xp.eff.length < R.effectHandMax && s.effDeck.length) {
-        const yes = yield* this.ask(this._dec('effdraw', ex));
-        if (yes) {
-          const e = s.effDeck.pop(); xp.eff.push(e); this.stat('effetto_pescato:' + e.k, ex);
-          b = this.say('effdraw', `🎴 ${this.pn(ex)} pesca una carta-effetto dal Mazzetto (ora ne ha ${xp.eff.length}).`, ex);
-          if (b) yield b;
-        }
+        const e = s.effDeck.pop(); xp.eff.push(e); this.stat('effetto_pescato:' + e.k, ex);
+        b = this.say('effdraw', `🎴 ${this.pn(ex)} (escluso) pesca una carta-effetto dal Mazzetto (ora ne ha ${xp.eff.length}).`, ex);
+        if (b) yield b;
       }
 
       // 10) fine turno: la carta centrale va negli scarti, Zapd rimandate, fine partita

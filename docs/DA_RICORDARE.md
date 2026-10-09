@@ -225,3 +225,7 @@ Il motore conta anche il numero di carte messe in ogni coppia (contribN); a pari
 ## 1 Zapd per colore + Cromozapd (5 Zapd in tutto, deciso da Niky dopo aver visto che con 13 ne usciva ~1 a turno)
 Frequenza (100 partite, media): 13 Zapd → 0,94 a turno, 50% delle partite con almeno 4 turni di fila con Zapd; 9 Zapd → 0,67, 29%; 5 Zapd → 0,41, 1%. La durata resta ~11–12 turni (la partita finisce quando esce l'ultima Zapd, sempre verso la fine del mazzo): con 5 Zapd la durata media è 11,1 turni ma più variabile (5%: ≤7 turni; minimo 3; massimo 13).
 Misure (hard×3, 300 partite): sforo 31,5%, punti coppia 121,7, posti A/B/C 36,1/32,1/31,8%, modificatori decisivi 1,22, egoista semplice 10,9%, difficile vs 2 medie 39,1% (34,7–43,7), media vs 2 facili 50,9% (46,3–55,5). L'IA stima i turni che restano dalle carte rimaste nel mazzo (non più dalle Zapd mancanti).
+
+## Correzioni (Niky): niente colore dominante prima della prima Zapd; l'escluso pesca sempre l'effetto
+- All'inizio `dominant = null`: nessuna regola finché non esce la prima Zapd colorata (o la Cromozapd, che fa scegliere il colore). Il tabellone mostra "Nessuno" e il messaggio spiega perché non c'è regola.
+- La pesca dell'effetto a fine turno non è più una domanda: l'escluso pesca sempre se ha meno di 2 effetti e il mazzetto non è vuoto (rifiutare non conveniva mai: gli effetti in mano sono privati e non costano nulla).

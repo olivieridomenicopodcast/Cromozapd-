@@ -90,7 +90,7 @@
     discuss: 'Poi: i due attivi giocano coperte la carta per la coppia, quella per sé ed eventualmente un effetto.',
     play: 'Poi: reveal simultaneo di tutte le carte.',
     reveal: 'Poi: effetti, range e punti.',
-    resolve: 'Poi: l\'escluso può pescare un effetto e si passa al turno successivo.',
+    resolve: 'Poi: l\'escluso pesca un effetto e si passa al turno successivo.',
     turn_end: 'Poi: nuovo turno.', setup: 'Poi: primo turno.', end: 'Partita finita.',
   };
 

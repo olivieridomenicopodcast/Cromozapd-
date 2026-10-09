@@ -19,7 +19,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 - **Colore dominante**: il colore dell'ultima Zapd; dice **quale regola** è in vigore (§7), che si attiva solo quando la carta centrale è di quel colore.
 
 ## 3. Preparazione
-1. Si mescola il mazzo e si pesca finché esce la **prima Zapd colorata**: il suo colore è il **colore dominante di partenza**. Poi si rimescola tutto (Zapd comprese).
+1. Si mescola il mazzo. **All'inizio non c'è nessun colore dominante**, quindi nessuna regola di colore: il primo colore dominante nasce quando esce la **prima Zapd colorata** (o la Cromozapd, che lo fa scegliere).
 2. Ognuno riceve 3 carte numeriche. L'**escluso iniziale è estratto a sorte** **[chiarito]** (nell'app dal seed, quindi riproducibile) e il verso di rotazione parte **orario** (A→B→C) **[interpretazione]**.
 3. Il Mazzetto Effetti e il Mazzetto Traditore sono mescolati; nessuno parte con carte-effetto.
 4. Se durante la distribuzione esce una Zapd si risolve come sempre (§6) e si ripesca **[interpretazione]**.
@@ -32,7 +32,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 4. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§9). Il tradimento tra attivi è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Con **Silenzio** attivo nessuno dichiara. Nell'hotseat si parla anche a voce.
 5. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto in fila** (3ª; con **Effetti vietati** attivo solo i modificatori).
 6. **Reveal.** Si scoprono le carte coperte degli attivi **e la X dell'escluso**.
-7. **Risoluzione**: effetti in fila (Reverse, Prossima carta, modificatori), range e punti (§5), eventuale carta Traditore, poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§9).
+7. **Risoluzione**: effetti in fila (Reverse, Prossima carta, modificatori), range e punti (§5), eventuale carta Traditore, poi, solo per l'escluso, la **pesca di una carta-effetto** (§9).
 
 Il turno in cui esce la **5ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si gioca per intero e si conta.
 
@@ -86,7 +86,7 @@ Il turno in cui esce la **5ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si g
 5. Sommi le tue carte per sé, togli le carte Traditore e moltiplichi per la quota.
 
 ## 9. Mazzetto Effetti (15 carte)
-Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
+Solo l'**escluso** pesca una carta-effetto, **sempre** (non ha motivo di rifiutare), a fine del suo turno da escluso, se ne ha meno di 2 in mano e il mazzetto non è vuoto. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
 
 | Carta | Quando | Cosa fa |
 |---|---|---|

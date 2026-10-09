@@ -74,7 +74,7 @@ test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd,
   const g = new FF.Game({ seed: 7 });
   FF.drive(g, g.setupGen(), () => null);
   for (const p of g.s.players) { assert.equal(p.hand.length, 3); assert.ok(p.hand.every((c) => !c.z)); }
-  assert.ok(g.s.dominant >= 0 && g.s.dominant < 4);
+  assert.ok(g.s.dominant == null || (g.s.dominant >= 0 && g.s.dominant < 4));   // nessun colore dominante finché non esce una Zapd
   assert.equal(g.s.zapPile.length, g.s.zapsDrawn);
   assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 85);
 });
@@ -314,15 +314,16 @@ test('Annulla non può bersagliare Sincero (non è in fila)', () => {
   assert.deepEqual(d.targets.map((t) => t.k), ['hi1']);
 });
 
-test('l\'escluso può pescare un effetto (max 2 in mano) e non può giocarne; gli attivi no', () => {
+test('l\'escluso pesca sempre un effetto (max 2 in mano) senza che gli venga chiesto, e non può giocarne; gli attivi no', () => {
   let g = mk({ effDeck: ['swap', 'next', 'reverse'], eff: [[], [], ['annulla']] });
-  let p = turn(g, { effdraw: true });
+  let p = turn(g);
+  assert.ok(!p.log.some((d) => d.type === 'effdraw'));
   assert.equal(g.s.players[2].eff.length, 2);
   assert.equal(g.s.players[0].eff.length, 0);
   // già a 2: non gli viene nemmeno chiesto
   g = mk({ effDeck: ['swap', 'next'], eff: [[], [], ['annulla', 'swap']] });
-  p = turn(g, { effdraw: true });
-  assert.equal(p.log.filter((d) => d.type === 'effdraw').length, 0);
+  p = turn(g);
+  assert.equal(g.s.players[2].eff.length, 2);
   // l'escluso non riceve la domanda "play" (ha solo xplay)
   assert.ok(!p.log.some((d) => d.type === 'play' && d.player === 2));
 });
@@ -528,4 +529,14 @@ test('foglio punti stampabile: esiste, spiega il podio e il pari merito, ha un e
   const g = mk({ rules: { scoring: 'podio' } }), s = g.s;
   s.contrib = [[14, 15, 12], [12, 13, 8], [9, 10, 17]]; s.pairPts = [35, 38, 37]; s.contribN = [[4, 4, 3], [3, 3, 2], [3, 3, 4]];
   assert.deepEqual([0, 1, 2].map((p) => g.podio(p)), [8, 5, 5]);
+});
+
+test('prima della prima Zapd non c\'è colore dominante e nessuna regola; la prima Zapd colorata (o la scelta della Cromozapd) lo fissa', () => {
+  const g = new FF.Game({ seed: 'nodom', log: true, rules: {} });
+  assert.equal(g.s.dominant, null);
+  assert.equal(FF.ruleOf(g.rules, null), null);
+  const bots = [FF.RandomBot('a'), FF.RandomBot('b'), FF.RandomBot('c')];
+  let sawNone = false, sawSome = false;
+  FF.drive(g, g.run(), (game, d) => { if (d.type === 'xdecl' || d.type === 'play') { if (game.s.dominant == null) { sawNone = true; assert.equal(game.s.rule, null); } else sawSome = true; } return bots[d.player].decide(game, d); });
+  assert.ok(sawSome, 'prima o poi esce una Zapd e fissa il colore');
 });
