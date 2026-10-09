@@ -254,7 +254,7 @@
     *turnGen() {
       const s = this.s, R = this.rules;
       let b;
-      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null;
+      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null; s.xPick = null;
       s.phase = 'draw';
       b = this.say('turn', `━━ Turno ${s.turn} · Zapd uscite ${s.zapsDrawn}/${this.totalZaps} ━━`);
       if (b) yield b;
@@ -300,6 +300,11 @@
         b = this.say('declare', `🚪 ${this.pn(ex)} (escluso) dichiara: «io gioco un ${s.xDecl}» — il range sarà da ${s.center.v} a ${s.center.v} + la sua carta, e si saprà solo al reveal. (Può mentire.)`, ex, { xdecl: s.xDecl });
         if (b) yield b;
       }
+      if (FF.xHidden(R)) {   // l'escluso mette COPERTA la sua carta subito (potrà essere cambiata solo dalle bugie: è già decisa)
+        const pk = yield* this.ask(this._dec('xplay', ex, { decls: [], early: true }));
+        const xh2 = s.players[ex].hand; s.xPick = xh2.find((c) => c.id === pk) || xh2[0];
+      }
+      if (FF.xFirst(R) || FF.xHidden(R)) yield* this.cambioWindow();   // effetti istantanei dopo la carta dell'escluso
 
       // 2) Sincero (istantanea, prima della discussione)
       s.phase = 'discuss';
@@ -335,10 +340,28 @@
       const plays = {};
       for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
       const xp = s.players[ex];
-      let xcard = s.xFirstCard;
+      let xcard = s.xFirstCard || s.xPick;
       if (!xcard) { xcard = yield* this.ask(this._dec('xplay', ex, { decls: s.decls.slice() })); xcard = xp.hand.find((c) => c.id === xcard) || xp.hand[0]; }
 
       yield* this.afterPlay(plays, xcard);
+    }
+
+    // VARIANTE: carta "Cambio centrale" — istantanea, dopo che l'escluso ha giocato: un attivo mette una carta della sua mano al posto della centrale e prende in mano la vecchia
+    *cambioWindow() {
+      const s = this.s; let b;
+      for (const pid of this.actives()) {
+        const p = s.players[pid]; const card = p.eff.find((e) => e.k === 'cambio');
+        if (!card) continue;
+        const raw = yield* this.ask(this._dec('cambio', pid, {}));
+        const c = raw != null ? p.hand.find((h) => h.id === raw) : null;
+        if (!c) continue;
+        p.eff.splice(p.eff.indexOf(card), 1); s.effDiscard.push(card);
+        const old = s.center; p.hand.splice(p.hand.indexOf(c), 1, old); s.center = c;
+        this.stat('effetto_giocato:cambio', pid); this.stat('cambio_centrale', pid);
+        const rg = s.xFirstCard ? FF.rangeBase(this.rules, c.v, s.xFirstCard.v) : null;
+        b = this.say('effect', `🔁 ${this.pn(pid)} gioca CAMBIO CENTRALE: mette il ${FF.cardName(c)} al posto del ${FF.cardName(old)} (che prende in mano). Nuova centrale: ${c.v}${rg ? ` → range ${rg[0]}–${rg[1]}` : ''}.`, pid, { k: 'cambio', center: c });
+        if (b) yield b;
+      }
     }
 
     // reveal, finestra di Annulla e risoluzione: separati per poterli rilanciare su un clone (modello in avanti delle AI)
@@ -610,6 +633,7 @@
           }
           case 'xplay': return pick(d.hand).id;
           case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
+          case 'cambio': return rng() < 0.3 ? pick(d.hand).id : null;
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;
           case 'correct': return rng() < 0.5 ? (game.rules.modFlex ? { id: d.opts[0].id, delta: d.opts[0].delta } : d.opts[0].id) : null;

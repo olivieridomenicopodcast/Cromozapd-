@@ -164,3 +164,14 @@ Mazzetto da 12 carte (0,0,1,1,1,1,2,2,2,2,3,3), penalità sempre quando il numer
 | coppia = la più bassa, sé = la più alta (egoista) | 14,5% | 67,0 | 25% | 16,65 |
 | equilibrato (IA difficile) | ~33% | ~58 | ~33% | ~18 |
 Entrambi gli estremi perdono molto: il gioco punisce sia chi spreme la coppia sia chi spreme sé stesso.
+
+## Carta "Cambio centrale" (simulazione; `effectCopies.cambio`, 0 di default)
+Istantanea, dopo che l'escluso ha giocato la sua carta: un attivo mette una carta della sua mano al posto della centrale e PRENDE IN MANO la vecchia centrale (la mano resta di 3). Il range diventa [V nuova, V nuova + X].
+Misure (hard×3, mazzo effetti senza Sincero/Scambio forzato; 3 copie di Cambio contro 0):
+| Versione | Copie | Sforo | Sotto / sopra | Punti coppia | Cambi a partita | Sforo nei turni con cambio vs senza |
+|---|---|---|---|---|---|---|
+| X scoperta (200 partite) | 0 | 26,4% | 2,03 / 1,38 | 142,4 | – | – |
+| X scoperta | 3 | 28,5% | 1,57 / 2,09 | 139,1 | 1,79 | 36% vs 28% |
+| X coperta + Traditore (160 partite) | 0 | 28,4% | 1,84 / 1,87 | 139,2 | – | – |
+| X coperta + Traditore | 3 | 32,4% | 1,60 / 2,60 | 132,6 | 1,83 | 39% vs 31% |
+Lettura: l'IA usa il Cambio soprattutto per prendersi una centrale alta e mettere una carta bassa (la finestra scende, si sfora più spesso verso l'alto): peggiora la coppia e fa un favore a chi lo gioca. Non aiuta a "centrare" il range.

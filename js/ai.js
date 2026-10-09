@@ -160,6 +160,7 @@
       case 'annulla': return null;
       case 'effdraw': return false;
       case 'sincero': return false;
+      case 'cambio': return null;
       default: return null;
     }
   };
@@ -314,6 +315,42 @@
       return hand[bi].id;
     }
 
+    // variante: carta "Cambio centrale"
+    function decideCambio(game, d) {
+      const pid = d.player, s = game.s, hand = d.hand, ex = s.excluded;
+      if (P.samples <= 0 || rng() < P.random) return rng() < 0.3 ? hand[rnd(hand.length)].id : null;
+      const act = [0, 1, 2].filter((i) => i !== ex);
+      const tot = new Array(hand.length + 1).fill(0); let n = 0;
+      for (let k = 0; k < P.samples; k++) {
+        const g2 = AI.determinize(game, pid, rng);
+        let xcard = s.xFirstCard;
+        if (!xcard) {
+          const eh = g2.s.players[ex].hand;
+          if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
+          if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
+        }
+        if (!xcard) continue;
+        n++;
+        for (let i = 0; i <= hand.length; i++) {
+          const g3 = g2.clone();
+          if (i > 0) {
+            const me = g3.s.players[pid], idx = me.hand.findIndex((c) => c.id === hand[i - 1].id);
+            if (idx < 0) continue;
+            const c = me.hand[idx]; me.hand.splice(idx, 1, g3.s.center); g3.s.center = c;
+            const ei = me.eff.findIndex((e) => e.k === 'cambio'); if (ei >= 0) me.eff.splice(ei, 1);
+          }
+          const base = {};
+          for (const q of act) base[q] = heurPlay(g3, q, null, P.trust, rng, 0.05);
+          if (!base[act[0]] || !base[act[1]]) continue;
+          tot[i] += simulate(g3, base, xcard, pid, P);
+        }
+      }
+      if (!n) return null;
+      let bi = 0, bv = -Infinity;
+      tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
+      return bi === 0 ? null : hand[bi - 1].id;
+    }
+
     function decideAnnulla(game, d) {
       const pid = d.player;
       if (rng() < P.annullaP) return d.targets[rnd(d.targets.length)].idx;
@@ -368,6 +405,7 @@
             return { couple: plan.couple, self: plan.self, eff: plan.eff };
           }
           case 'xplay': return decideXplay(game, d);
+          case 'cambio': return decideCambio(game, d);
           case 'xdecl': return planXHidden(game, d).decl;
           case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?
             if (level === 'easy' && rng() < 0.5) return null;
