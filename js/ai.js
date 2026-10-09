@@ -17,9 +17,9 @@
 
   // parametri dei livelli (si possono sovrascrivere per fare esperimenti: AI.create(level, seed, {samples: 8}))
   AI.PARAMS = {
-    easy: { samples: 0, random: 0.75, noise: 0, trust: 0.6, honest: false, lie: 0.25, holdW: 0, handW: 0.3, exclW: 0, oppW: 0.3, betrayGain: 99, effBonus: 0.05, sinceroP: 0.1, annullaP: 0.25, annullaGain: 0 },
-    medium: { samples: 2, random: 0.15, noise: 1.2, trust: 0.75, honest: true, lie: 0, holdW: 0.2, handW: 0.5, exclW: 0, oppW: 0.4, betrayGain: 99, effBonus: 0.12, sinceroP: 0.3, annullaP: 0, annullaGain: 0.6 },
-    hard: { samples: 14, random: 0, noise: 0.05, trust: 0.85, honest: false, lie: 0, holdW: 0.25, handW: 0.5, exclW: 2.0, oppW: 0.5, betrayGain: 0.6, effBonus: 0.12, sinceroP: 0.25, annullaP: 0, annullaGain: 0.3 },
+    easy: { xLie: false, samples: 0, random: 0.75, noise: 0, trust: 0.6, honest: false, lie: 0.25, holdW: 0, handW: 0.3, exclW: 0, oppW: 0.3, betrayGain: 99, effBonus: 0.05, sinceroP: 0.1, annullaP: 0.25, annullaGain: 0 },
+    medium: { xLie: false, samples: 2, random: 0.15, noise: 1.2, trust: 0.75, honest: true, lie: 0, holdW: 0.2, handW: 0.5, exclW: 0, oppW: 0.4, betrayGain: 99, effBonus: 0.12, sinceroP: 0.3, annullaP: 0, annullaGain: 0.6 },
+    hard: { xLie: true, samples: 14, random: 0, noise: 0.05, trust: 0.85, honest: false, lie: 0, holdW: 0.25, handW: 0.5, exclW: 2.0, oppW: 0.5, betrayGain: 0.6, effBonus: 0.12, sinceroP: 0.25, annullaP: 0, annullaGain: 0.3 },
   };
 
   // ───────────────────────── informazione: cosa può sapere un giocatore ─────────────────────────
@@ -54,6 +54,7 @@
       s.players[q].eff = eunk.splice(0, game.s.players[q].eff.length);
     }
     s.effDeck = eunk;
+    if (s.traitorDeck && s.traitorDeck.length) shuffle(s.traitorDeck);   // si sa cosa resta nel mazzetto Traditore, non l'ordine
     s.rng = Math.floor(rng() * 2147483647) | 0; // i dadi del motore veri non si conoscono
     return g;
   };
@@ -122,7 +123,7 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : undefined, c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : undefined), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
@@ -199,7 +200,9 @@
         // gli altri giocano secondo il modello
         const base = {};
         base[partner] = heurPlay(g2, partner, mydecl ? mydecl.num : null, P.trust, rng, 0.05);
-        const xid = s.xFirstCard ? s.xFirstCard.id : heurX(g2, ex, rng, 0.1);
+        let xid = s.xFirstCard ? s.xFirstCard.id : null;
+        if (xid == null && s.xDecl != null && rng() < P.trust) { const hc = g2.s.players[ex].hand.find((c) => c.v === s.xDecl); if (hc) xid = hc.id; }   // l'escluso ha detto la verità (o così credo)
+        if (xid == null) xid = heurX(g2, ex, rng, 0.1);
         const xcard = s.xFirstCard || g2.s.players[ex].hand.find((c) => c.id === xid);
         if (!base[partner] || !xcard) continue;
         // se il compagno ha dichiarato un numero, con probabilità `trust` gioca davvero quella carta
@@ -227,10 +230,46 @@
       return { couple: best.c.c.id, self: best.c.sf.id, eff: best.c.e ? best.c.e.id : null, u: best.v };
     }
 
+    // variante 'xHidden': l'escluso sceglie CARTA da giocare e NUMERO da dichiarare (può mentire, ma se mente e la coppia sfora paga la carta Traditore)
+    function planXHidden(game, d) {
+      const pid = d.player, s = game.s, hand = d.hand;
+      if (api.xPlan && api.xPlan.key === s.turn + ':' + s.zapsDrawn + ':' + hand.map((c) => c.id).join(',')) return api.xPlan;
+      let plan;
+      if (P.samples <= 0 || rng() < P.random) { const id = heurX(game, pid, rng, 0); const c = hand.find((x) => x.id === id) || hand[0]; plan = { card: c, decl: c.v }; }
+      else {
+        const act = [0, 1, 2].filter((i) => i !== pid);
+        const lieSet = P.xLie ? [...new Set([...hand.map((c) => c.v), Math.max(...hand.map((c) => c.v)), game.rules.maxValue])] : [];
+        const cands = [];
+        for (const c of hand) { cands.push({ c, n: c.v }); for (const n of lieSet) if (n !== c.v) cands.push({ c, n }); }
+        const tot = new Array(cands.length).fill(0); let nn = 0;
+        for (let k = 0; k < P.samples; k++) {
+          const g2 = AI.determinize(game, pid, rng), baseBy = {};
+          for (const n of new Set(cands.map((x) => x.n))) {
+            const g3 = g2.clone(); g3.s.xDecl = n; const b = {};
+            for (const q of act) b[q] = heurPlay(g3, q, null, P.trust, rng, 0.05);
+            baseBy[n] = b;
+          }
+          nn++;
+          cands.forEach((cd, i) => {
+            const b = baseBy[cd.n]; if (!b[act[0]] || !b[act[1]]) return;
+            const g4 = g2.clone(); g4.s.xDecl = cd.n;
+            tot[i] += simulate(g4, b, cd.c, pid, P);
+          });
+        }
+        let bi = 0, bv = -Infinity;
+        cands.forEach((cd, i) => { const v = tot[i] / Math.max(1, nn) + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
+        plan = { card: cands[bi].c, decl: cands[bi].n };
+      }
+      plan.key = s.turn + ':' + s.zapsDrawn + ':' + hand.map((c) => c.id).join(',');
+      api.xPlan = plan;
+      return plan;
+    }
+
     function decideXplay(game, d) {
       const pid = d.player, s = game.s, ex = pid;
       const hand = d.hand;
       if (!hand.length) return null;
+      if (game.rules.rangeMode === 'xsum' && game.rules.xHidden) return planXHidden(game, d).card.id;
       if (P.samples <= 0 || rng() < P.random) return rng() < P.random * 0.5 ? hand[rnd(hand.length)].id : heurX(game, pid, rng, 0);
       const act = [0, 1, 2].filter((i) => i !== ex);
       if (d.first) {   // variante 'xcard': l'escluso gioca per primo e la sua carta decide il range; gli attivi (non hanno ancora parlato) rispondono con l'euristica
@@ -329,6 +368,7 @@
             return { couple: plan.couple, self: plan.self, eff: plan.eff };
           }
           case 'xplay': return decideXplay(game, d);
+          case 'xdecl': return planXHidden(game, d).decl;
           case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?
             if (level === 'easy' && rng() < 0.5) return null;
             const g0 = game.clone(), g1 = game.clone(), s1 = g1.s, ex = d.excluded, lp = s1.lastPlay;

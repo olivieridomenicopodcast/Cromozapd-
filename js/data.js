@@ -47,6 +47,9 @@
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
     rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base
     pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
+    xHidden: false,         // VARIANTE (solo simulazione, con rangeMode 'xsum'): l'escluso DICHIARA un numero esatto, gioca coperto, X si scopre al reveal
+    traitor: false,         // VARIANTE (con xHidden): se l'escluso ha mentito e la coppia sfora pesca una carta Traditore: ne toglie il valore ai suoi punti personali
+    traitorCards: [1, 2, 2, 3, 3, 4, 5, 6],   // mazzetto Traditore (si pesca senza reinserimento)
     modMode: 'widen',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
     modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)
     modFlex: false,         // VARIANTE (solo simulazione, con modTiming 'after'): il modificatore si usa in entrambi i versi (±n a scelta)
@@ -79,7 +82,8 @@
     const [a, b] = FF.rangeBase(rules, v, x), nn = m ? m.n * (rules.modScale || 1) : 0, md = rules.modMode || 'range';
     return [a - (md === 'widen' ? nn : md === 'range' && m && m.dir === 'lo' ? nn : 0), b + (md === 'widen' ? nn : md === 'range' && m && m.dir === 'hi' ? nn : 0)];
   };
-  FF.xFirst = (rules) => rules.rangeMode === 'xcard' || rules.rangeMode === 'xsum';
+  FF.xFirst = (rules) => rules.rangeMode === 'xcard' || (rules.rangeMode === 'xsum' && !rules.xHidden);
+  FF.xHidden = (rules) => rules.rangeMode === 'xsum' && !!rules.xHidden;
   FF.rangeBase = (rules, v, x) => (rules.rangeMode === 'xsum' ? [v, v + (x || 0)] : rules.rangeMode === 'xcard' ? [Math.max(1, v - (x || 0)), v + (x || 0)] : rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : rules.rangeMode === 'double' ? [v, 2 * v] : [v, v + rules.base]);
   FF.cardName = (c) => (c.z ? `⚡Zapd ${FF.COLORS[c.c].i}` : `${c.v}${FF.COLORS[c.c].i}`);
   FF.effName = (e) => `${FF.EFFECTS[e.k].i} ${FF.EFFECTS[e.k].n}`;

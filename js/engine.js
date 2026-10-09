@@ -66,7 +66,8 @@
       const t = this.s; // le carte sono oggetti immutabili: si condividono, si copiano solo gli array
       g.s = Object.assign({}, t, {
         deck: t.deck.slice(), discard: t.discard.slice(), zapPile: t.zapPile.slice(), effDeck: t.effDeck.slice(), effDiscard: t.effDiscard.slice(),
-        players: t.players.map((p) => Object.assign({}, p, { hand: p.hand.slice(), eff: p.eff.slice() })),
+        traitorDeck: (t.traitorDeck || []).slice(),
+        players: t.players.map((p) => Object.assign({}, p, { hand: p.hand.slice(), eff: p.eff.slice(), traitor: (p.traitor || []).slice() })),
         pending: t.pending.slice(), pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()),
         decls: t.decls.slice(), lastPlay: t.lastPlay ? Object.assign({}, t.lastPlay, { fila: t.lastPlay.fila.map((f) => Object.assign({}, f)) }) : null,
       });
@@ -89,7 +90,7 @@
       const pl = cfg.players || [];
       s.players = [0, 1, 2].map((i) => {
         const p = pl[i] || {};
-        return { id: i, name: p.name || FF.SEATS[i], kind: p.kind || 'ai', level: p.level || null, hand: [], eff: [], personal: 0 };
+        return { id: i, name: p.name || FF.SEATS[i], kind: p.kind || 'ai', level: p.level || null, hand: [], eff: [], personal: 0, traitor: [] };
       });
       s.excluded = this.rules.startExcluded >= 0 ? this.rules.startExcluded % 3 : this.randInt(3); // a sorte (riproducibile dal seed) se < 0
       s.startExcluded = s.excluded; s.dir = this.rules.startDir;
@@ -97,6 +98,7 @@
       s.turn = 0; s.phase = 'setup'; s.over = false;
       s.center = null; s.nextCenter = null;
       s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null;
+      s.xDecl = null; s.traitorDeck = this.rules.traitor ? this._shuffle(this.rules.traitorCards.slice()) : [];
       s.pairPts = [0, 0, 0];          // indicizzato per ESCLUSO: coppia = gli altri due
       s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso]
       return s;
@@ -252,7 +254,7 @@
     *turnGen() {
       const s = this.s, R = this.rules;
       let b;
-      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null;
+      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null;
       s.phase = 'draw';
       b = this.say('turn', `━━ Turno ${s.turn} · Zapd uscite ${s.zapsDrawn}/${this.totalZaps} ━━`);
       if (b) yield b;
@@ -288,9 +290,16 @@
       } else
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
-      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. ${FF.xFirst(R) ? 'L\'escluso ha già giocato scoperta la carta che decide il range' : 'L\'escluso gioca 1 carta per la coppia' + (R.xInSum ? ': la sua carta conta nella somma del range' : '')}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
+      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. ${FF.xHidden(R) ? 'L\'escluso dichiara una carta e poi la gioca coperta: decide il range, che si scopre al reveal' : FF.xFirst(R) ? 'L\'escluso ha già giocato scoperta la carta che decide il range' : 'L\'escluso gioca 1 carta per la coppia' + (R.xInSum ? ': la sua carta conta nella somma del range' : '')}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
       if (b) yield b;
       this.stat('turni', -1);
+      if (FF.xHidden(R)) {   // VARIANTE: l'escluso dichiara il numero esatto che giocherà (poi gioca coperto; potrà mentire)
+        const raw = yield* this.ask(this._dec('xdecl', ex, {}));
+        const xh = s.players[ex].hand;
+        s.xDecl = Number.isInteger(raw) && raw >= 1 && raw <= R.maxValue ? raw : (xh[0] ? xh[0].v : 1);
+        b = this.say('declare', `🚪 ${this.pn(ex)} (escluso) dichiara: «io gioco un ${s.xDecl}» — il range sarà da ${s.center.v} a ${s.center.v} + la sua carta, e si saprà solo al reveal. (Può mentire.)`, ex, { xdecl: s.xDecl });
+        if (b) yield b;
+      }
 
       // 2) Sincero (istantanea, prima della discussione)
       s.phase = 'discuss';
@@ -475,6 +484,20 @@
         }
       }
       const scored = inRange || immune;
+      if (FF.xHidden(R)) {   // dichiarato vs giocato; se mente e la coppia sfora → carta Traditore
+        const lied = xcard.v !== s.xDecl;
+        this.stat(lied ? 'escluso_mente' : 'escluso_onesto', ex);
+        if (lied && scored) this.stat('bugia_senza_conseguenze', ex);
+        if (lied && !scored) {
+          this.stat('bugia_scoperta', ex);
+          if (R.traitor && s.traitorDeck.length) {
+            const tv = s.traitorDeck.splice(this.randInt(s.traitorDeck.length), 1)[0];
+            xp.traitor.push(tv); xp.personal -= tv; this.stat('carta_traditore', ex, tv);
+            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}, e la coppia ha sforato: pesca una carta TRADITORE da ${tv} (−${tv} ai punti personali).`, ex, { traitor: tv });
+            if (b) yield b;
+          }
+        }
+      }
       const pts = scored ? sumPair + xcard.v : 0;
       this.stat(inRange ? 'coppia_nel_range' : (immune ? 'coppia_salvata_dal_colore' : 'coppia_sfora'), -1);
       if (!inRange) this.stat(R.rangeOutside ? 'sfora_dentro' : (sum < min ? 'sfora_sotto' : 'sfora_sopra'), -1);
@@ -524,7 +547,7 @@
       const s = this.s, p = s.players[pid];
       return Object.assign({
         type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null, s.xFirstCard ? s.xFirstCard.v : undefined),
-        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(), xcard: s.xFirstCard || null,
+        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(), xcard: s.xFirstCard || null, xdecl: s.xDecl == null ? null : s.xDecl,
       }, extra || {});
     }
 
@@ -587,6 +610,7 @@
             return { couple: a.id, self: b.id, eff: fila.length && rng() < 0.5 ? pick(fila).id : null };
           }
           case 'xplay': return pick(d.hand).id;
+          case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;
           case 'correct': return rng() < 0.5 ? (game.rules.modFlex ? { id: d.opts[0].id, delta: d.opts[0].delta } : d.opts[0].id) : null;
