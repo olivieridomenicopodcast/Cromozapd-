@@ -127,13 +127,13 @@ test('regole predefinite: range da V a V+X, colore = regola, Cromozapd, carte Tr
   const D = FF.DEFAULT_RULES;
   assert.equal(D.rangeMode, 'xsum'); assert.equal(D.xInSum, false); assert.equal(D.colorRules, true); assert.equal(D.immunity, false); assert.equal(D.cromozapd, true);
   assert.equal(D.traitor, true); assert.equal(D.traitorCards.length, 12); assert.equal(D.traitorOverflow, 3); assert.equal(D.barattoSee, true);
-  assert.deepEqual(D.colorRuleMap, ['silenzio', 'giuramento', 'luce', 'effetti']);
+  assert.deepEqual(D.colorRuleMap, ['silenzio', 'carnevale', 'luce', 'effetti']);
   assert.equal(D.modMode, 'widen'); assert.equal(D.modScale, 2);
   const g = new FF.Game({ seed: 1, log: true }), R = g.rules;
   assert.deepEqual(FF.rangeBase(R, 6, 7), [6, 13]); assert.deepEqual(FF.rangeBase(R, 3, 1), [3, 4]);
   assert.deepEqual(FF.rangeFor(R, 6, { dir: 'lo', n: 2 }, 7), [2, 17]); assert.deepEqual(FF.rangeFor(R, 6, { dir: 'hi', n: 1 }, 7), [4, 15]);
   assert.equal(g.totalZaps, 13);
-  assert.equal(FF.xmodeFor(R, 'luce'), 'first'); assert.equal(FF.xmodeFor(R, 'silenzio'), 'hidden'); assert.equal(FF.xmodeFor(R, 'giuramento'), 'hidden');
+  assert.equal(FF.xmodeFor(R, 'luce'), 'first'); assert.equal(FF.xmodeFor(R, 'silenzio'), 'hidden'); assert.equal(FF.xmodeFor(R, 'carnevale'), 'hidden');
   // l'escluso gioca PER PRIMO, scoperto (prima di ogni dichiarazione): centro 6, X=7 → range 6–13
   const m = (xi) => mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
   let t = m(); const p = turn(t, { x: 0 });
@@ -481,4 +481,19 @@ test('regole di colore: si attivano solo se la carta centrale ha il colore domin
   assert.equal(r.g.s.rule, 'effetti'); assert.ok(r.g.s.noEff);
   r = run(0, [5, 1], { colorTrigger: false });
   assert.equal(r.g.s.rule, 'silenzio');
+});
+
+test('Carnevale (Blu): se l\'escluso gioca un numero diverso dal dichiarato non pesca carte Traditore; nel turno normale sì', () => {
+  const lie = (dom, ctr) => {
+    const g = mk({ rules: { rangeMode: 'xsum', colorRules: true, colorTrigger: true, immunity: false, xHidden: true, traitor: true, traitorCards: [3] }, center: ctr, dom });
+    g.s.traitorDeck = [3];
+    // l'escluso dichiara 9 ma gioca la sua prima carta (4)
+    const pol0 = pol({ x: 0 }); const base = pol0;
+    FF.drive(g, g.turnGen(), (game, d) => (d.type === 'xdecl' ? 9 : base(game, d)));
+    return g;
+  };
+  let g = lie(1, [5, 1]);   // Blu e centrale blu → Carnevale attivo
+  assert.equal(g.s.rule, 'carnevale'); assert.equal(g.s.players[2].traitor.length, 0); assert.equal(g.stats.p[2].bugia_gratis_carnevale, 1);
+  g = lie(1, [5, 0]);       // centrale di un altro colore → turno normale: pesca la carta Traditore
+  assert.equal(g.s.rule, null); assert.equal(g.s.players[2].traitor.length, 1); assert.equal(g.s.players[2].traitor[0], 3);
 });

@@ -44,7 +44,7 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 - **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**. Nessun vantaggio dallo sforo per l'escluso.
 - **Niente immunità di colore** **[chiarito]**: il colore delle carte non salva dallo sforo.
 - La **carta per sé** vale sempre il suo valore, anche se la coppia sfora.
-- **L'escluso dichiara e può tradire** **[chiarito]**: prima di mettere la X coperta dichiara un **numero esatto**. Al reveal, se la carta giocata ha un **valore diverso** da quello dichiarato (sforo o no), **pesca una carta Traditore** (2 con **Giuramento** attivo): il suo valore (0–3) si **toglie ai punti personali grezzi**, e la carta resta scoperta davanti a lui per tutta la partita. Se la coppia sfora per colpa degli attivi e l'escluso era stato onesto, non succede nulla. Finito il mazzetto Traditore (12 carte), **ogni nuovo tradimento costa 3** punti personali.
+- **L'escluso dichiara e può tradire** **[chiarito]**: prima di mettere la X coperta dichiara un **numero esatto**. Al reveal, se la carta giocata ha un **valore diverso** da quello dichiarato (sforo o no), **pesca una carta Traditore** (nessuna con **Carnevale** attivo): il suo valore (0–3) si **toglie ai punti personali grezzi**, e la carta resta scoperta davanti a lui per tutta la partita. Se la coppia sfora per colpa degli attivi e l'escluso era stato onesto, non succede nulla. Finito il mazzetto Traditore (12 carte), **ogni nuovo tradimento costa 3** punti personali.
 
 ## 6. Escluso, verso, Zapd e Cromozapd
 - **Rotazione a ogni turno [chiarito]**: il gettone escluso **avanza di un posto a ogni nuovo turno** (dal 2° turno; nel 1° l'escluso è quello estratto a sorte), nel verso di rotazione. **Poi**, se durante la pesca escono Zapd, avanza **ancora** di un posto per ogni Zapd. Quindi nello stesso turno può avanzare di 1, 2, 3… posti.
@@ -63,7 +63,7 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 | Colore | Regola | Cosa cambia (quando è attiva) |
 |---|---|---|
 | Rosso | **Silenzio** | L'escluso non dichiara e gli attivi non fanno dichiarazioni. La X resta coperta fino al reveal: nessuno può tradire, nessuno può fidarsi. |
-| Blu | **Giuramento** | Come il turno normale, ma chi tradisce pesca **2 carte Traditore** invece di 1. |
+| Blu | **Carnevale** | Come il turno normale, ma **mentire è gratis**: l'escluso può giocare un numero diverso da quello dichiarato senza pescare carte Traditore. La dichiarazione non vale niente. |
 | Verde | **Luce** | L'escluso gioca per primo la sua X, **scoperta**: il range è noto prima della discussione e nessuno può mentire. |
 | Giallo | **Effetti vietati** | In questo turno nessuno gioca **Reverse, Prossima carta e Baratto**; i **modificatori ±n si possono giocare**. L'escluso pesca comunque a fine turno. |
 
@@ -144,7 +144,7 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 | Carta dell'escluso | Ambigua con lo sforo | **Decide il range** (X): dichiarata e giocata coperta, scoperta al reveal; conta per i punti della coppia e per il suo Fattore; 0 se la coppia sfora (voluto da Niky) |
 | Range | V … V + Base | **V … V + X** (X = carta dell'escluso) |
 | Tradimento | Libero e senza effetti | L'escluso che gioca un numero diverso da quello dichiarato pesca una **carta Traditore** (toglie 0–3 punti personali) |
-| Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Giuramento, Luce, Effetti vietati), attiva solo se la carta centrale è di quel colore; niente immunità |
+| Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Carnevale, Luce, Effetti vietati), attiva solo se la carta centrale è di quel colore; niente immunità |
 | Zapd | 12 | **13**: la Cromozapd fa passare le mani e fa scegliere il colore |
 | Modificatori −n / +n | Abbassano il minimo / alzano il massimo | **±n allargano il range di 2n per lato** |
 | Mazzetto Effetti | 20 carte (con Sincero, Scambio forzato, Annulla) | **15 carte** (Reverse, Prossima carta, ±n, Baratto) |

@@ -347,13 +347,13 @@
 
     // l'escluso dichiara il numero che giocherà (potrà mentire, a suo rischio)
     xdeclPanel(d) {
-      const R = this.game.rules, gs = this.game.s, max = R.maxValue, nT = gs.oath ? 2 : 1;
+      const R = this.game.rules, gs = this.game.s, max = R.maxValue, nT = 1;
       return new Promise((resolve) => {
         let num = null;
         const render = () => {
           this.setAction(`<h3>🚪 ${esc(this.pname(d.player))}: cosa dichiari agli attivi?</h3>${this.ctxLine(d)}
             <p>Sei l'escluso: la carta che metterai <b>coperta</b> decide il range (da ${d.center.v} a ${d.center.v} + la tua carta). <b>Dichiara il numero che giocherai</b>: i due attivi si fideranno, o no.</p>
-            ${gs.oath ? '<div class="infobox">📜 <b>Giuramento</b>: se poi giochi un numero diverso pescherai <b>2 carte Traditore</b> invece di 1.</div>' : ''}
+            ${gs.carnival ? '<div class="infobox">🎭 <b>Carnevale</b>: in questo turno <b>mentire è gratis</b>: puoi giocare un numero diverso da quello dichiarato senza pescare carte Traditore. Gli attivi lo sanno.</div>' : ''}
             ${this.handStrip(d)}
             <div class="lbl">Il numero che dichiari</div>
             <div class="numrow">${Array.from({ length: max }, (_, i) => i + 1).map((n) => `<button class="${num === n ? 'sel' : ''} ${d.hand.some((c) => c.v === n) ? 'inhand' : ''}" data-num="${n}">${n}</button>`).join('')}</div>
@@ -477,9 +477,9 @@
           if (excl && d.early) {
             const cx = sel.couple != null ? cardById(sel.couple) : null;
             const rows = d.hand.map((c) => `<span class="${cx && cx.id === c.id ? 'good' : ''}">${c.v} → ${d.center.v}–${d.center.v + c.v}</span>`).join(' · ');
-            const nT = gs.oath ? 2 : 1, left = gs.traitorDeck.length;
+            const nT = 1, left = gs.traitorDeck.length;
             const lie = cx && d.xdecl != null && cx.v !== d.xdecl;
-            return `<div class="pv"><div>Metti <b>coperta</b> la carta che <b>decide il range</b>: da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Si scopre al reveal. ${d.xdecl != null ? `Hai dichiarato <b>${d.xdecl}</b>: gli attivi giocheranno fidandosi (o no).` : '🤫 Silenzio: non hai dichiarato nulla.'} Carta alta = range largo (aiuti), carta bassa = range stretto (ostacoli). Conta anche per i punti della coppia e il tuo Fattore se la coppia non sfora.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}${lie ? `<div class="bad">🐍 Hai dichiarato ${d.xdecl} ma giochi ${cx.v}: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> (da 0 a 3 punti personali persi ciascuna; ${left > 0 ? `nel mazzetto ne restano ${left}` : 'mazzetto finito: ognuna vale ' + R.traitorOverflow}).</div>` : cx && d.xdecl != null ? '<div class="good">✔ Coerente con ciò che hai dichiarato: nessuna carta Traditore.</div>' : ''}</div>`;
+            return `<div class="pv"><div>Metti <b>coperta</b> la carta che <b>decide il range</b>: da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Si scopre al reveal. ${d.xdecl != null ? `Hai dichiarato <b>${d.xdecl}</b>: gli attivi giocheranno fidandosi (o no).` : '🤫 Silenzio: non hai dichiarato nulla.'} Carta alta = range largo (aiuti), carta bassa = range stretto (ostacoli). Conta anche per i punti della coppia e il tuo Fattore se la coppia non sfora.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}${lie && gs.carnival ? '<div class="good">🎭 Carnevale: mentire è gratis, nessuna carta Traditore.</div>' : lie ? `<div class="bad">🐍 Hai dichiarato ${d.xdecl} ma giochi ${cx.v}: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> (da 0 a 3 punti personali persi ciascuna; ${left > 0 ? `nel mazzetto ne restano ${left}` : 'mazzetto finito: ognuna vale ' + R.traitorOverflow}).</div>` : cx && d.xdecl != null ? '<div class="good">✔ Coerente con ciò che hai dichiarato: nessuna carta Traditore.</div>' : ''}</div>`;
           }
           if (excl) {
             const [lo, hi] = FF.rangeBase(R, d.center.v);
@@ -544,7 +544,7 @@
             const warns = [];
             if (excl && d.early) {
               const cx = cardById(sel.couple);
-              if (d.xdecl != null && cx.v !== d.xdecl) { const nT = gs.oath ? 2 : 1; warns.push(`Hai dichiarato <b>${d.xdecl}</b> ma stai giocando <b>${cx.v}</b>: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> e perderai quei punti personali.`); }
+              if (d.xdecl != null && cx.v !== d.xdecl) { const nT = 1; if (!gs.carnival) warns.push(`Hai dichiarato <b>${d.xdecl}</b> ma stai giocando <b>${cx.v}</b>: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> e perderai quei punti personali.`); }
             }
             if (!excl) {
               const cc = cardById(sel.couple), effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null, m = effc && EFFECTS[effc.k].mod;

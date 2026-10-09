@@ -126,7 +126,7 @@
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
     h += row('🎯', '<b>Range</b>: la somma delle due carte-coppia deve stare tra <b>V</b> (carta centrale) e <b>V + X</b>, dove X è la carta dell\'escluso (si scopre al reveal, salvo la regola Luce).');
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
-    h += row('🐍', '<b>Carta Traditore</b>: se l\'escluso gioca un numero diverso da quello dichiarato ne pesca una (2 col Giuramento): toglie da 0 a 3 punti personali. Finito il mazzetto di 12, ogni tradimento costa 3.');
+    h += row('🐍', '<b>Carta Traditore</b>: se l\'escluso gioca un numero diverso da quello dichiarato ne pesca una (nessuna col Carnevale): toglie da 0 a 3 punti personali. Finito il mazzetto di 12, ogni tradimento costa 3.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
     h += row('📊', '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
     h += '<div class="lgroup">Carte-effetto (15)</div>';

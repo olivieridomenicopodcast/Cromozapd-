@@ -98,7 +98,7 @@
       s.turn = 0; s.phase = 'setup'; s.over = false;
       s.center = null; s.nextCenter = null;
       s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null;
-      s.rule = null; s.ruleLatent = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.oath = false;
+      s.rule = null; s.ruleLatent = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.carnival = false;
       s.xDecl = null; s.traitorDeck = this.rules.traitor ? this._shuffle(this.rules.traitorCards.slice()) : [];
       s.pairPts = [0, 0, 0];          // indicizzato per ESCLUSO: coppia = gli altri due
       s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso]
@@ -305,7 +305,7 @@
       s.ruleLatent = FF.ruleOf(R, s.dominant);
       s.rule = s.ruleLatent && (!R.colorTrigger || s.center.c === s.dominant) ? s.ruleLatent : null;
       s.xmode = FF.xmodeFor(R, s.rule);
-      s.silent = s.rule === 'silenzio'; s.oath = s.rule === 'giuramento'; s.noEff = s.rule === 'effetti';
+      s.silent = s.rule === 'silenzio'; s.carnival = s.rule === 'carnevale'; s.noEff = s.rule === 'effetti';
       if (s.ruleLatent) {
         const rl = FF.COLOR_RULES[s.ruleLatent];
         if (s.rule) { this.stat('regola_attiva:' + s.rule, -1); b = this.say('rule', `📜 La carta centrale è ${this.col(s.center.c)}, come il colore dominante: si attiva la regola ${rl.i} ${rl.n} — ${rl.d}`, -1, { rule: s.rule }); }
@@ -549,20 +549,24 @@
         }
       }
       const scored = inRange || immune;
-      if (s.xmode === 'hidden' && s.xDecl != null) {   // dichiarato vs giocato; se mente (sfori o no) → carta Traditore (2 sotto Giuramento)
+      if (s.xmode === 'hidden' && s.xDecl != null) {   // dichiarato vs giocato; se mente (sfori o no) → carta Traditore 
         const lied = xcard.v !== s.xDecl;
         this.stat(lied ? 'escluso_mente' : 'escluso_onesto', ex);
         if (lied) {
           this.stat('bugia_scoperta', ex);
-          if (R.traitor) {
-            const n = s.oath ? 2 : 1, vals = [];
+          if (R.traitor && s.carnival) {
+            this.stat('bugia_gratis_carnevale', ex);
+            b = this.say('score', `🎭 Carnevale: ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}. Oggi mentire è gratis: nessuna carta Traditore.`, ex, { traitor: [] });
+            if (b) yield b;
+          } else if (R.traitor) {
+            const n = 1, vals = [];
             for (let i = 0; i < n; i++) {
               let tv;
               if (s.traitorDeck.length) tv = s.traitorDeck.splice(this.randInt(s.traitorDeck.length), 1)[0];
               else { tv = R.traitorOverflow; this.stat('traditore_oltre_il_mazzetto', ex); }
               vals.push(tv); xp.traitor.push(tv); xp.personal -= tv; this.stat('carta_traditore', ex, tv);
             }
-            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}: pesca ${n === 2 ? '2 carte TRADITORE' : 'una carta TRADITORE'} da ${vals.join(' + ')} (−${vals.reduce((a, c) => a + c, 0)} ai punti personali).`, ex, { traitor: vals });
+            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}: pesca una carta TRADITORE da ${vals.join(' + ')} (−${vals.reduce((a, c) => a + c, 0)} ai punti personali).`, ex, { traitor: vals });
             if (b) yield b;
           }
         }

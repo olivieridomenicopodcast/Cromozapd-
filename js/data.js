@@ -38,7 +38,7 @@
   // Regole di colore: il colore dominante (quello dell'ultima Zapd, o scelto con la Cromozapd) decide la regola in vigore
   FF.COLOR_RULES = {
     silenzio: { id: 'silenzio', n: 'Silenzio', i: '🤫', s: 'Non si parla', d: 'L\'escluso non dichiara nulla e gli attivi non fanno dichiarazioni. La carta dell\'escluso resta coperta fino al reveal: nessuno può tradire, nessuno può fidarsi.' },
-    giuramento: { id: 'giuramento', n: 'Giuramento', i: '🤞', s: 'Il tradimento costa doppio', d: 'L\'escluso dichiara un numero e poi gioca coperto: se gioca un numero diverso pesca 2 carte Traditore invece di 1.' },
+    carnevale: { id: 'carnevale', n: 'Carnevale', i: '🎭', s: 'Mentire è gratis', d: 'L\'escluso dichiara un numero e poi gioca coperto: in questo turno può giocare un numero diverso senza pescare carte Traditore. La dichiarazione non vale niente: gli attivi si fidano a loro rischio.' },
     luce: { id: 'luce', n: 'Luce', i: '💡', s: 'La carta dell\'escluso è scoperta', d: 'L\'escluso gioca per primo la sua carta, scoperta: il range è noto prima della discussione e nessuno può mentire.' },
     effetti: { id: 'effetti', n: 'Effetti vietati', i: '🚫', s: 'Niente Reverse, Prossima carta e Baratto', d: 'In questo turno nessuno può giocare Reverse, Prossima carta o Baratto. I modificatori ±n si possono giocare. Chi è escluso pesca comunque a fine turno.' },
   };
@@ -58,9 +58,9 @@
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     xInSum: false,           // variante: la carta dell'escluso conta nella somma controllata dal range (con 'xsum' no: la sua carta decide il range)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
-    colorRules: true,       // il colore dominante è la REGOLA IN VIGORE del turno (Silenzio, Giuramento, Luce, Effetti vietati)
+    colorRules: true,       // il colore dominante è la REGOLA IN VIGORE del turno (Silenzio, Carnevale, Luce, Effetti vietati)
     colorTrigger: true,     // la regola del colore dominante si attiva SOLO nei turni in cui la carta centrale è di quel colore (false = sempre)
-    colorRuleMap: ['silenzio', 'giuramento', 'luce', 'effetti'],   // regola per colore: Rosso, Blu, Verde, Giallo
+    colorRuleMap: ['silenzio', 'carnevale', 'luce', 'effetti'],   // regola per colore: Rosso, Blu, Verde, Giallo
     immunity: false,        // VARIANTE (vecchia regola): la coppia con entrambe le carte del colore dominante non sfora mai
     cromozapd: true,        // 13ª Zapd speciale: chi la pesca sceglie il colore (la regola) e tutti passano la mano
     rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base

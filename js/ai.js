@@ -125,7 +125,7 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.lensBy === pid && s.xPick ? s.xPick.v : s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : (s.xmode === 'hidden' ? 5 : undefined)), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.lensBy === pid && s.xPick ? s.xPick.v : s.xDecl != null ? (rng() < (s.carnival ? trust * 0.35 : trust) ? s.xDecl : 5) : (s.xmode === 'hidden' ? 5 : undefined)), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
@@ -207,7 +207,7 @@
         const base = {};
         base[partner] = heurPlay(g2, partner, mydecl ? mydecl.num : null, P.trust, rng, 0.05);
         let xid = s.xFirstCard ? s.xFirstCard.id : (s.lensBy === pid && s.xPick ? s.xPick.id : null);
-        if (xid == null && s.xDecl != null && rng() < P.trust) { const hc = g2.s.players[ex].hand.find((c) => c.v === s.xDecl); if (hc) xid = hc.id; }   // l'escluso ha detto la verità (o così credo)
+        if (xid == null && s.xDecl != null && rng() < (s.carnival ? P.trust * 0.35 : P.trust)) { const hc = g2.s.players[ex].hand.find((c) => c.v === s.xDecl); if (hc) xid = hc.id; }   // l'escluso ha detto la verità (o così credo)
         if (xid == null) xid = heurX(g2, ex, rng, 0.1);
         const xcard = s.xFirstCard || (s.lensBy === pid && s.xPick ? s.xPick : null) || g2.s.players[ex].hand.find((c) => c.id === xid);
         if (!base[partner] || !xcard) continue;
@@ -329,7 +329,7 @@
       const isEx = s.excluded === pid;
       const hasEff = (q) => s.players[q].eff.length;
       if (!isEx && !hasEff(pid) && [0, 1, 2].some((q) => q !== pid && hasEff(q) >= 1) && col('effetti') >= 0) return col('effetti');
-      const want = isEx ? ['silenzio', 'giuramento', 'effetti', 'luce'] : ['luce', 'giuramento', 'effetti', 'silenzio'];
+      const want = isEx ? ['carnevale', 'silenzio', 'effetti', 'luce'] : ['luce', 'effetti', 'silenzio', 'carnevale'];
       for (const r of want) if (col(r) >= 0) return col(r);
       return rnd(4);
     }
@@ -344,7 +344,7 @@
         const g2 = AI.determinize(game, pid, rng);
         const eh = g2.s.players[ex].hand;
         let xcard = null;
-        if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
+        if (s.xDecl != null && rng() < (s.carnival ? P.trust * 0.35 : P.trust)) xcard = eh.find((c) => c.v === s.xDecl);
         if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
         if (!xcard) continue;
         n++;
@@ -429,7 +429,7 @@
         let xcard = s.xFirstCard;
         if (!xcard) {
           const eh = g2.s.players[ex].hand;
-          if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
+          if (s.xDecl != null && rng() < (s.carnival ? P.trust * 0.35 : P.trust)) xcard = eh.find((c) => c.v === s.xDecl);
           if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
         }
         if (!xcard) continue;
