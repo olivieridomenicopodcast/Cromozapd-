@@ -125,15 +125,15 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.lensBy === pid && s.xPick ? s.xPick.v : s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : undefined), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.lensBy === pid && s.xPick ? s.xPick.v : s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : (s.xmode === 'hidden' ? 5 : undefined)), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
-      const fl = fila(p.eff);
+      const fl = s.noEff ? [] : fila(p.eff);
       return { coupleId: hand[i].id, selfId: hand[j].id, effId: fl.length && rng() < 0.3 ? fl[Math.floor(rng() * fl.length)].id : null };
     }
     let best = null, bv = -Infinity;
-    const effOpts = [null, ...fila(p.eff).filter((e) => !(R.modTiming === 'after' && EFFECTS[e.k].mod))];
+    const effOpts = [null, ...(s.noEff ? [] : fila(p.eff).filter((e) => !(R.modTiming === 'after' && EFFECTS[e.k].mod)))];
     for (const c of hand) for (const sf of hand) {
       if (c === sf) continue;
       for (const e of effOpts) {
@@ -165,6 +165,7 @@
       case 'cambio': return null;
       case 'baratto': return null;
       case 'lente': return false;
+      case 'colorpick': return 0;
       default: return null;
     }
   };
@@ -195,7 +196,7 @@
       }
       // candidati: tutte le coppie ordinate di carte × (nessun effetto | ogni effetto in fila diverso)
       const effOpts = [null]; const seen = new Set();
-      for (const e of fila(d.eff)) if (!seen.has(e.k) && !(game.rules.modTiming === 'after' && EFFECTS[e.k].mod)) { seen.add(e.k); effOpts.push(e); }
+      for (const e of (s.noEff ? [] : fila(d.eff))) if (!seen.has(e.k) && !(game.rules.modTiming === 'after' && EFFECTS[e.k].mod)) { seen.add(e.k); effOpts.push(e); }
       const cands = [];
       for (const c of hand) for (const sf of hand) if (c !== sf) for (const e of effOpts) cands.push({ c, sf, e });
       const tot = new Array(cands.length).fill(0);
@@ -243,21 +244,21 @@
       if (P.samples <= 0 || rng() < P.random) { const id = heurX(game, pid, rng, 0); const c = hand.find((x) => x.id === id) || hand[0]; plan = { card: c, decl: c.v }; }
       else {
         const act = [0, 1, 2].filter((i) => i !== pid);
-        const lieSet = P.xLie ? [...new Set([...hand.map((c) => c.v), Math.max(...hand.map((c) => c.v)), game.rules.maxValue])] : [];
+        const lieSet = P.xLie && !s.silent ? [...new Set([...hand.map((c) => c.v), Math.max(...hand.map((c) => c.v)), game.rules.maxValue])] : [];
         const cands = [];
         for (const c of hand) { cands.push({ c, n: c.v }); for (const n of lieSet) if (n !== c.v) cands.push({ c, n }); }
         const tot = new Array(cands.length).fill(0); let nn = 0;
         for (let k = 0; k < P.samples; k++) {
           const g2 = AI.determinize(game, pid, rng), baseBy = {};
           for (const n of new Set(cands.map((x) => x.n))) {
-            const g3 = g2.clone(); g3.s.xDecl = n; const b = {};
+            const g3 = g2.clone(); if (!s.silent) g3.s.xDecl = n; const b = {};
             for (const q of act) b[q] = heurPlay(g3, q, null, P.trust, rng, 0.05);
             baseBy[n] = b;
           }
           nn++;
           cands.forEach((cd, i) => {
             const b = baseBy[cd.n]; if (!b[act[0]] || !b[act[1]]) return;
-            const g4 = g2.clone(); g4.s.xDecl = cd.n;
+            const g4 = g2.clone(); if (!s.silent) g4.s.xDecl = cd.n;
             tot[i] += simulate(g4, b, cd.c, pid, P);
           });
         }
@@ -274,7 +275,7 @@
       const pid = d.player, s = game.s, ex = pid;
       const hand = d.hand;
       if (!hand.length) return null;
-      if (game.rules.rangeMode === 'xsum' && game.rules.xHidden) return planXHidden(game, d).card.id;
+      if (game.s.xmode === 'hidden') return planXHidden(game, d).card.id;
       if (P.samples <= 0 || rng() < P.random) return rng() < P.random * 0.5 ? hand[rnd(hand.length)].id : heurX(game, pid, rng, 0);
       const act = [0, 1, 2].filter((i) => i !== ex);
       if (d.first) {   // variante 'xcard': l'escluso gioca per primo e la sua carta decide il range; gli attivi (non hanno ancora parlato) rispondono con l'euristica
@@ -317,6 +318,20 @@
       let bi = 0, bv = -Infinity;
       tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
       return hand[bi].id;
+    }
+
+    // Cromozapd: scelta del colore (= regola in vigore). Euristica: da escluso preferisco Silenzio (nessuna dichiarazione, X coperta),
+    // da attivo Luce (la carta dell'escluso è scoperta); se non ho effetti e ne hanno gli altri, Effetti vietati.
+    function decideColor(game, d) {
+      const R = game.rules, s = game.s, pid = d.player;
+      if (P.samples <= 0 || rng() < P.random) return rnd(4);
+      const col = (rule) => (R.colorRuleMap || []).indexOf(rule);
+      const isEx = s.excluded === pid;
+      const hasEff = (q) => s.players[q].eff.length;
+      if (!isEx && !hasEff(pid) && [0, 1, 2].some((q) => q !== pid && hasEff(q) >= 1) && col('effetti') >= 0) return col('effetti');
+      const want = isEx ? ['silenzio', 'giuramento', 'effetti', 'luce'] : ['luce', 'giuramento', 'effetti', 'silenzio'];
+      for (const r of want) if (col(r) >= 0) return col(r);
+      return rnd(4);
     }
 
     // variante: carta "Lente" — conviene guardare la carta dell'escluso rinunciando a parlare?
@@ -495,6 +510,7 @@
           case 'xplay': return decideXplay(game, d);
           case 'cambio': return decideCambio(game, d);
           case 'baratto': return decideBaratto(game, d);
+          case 'colorpick': return decideColor(game, d);
           case 'lente': return decideLente(game, d);
           case 'xdecl': return planXHidden(game, d).decl;
           case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?

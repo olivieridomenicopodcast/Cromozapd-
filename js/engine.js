@@ -57,7 +57,7 @@
       this.s = this._setup(cfg);
     }
 
-    get totalZaps() { return 4 * this.rules.zapPerColor; }
+    get totalZaps() { return 4 * this.rules.zapPerColor + (this.rules.cromozapd ? 1 : 0); }
 
     clone() {
       const g = Object.create(Game.prototype);
@@ -68,7 +68,7 @@
         deck: t.deck.slice(), discard: t.discard.slice(), zapPile: t.zapPile.slice(), effDeck: t.effDeck.slice(), effDiscard: t.effDiscard.slice(),
         traitorDeck: (t.traitorDeck || []).slice(),
         players: t.players.map((p) => Object.assign({}, p, { hand: p.hand.slice(), eff: p.eff.slice(), traitor: (p.traitor || []).slice() })),
-        pending: t.pending.slice(), pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()),
+        pending: t.pending.slice(), cromoPending: t.cromoPending ? Object.assign({}, t.cromoPending) : null, pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()),
         decls: t.decls.slice(), lastPlay: t.lastPlay ? Object.assign({}, t.lastPlay, { fila: t.lastPlay.fila.map((f) => Object.assign({}, f)) }) : null,
       });
       return g;
@@ -84,7 +84,7 @@
       s.effDiscard = [];
       // colore dominante di partenza: il colore della prima Zapd che esce, poi si rimescola tutto
       let c = 0;
-      for (let i = s.deck.length - 1; i >= 0; i--) if (s.deck[i].z) { c = s.deck[i].c; break; }
+      for (let i = s.deck.length - 1; i >= 0; i--) if (s.deck[i].z && !s.deck[i].cromo) { c = s.deck[i].c; break; }
       s.dominant = c;
       this._shuffle(s.deck);
       const pl = cfg.players || [];
@@ -98,6 +98,7 @@
       s.turn = 0; s.phase = 'setup'; s.over = false;
       s.center = null; s.nextCenter = null;
       s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null;
+      s.rule = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.oath = false;
       s.xDecl = null; s.traitorDeck = this.rules.traitor ? this._shuffle(this.rules.traitorCards.slice()) : [];
       s.pairPts = [0, 0, 0];          // indicizzato per ESCLUSO: coppia = gli altri due
       s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso]
@@ -173,16 +174,36 @@
       const s = this.s;
       s.zapPile.push(card); s.zapsDrawn++;
       this.stat('zapd', -1);
+      const cn = !!card.cromo, nm = cn ? '🌈 CROMOZAPD' : `Zapd ${this.col(card.c)}`;
       let b;
       if (defer) {
-        s.pending.push(card.c);
-        b = this.say('zap', `⚡ Esce una Zapd ${this.col(card.c)} da "Prossima carta" (${s.zapsDrawn}/${this.totalZaps}). Colore dominante e escluso cambieranno dal turno dopo.`, -1, { zap: card.c });
+        s.pending.push({ c: card.c, cromo: cn, who: who == null ? null : who });
+        b = this.say('zap', `⚡ Esce ${cn ? 'la' : 'una'} ${nm} da "Prossima carta" (${s.zapsDrawn}/${this.totalZaps}). ${cn ? 'Effetto' : 'Colore dominante e escluso cambieranno'} dal turno dopo.`, -1, { zap: card.c, cromo: cn });
       } else {
         const from = s.excluded, d0 = s.dir;
-        s.dominant = card.c; s.excluded = mod3(s.excluded + s.dir);
+        if (!cn) s.dominant = card.c;
+        s.excluded = mod3(s.excluded + s.dir);
         if (this.rules.zapFlipsDir) s.dir = -s.dir;
-        b = this.say('zap', `⚡ Zapd ${this.col(card.c)} (${s.zapsDrawn}/${this.totalZaps})${who != null ? ' pescata da ' + this.pn(who) : ''}: il colore dominante diventa ${this.col(card.c)}, il gettone escluso passa da ${this.seatName(from)} a ${this.seatName(s.excluded)} (verso ${this.dirTxt(d0)})${this.rules.zapFlipsDir ? ` e il verso si inverte: ora ${this.dirTxt(s.dir)}` : ''}.`, -1, { zap: card.c });
+        if (cn) { s.cromoPending = { who: who == null ? s.prevExcluded : who }; this.stat('cromozapd', -1); }
+        b = this.say('zap', `⚡ ${cn ? 'La ' + nm : nm} (${s.zapsDrawn}/${this.totalZaps})${who != null ? ' pescata da ' + this.pn(who) : ''}: ${cn ? 'a pesca finita tutti passano la mano e chi l\'ha pescata sceglie il colore dominante;' : `il colore dominante diventa ${this.col(card.c)},`} il gettone escluso passa da ${this.seatName(from)} a ${this.seatName(s.excluded)} (verso ${this.dirTxt(d0)})${this.rules.zapFlipsDir ? ` e il verso si inverte: ora ${this.dirTxt(s.dir)}` : ''}.`, -1, { zap: card.c, cromo: cn });
       }
+      if (b) yield b;
+    }
+
+    // Effetto della Cromozapd: tutti passano la mano di carte numeriche al giocatore successivo (nel verso attuale), poi chi l'ha pescata sceglie il colore dominante (= la regola in vigore)
+    *resolveCromo() {
+      const s = this.s, cp = s.cromoPending; let b;
+      if (!cp) return;
+      s.cromoPending = null;
+      const old = s.players.map((p) => p.hand);
+      for (let i = 0; i < 3; i++) s.players[mod3(i + s.dir)].hand = old[i];
+      b = this.say('zap', `🤝 CROMOZAPD: tutti passano la propria mano al giocatore successivo (verso ${this.dirTxt(s.dir)}). Le carte-effetto restano a chi le ha.`, -1, { cromoPass: true });
+      if (b) yield b;
+      const pick = yield* this.ask(this._dec('colorpick', cp.who, {}));
+      const col = Number.isInteger(pick) && pick >= 0 && pick < 4 ? pick : s.dominant;
+      s.dominant = col;
+      const rl = FF.COLOR_RULES[FF.ruleOf(this.rules, col)];
+      b = this.say('zap', `🌈 ${this.pn(cp.who)} sceglie il colore dominante: ${this.col(col)}${rl ? ` → regola in vigore: ${rl.i} ${rl.n} (${rl.s})` : ''}.`, cp.who, { color: col });
       if (b) yield b;
     }
 
@@ -254,7 +275,7 @@
     *turnGen() {
       const s = this.s, R = this.rules;
       let b;
-      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null; s.xPick = null; s.lensBy = null;
+      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null; s.xPick = null; s.lensBy = null; s.xFirstCard = null;
       s.phase = 'draw';
       b = this.say('turn', `━━ Turno ${s.turn} · Zapd uscite ${s.zapsDrawn}/${this.totalZaps} ━━`);
       if (b) yield b;
@@ -275,10 +296,19 @@
       if (s.nextCenter) {
         s.center = s.nextCenter; s.nextCenter = null;
         this.stat('centrale_da_prossima', -1);
-      } else s.center = yield* this.drawNumeric(false, null);
+      } else s.center = yield* this.drawNumeric(false, s.prevExcluded);
       if (!s.center) { s.over = true; this.emit('warn', '⚠ Carte finite: partita conclusa.'); return; }
+      if (s.cromoPending) yield* this.resolveCromo();   // Cromozapd uscita in questa pesca: passa le mani e si sceglie il colore
       const ex = s.excluded, act = this.actives();
-      const XF = FF.xFirst(R); s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
+      // regola in vigore: dipende dal colore dominante
+      s.rule = FF.ruleOf(R, s.dominant); s.xmode = FF.xmodeFor(R, s.rule);
+      s.silent = s.rule === 'silenzio'; s.oath = s.rule === 'giuramento'; s.noEff = s.rule === 'effetti';
+      if (s.rule) {
+        const rl = FF.COLOR_RULES[s.rule];
+        b = this.say('rule', `📜 Regola in vigore (colore ${this.col(s.dominant)}): ${rl.i} ${rl.n} — ${rl.d}`, -1, { rule: s.rule });
+        if (b) yield b;
+      }
+      const XF = s.xmode === 'first'; s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
       if (XF) {
         b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)}. Il range lo decide la carta dell'escluso (X): ${R.rangeMode === 'xsum' ? 'da V a V+X' : 'da V−X a V+X'}. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
         if (b) yield b;
@@ -290,25 +320,25 @@
       } else
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
-      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. ${FF.xHidden(R) ? 'L\'escluso dichiara una carta e poi la gioca coperta: decide il range, che si scopre al reveal' : FF.xFirst(R) ? 'L\'escluso ha già giocato scoperta la carta che decide il range' : 'L\'escluso gioca 1 carta per la coppia' + (R.xInSum ? ': la sua carta conta nella somma del range' : '')}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
+      b = this.say('roles', `👥 Coppia ${pairLabel(ex)} (attivi) · escluso: ${this.pn(ex)}. ${s.xmode === 'hidden' ? (s.silent ? 'L\'escluso gioca coperta la carta che decide il range, che si scopre al reveal: nessuno parla' : 'L\'escluso dichiara una carta e poi la gioca coperta: decide il range, che si scopre al reveal') : s.xmode === 'first' ? 'L\'escluso ha già giocato scoperta la carta che decide il range' : 'L\'escluso gioca 1 carta per la coppia' + (R.xInSum ? ': la sua carta conta nella somma del range' : '')}; ascolta la discussione ma non parla.`, ex, { excluded: ex });
       if (b) yield b;
       this.stat('turni', -1);
-      if (FF.xHidden(R)) {   // VARIANTE: l'escluso dichiara il numero esatto che giocherà (poi gioca coperto; potrà mentire)
+      if (s.xmode === 'hidden' && !s.silent) {   // l'escluso dichiara il numero esatto che giocherà (poi gioca coperto; potrà mentire)
         const raw = yield* this.ask(this._dec('xdecl', ex, {}));
         const xh = s.players[ex].hand;
         s.xDecl = Number.isInteger(raw) && raw >= 1 && raw <= R.maxValue ? raw : (xh[0] ? xh[0].v : 1);
         b = this.say('declare', `🚪 ${this.pn(ex)} (escluso) dichiara: «io gioco un ${s.xDecl}» — il range sarà da ${s.center.v} a ${s.center.v} + la sua carta, e si saprà solo al reveal. (Può mentire.)`, ex, { xdecl: s.xDecl });
         if (b) yield b;
       }
-      if (FF.xHidden(R)) {   // l'escluso mette COPERTA la sua carta subito (potrà essere cambiata solo dalle bugie: è già decisa)
+      if (s.xmode === 'hidden') {   // l'escluso mette COPERTA la sua carta subito (potrà essere cambiata solo dalle bugie: è già decisa)
         const pk = yield* this.ask(this._dec('xplay', ex, { decls: [], early: true }));
         const xh2 = s.players[ex].hand; s.xPick = xh2.find((c) => c.id === pk) || xh2[0];
       }
-      if (FF.xFirst(R) || FF.xHidden(R)) yield* this.cambioWindow();   // effetti istantanei dopo la carta dell'escluso
+      if (s.xmode && !s.noEff) yield* this.instantWindow();   // effetti istantanei dopo la carta dell'escluso
 
       // 2) Sincero (istantanea, prima della discussione)
       s.phase = 'discuss';
-      b = this.say('phase', '🗨️ Fase 2 — Discussione di coppia: solo i due attivi, con una dichiarazione non vincolante (si può tradire).', -1, { phase: 'discuss' });
+      b = this.say('phase', s.silent ? '🤫 Fase 2 — SILENZIO: nessuno dichiara, nessuno parla.' : '🗨️ Fase 2 — Discussione di coppia: solo i due attivi, con una dichiarazione non vincolante (si può tradire).', -1, { phase: 'discuss' });
       if (b) yield b;
       for (const pid of act) {
         const p = s.players[pid]; const card = p.eff.find((e) => e.k === 'sincero');
@@ -325,7 +355,7 @@
       // 3) discussione: dichiarazioni (la seconda vede la prima)
       for (const pid of act) {
         const other = act.find((x) => x !== pid);
-        if (s.lensBy === pid) { s.decls[pid] = { num: null, mod: null }; b = this.say('declare', `🤐 ${this.pn(pid)} ha usato la Lente: non può fare dichiarazioni in questo turno.`, pid, { decl: s.decls[pid] }); if (b) yield b; continue; }
+        if (s.silent) { s.decls[pid] = { num: null, mod: null }; continue; }
         const raw = yield* this.ask(this._dec('declare', pid, { partner: other, partnerDecl: s.decls[other] }));
         const d = this._sanitizeDecl(raw);
         s.decls[pid] = d;
@@ -336,7 +366,7 @@
 
       // 4) gioco coperto (simultaneo: nessuno vede le scelte altrui)
       s.phase = 'play';
-      b = this.say('phase', '🂠 Fase 3 — Gioco coperto: ogni attivo sceglie carta per la coppia, carta per sé ed eventuale effetto; l\'escluso ' + (FF.xFirst(R) ? 'ha già giocato la sua.' : 'gioca 1 carta.'), -1, { phase: 'play' });
+      b = this.say('phase', '🂠 Fase 3 — Gioco coperto: ogni attivo sceglie carta per la coppia, carta per sé ed eventuale effetto; l\'escluso ' + (s.xmode ? 'ha già messo la sua.' : 'gioca 1 carta.'), -1, { phase: 'play' });
       if (b) yield b;
       const plays = {};
       for (const pid of act) plays[pid] = this._sanitizePlay(pid, yield* this.ask(this._dec('play', pid, { decls: s.decls.slice() })));
@@ -347,49 +377,25 @@
       yield* this.afterPlay(plays, xcard);
     }
 
-    // VARIANTE: carta "Cambio centrale" — istantanea, dopo che l'escluso ha giocato: un attivo mette una carta della sua mano al posto della centrale e prende in mano la vecchia
-    *cambioWindow() {
+    // Effetti istantanei, dopo che l'escluso ha giocato la sua carta e prima della discussione: Baratto
+    *instantWindow() {
       const s = this.s; let b;
       for (const pid of this.actives()) {
         const p = s.players[pid];
-        const lens = p.eff.find((e) => e.k === 'lente');
-        if (lens && s.xPick && s.lensBy == null) {   // VARIANTE: Lente — guardi la carta coperta dell'escluso, ma non parli
-          const use = yield* this.ask(this._dec('lente', pid, {}));
-          if (use) {
-            p.eff.splice(p.eff.indexOf(lens), 1); s.effDiscard.push(lens); s.lensBy = pid;
-            this.stat('effetto_giocato:lente', pid); this.stat('lente', pid);
-            if (s.xPick.v !== s.xDecl) this.stat('lente_smaschera', pid);
-            b = this.say('effect', `🔍 ${this.pn(pid)} gioca LENTE: guarda di nascosto la carta coperta dell'escluso. In questo turno non può fare dichiarazioni.`, pid, { k: 'lente' });
-            if (b) yield b;
-          }
-        }
         const bar = p.eff.find((e) => e.k === 'baratto');
-        if (bar) {   // VARIANTE: Baratto — prendi una carta dall'escluso (alla cieca, o scelta se barattoSee) e gliene dai una tua
-          const xh = s.players[s.excluded].hand, pool = xh.filter((c) => !s.xPick || c.id !== s.xPick.id);
-          const see = !!this.rules.barattoSee;
-          const raw = yield* this.ask(this._dec('baratto', pid, see ? { see: true, xhand: pool.slice() } : {}));
-          const give = raw && typeof raw === 'object' ? raw.give : raw;
-          const gc = give != null ? p.hand.find((h) => h.id === give) : null;
-          if (gc && pool.length) {
-            const wanted = see && raw && typeof raw === 'object' ? pool.find((c) => c.id === raw.take) : null;
-            const tk = wanted || (see ? pool[0] : pool[this.randInt(pool.length)]);
-            p.eff.splice(p.eff.indexOf(bar), 1); s.effDiscard.push(bar);
-            p.hand.splice(p.hand.indexOf(gc), 1, tk); xh.splice(xh.indexOf(tk), 1, gc);
-            this.stat('effetto_giocato:baratto', pid); this.stat('baratto', pid);
-            b = this.say('effect', `🤝 ${this.pn(pid)} gioca BARATTO: ${see ? `l'escluso gli mostra la mano e ${this.pn(pid)} sceglie una carta` : `pesca alla cieca una carta`} dalla mano di ${this.pn(s.excluded)} e gliene dà una sua.`, pid, { k: 'baratto' });
-            if (b) yield b;
-          }
-        }
-        const card = p.eff.find((e) => e.k === 'cambio');
-        if (!card) continue;
-        const raw = yield* this.ask(this._dec('cambio', pid, {}));
-        const c = raw != null ? p.hand.find((h) => h.id === raw) : null;
-        if (!c) continue;
-        p.eff.splice(p.eff.indexOf(card), 1); s.effDiscard.push(card);
-        const old = s.center; if (this.rules.cambioDiscard) { p.hand.splice(p.hand.indexOf(c), 1); s.discard.push(old); } else p.hand.splice(p.hand.indexOf(c), 1, old); s.center = c;
-        this.stat('effetto_giocato:cambio', pid); this.stat('cambio_centrale', pid);
-        const rg = s.xFirstCard ? FF.rangeBase(this.rules, c.v, s.xFirstCard.v) : null;
-        b = this.say('effect', `🔁 ${this.pn(pid)} gioca CAMBIO CENTRALE: mette il ${FF.cardName(c)} al posto del ${FF.cardName(old)} (${this.rules.cambioDiscard ? 'che si scarta' : 'che prende in mano'}). Nuova centrale: ${c.v}${rg ? ` → range ${rg[0]}–${rg[1]}` : ''}.`, pid, { k: 'cambio', center: c });
+        if (!bar) continue;
+        const xh = s.players[s.excluded].hand, pool = xh.filter((c) => !s.xPick || c.id !== s.xPick.id);
+        const see = !!this.rules.barattoSee;
+        const raw = yield* this.ask(this._dec('baratto', pid, see ? { see: true, xhand: pool.slice() } : {}));
+        const give = raw && typeof raw === 'object' ? raw.give : raw;
+        const gc = give != null ? p.hand.find((h) => h.id === give) : null;
+        if (!gc || !pool.length) continue;
+        const wanted = see && raw && typeof raw === 'object' ? pool.find((c) => c.id === raw.take) : null;
+        const tk = wanted || (see ? pool[0] : pool[this.randInt(pool.length)]);
+        p.eff.splice(p.eff.indexOf(bar), 1); s.effDiscard.push(bar);
+        p.hand.splice(p.hand.indexOf(gc), 1, tk); xh.splice(xh.indexOf(tk), 1, gc);
+        this.stat('effetto_giocato:baratto', pid); this.stat('baratto', pid);
+        b = this.say('effect', `🤝 ${this.pn(pid)} gioca BARATTO: ${see ? `${this.pn(s.excluded)} gli mostra la mano rimasta e ${this.pn(pid)} sceglie una carta da prendere` : 'pesca alla cieca una carta'}, e gli dà in cambio una sua carta (coperta).`, pid, { k: 'baratto' });
         if (b) yield b;
       }
     }
@@ -489,7 +495,7 @@
           if (s.nextCenter) {
             b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA, ma ce n'è già una messa da parte: nessun effetto.`, f.pid, { k: 'next' });
           } else {
-            const c = yield* this.drawNumeric(true, null);
+            const c = yield* this.drawNumeric(true, f.pid);
             s.nextCenter = c;
             b = this.say('effect', `🔮 ${this.pn(f.pid)} gioca PROSSIMA CARTA: ${c ? FF.cardName(c) : 'nessuna carta'} è messa da parte, scoperta, e sarà la carta centrale del turno dopo.`, f.pid, { k: 'next', card: c });
           }
@@ -518,7 +524,7 @@
         const baseW = sumRaw >= rb0 && sumRaw <= rb1, baseOk = R.rangeOutside ? !baseW : baseW;
         this.stat(baseOk ? (inRange ? 'modificatore_inutile' : 'modificatore_dannoso') : inRange ? 'modificatore_decisivo' : 'modificatore_non_basta', -1);
       }
-      const immune = ca.c === s.dominant && cb.c === s.dominant;
+      const immune = !!R.immunity && ca.c === s.dominant && cb.c === s.dominant;
       // VARIANTE modTiming 'after': dopo il reveal, a somma nota, un attivo può giocare un modificatore per correggere lo sforo
       if (R.modTiming === 'after' && !inRange && !immune) {
         for (const pid of [mod3(ex + 1), mod3(ex + 2)]) {
@@ -537,15 +543,20 @@
         }
       }
       const scored = inRange || immune;
-      if (FF.xHidden(R)) {   // dichiarato vs giocato; se mente (sfori o no) → carta Traditore
+      if (s.xmode === 'hidden' && s.xDecl != null) {   // dichiarato vs giocato; se mente (sfori o no) → carta Traditore (2 sotto Giuramento)
         const lied = xcard.v !== s.xDecl;
         this.stat(lied ? 'escluso_mente' : 'escluso_onesto', ex);
         if (lied) {
           this.stat('bugia_scoperta', ex);
-          if (R.traitor && s.traitorDeck.length) {
-            const tv = s.traitorDeck.splice(this.randInt(s.traitorDeck.length), 1)[0];
-            xp.traitor.push(tv); xp.personal -= tv; this.stat('carta_traditore', ex, tv);
-            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}: pesca una carta TRADITORE da ${tv} (−${tv} ai punti personali).`, ex, { traitor: tv });
+          if (R.traitor) {
+            const n = s.oath ? 2 : 1, vals = [];
+            for (let i = 0; i < n; i++) {
+              let tv;
+              if (s.traitorDeck.length) tv = s.traitorDeck.splice(this.randInt(s.traitorDeck.length), 1)[0];
+              else { tv = R.traitorOverflow; this.stat('traditore_oltre_il_mazzetto', ex); }
+              vals.push(tv); xp.traitor.push(tv); xp.personal -= tv; this.stat('carta_traditore', ex, tv);
+            }
+            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}: pesca ${n === 2 ? '2 carte TRADITORE' : 'una carta TRADITORE'} da ${vals.join(' + ')} (−${vals.reduce((a, c) => a + c, 0)} ai punti personali).`, ex, { traitor: vals });
             if (b) yield b;
           }
         }
@@ -577,11 +588,17 @@
 
       // 10) fine turno: la carta centrale va negli scarti, Zapd rimandate, fine partita
       s.discard.push(s.center);
+      s.prevExcluded = s.excluded;
       if (s.pending.length) {
-        for (const c of s.pending) { s.dominant = c; s.excluded = mod3(s.excluded + s.dir); if (this.rules.zapFlipsDir) s.dir = -s.dir; }
-        b = this.say('zap', `⚡ Effetti della Zapd rimandata: colore dominante ${this.col(s.dominant)}, escluso ora ${this.pn(s.excluded)}${this.rules.zapFlipsDir ? `, verso ${this.dirTxt(s.dir)}` : ''}.`);
+        let cromoWho = null;
+        for (const e of s.pending) {
+          if (e.cromo) cromoWho = e.who == null ? s.prevExcluded : e.who; else s.dominant = e.c;
+          s.excluded = mod3(s.excluded + s.dir); if (this.rules.zapFlipsDir) s.dir = -s.dir;
+        }
+        b = this.say('zap', `⚡ Effetti della Zapd rimandata: ${s.pending.some((e) => !e.cromo) ? `colore dominante ${this.col(s.dominant)}, ` : ''}escluso ora ${this.pn(s.excluded)}${this.rules.zapFlipsDir ? `, verso ${this.dirTxt(s.dir)}` : ''}.`);
         s.pending = [];
         if (b) yield b;
+        if (cromoWho != null) { s.cromoPending = { who: cromoWho }; this.stat('cromozapd', -1); yield* this.resolveCromo(); }
       }
       s.phase = 'turn_end';
       if (s.zapsDrawn >= this.totalZaps) {
@@ -624,7 +641,7 @@
         this.emit('warn', `⚠ Giocata non valida di ${this.pn(pid)}: uso le prime due carte.`);
         couple = h[0]; self = h[1];
       }
-      const eff = raw.eff != null ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila' && !(this.rules.modTiming === 'after' && EFFECTS[e.k].mod)) : null;
+      const eff = raw.eff != null && !this.s.noEff ? p.eff.find((e) => e.id === raw.eff && EFFECTS[e.k].kind === 'fila' && !(this.rules.modTiming === 'after' && EFFECTS[e.k].mod)) : null;
       return { coupleId: couple.id, selfId: self.id, effId: eff ? eff.id : null };
     }
   }
@@ -665,6 +682,7 @@
           case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
           case 'cambio': return rng() < 0.3 ? pick(d.hand).id : null;
           case 'lente': return rng() < 0.2;
+          case 'colorpick': return Math.floor(rng() * 4);
           case 'baratto': { if (rng() >= 0.3) return null; const gv = pick(d.hand).id; return d.see ? { give: gv, take: pick(d.xhand).id } : gv; }
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;

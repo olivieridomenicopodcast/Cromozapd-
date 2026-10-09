@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1 }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1, colorRules: false, immunity: true, cromozapd: false, xHidden: false, traitor: false }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -53,19 +53,21 @@ function pol(o = {}) {
 const turn = (g, o = {}) => { FF.drive(g, g.turnGen(), pol(o)); return o; };
 const pts = (g, e = 2) => g.s.pairPts[e];
 
-test('mazzi: 92 carte (80 numeriche + 12 Zapd), ogni colore-valore due volte; Mazzetto Effetti da 17', () => {
+test('mazzi: 93 carte (80 numeriche + 12 Zapd colorate + la Cromozapd), ogni colore-valore due volte; Mazzetto Effetti da 15', () => {
   const d = FF.buildDeck();
-  assert.equal(d.length, 92);
-  assert.equal(d.filter((c) => c.z).length, 12);
+  assert.equal(d.length, 93);
+  assert.equal(d.filter((c) => c.z).length, 13);
+  assert.equal(d.filter((c) => c.cromo).length, 1);
   for (let c = 0; c < 4; c++) {
     assert.equal(d.filter((x) => x.z && x.c === c).length, 3);
     for (let v = 1; v <= 10; v++) assert.equal(d.filter((x) => !x.z && x.c === c && x.v === v).length, 2);
   }
-  assert.equal(new Set(d.map((c) => c.id)).size, 92);
+  assert.equal(new Set(d.map((c) => c.id)).size, 93);
   const e = FF.buildEffectDeck();
-  assert.equal(e.length, 17);
+  assert.equal(e.length, 15);
   assert.equal(e.filter((x) => x.k === 'reverse').length, 3);
-  assert.equal(e.filter((x) => x.k === 'swap').length, 2);
+  assert.equal(e.filter((x) => x.k === 'baratto').length, 3);
+  assert.equal(e.filter((x) => x.k === 'sincero' || x.k === 'swap' || x.k === 'annulla').length, 0);
 });
 
 test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd, escluso iniziale A', () => {
@@ -74,7 +76,7 @@ test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd,
   for (const p of g.s.players) { assert.equal(p.hand.length, 3); assert.ok(p.hand.every((c) => !c.z)); }
   assert.ok(g.s.dominant >= 0 && g.s.dominant < 4);
   assert.equal(g.s.zapPile.length, g.s.zapsDrawn);
-  assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 92);
+  assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 93);
 });
 
 test('escluso iniziale a sorte: riproducibile dal seed, tutti e tre i posti possibili; con un valore fisso viene rispettato', () => {
@@ -121,13 +123,17 @@ test('variante (solo simulazione) rangeOutside: si incassa solo con la somma FUO
   assert.equal(pts(g), 0); assert.equal(g.stats.g.sfora_dentro, 1);
 });
 
-test('regole predefinite: range da V a V+X (X = carta dell\'escluso, giocata per prima), modificatori che allargano ×2', () => {
-  assert.equal(FF.DEFAULT_RULES.rangeMode, 'xsum'); assert.equal(FF.DEFAULT_RULES.xInSum, false);
-  assert.equal(FF.DEFAULT_RULES.modMode, 'widen'); assert.equal(FF.DEFAULT_RULES.modScale, 2);
+test('regole predefinite: range da V a V+X, colore = regola, Cromozapd, carte Traditore, modificatori che allargano ×2', () => {
+  const D = FF.DEFAULT_RULES;
+  assert.equal(D.rangeMode, 'xsum'); assert.equal(D.xInSum, false); assert.equal(D.colorRules, true); assert.equal(D.immunity, false); assert.equal(D.cromozapd, true);
+  assert.equal(D.traitor, true); assert.equal(D.traitorCards.length, 12); assert.equal(D.traitorOverflow, 3); assert.equal(D.barattoSee, true);
+  assert.deepEqual(D.colorRuleMap, ['silenzio', 'giuramento', 'luce', 'effetti']);
+  assert.equal(D.modMode, 'widen'); assert.equal(D.modScale, 2);
   const g = new FF.Game({ seed: 1, log: true }), R = g.rules;
   assert.deepEqual(FF.rangeBase(R, 6, 7), [6, 13]); assert.deepEqual(FF.rangeBase(R, 3, 1), [3, 4]);
   assert.deepEqual(FF.rangeFor(R, 6, { dir: 'lo', n: 2 }, 7), [2, 17]); assert.deepEqual(FF.rangeFor(R, 6, { dir: 'hi', n: 1 }, 7), [4, 15]);
-  assert.equal(FF.xFirst(R), true);
+  assert.equal(g.totalZaps, 13);
+  assert.equal(FF.xmodeFor(R, 'luce'), 'first'); assert.equal(FF.xmodeFor(R, 'silenzio'), 'hidden'); assert.equal(FF.xmodeFor(R, 'giuramento'), 'hidden');
   // l'escluso gioca PER PRIMO, scoperto (prima di ogni dichiarazione): centro 6, X=7 → range 6–13
   const m = (xi) => mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
   let t = m(); const p = turn(t, { x: 0 });
@@ -366,16 +372,16 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
       if (s.nextCenter) ids.push(s.nextCenter.id);
       if (s.center && !s.discard.includes(s.center)) ids.push(s.center.id);
       if (s.xFirstCard && !s.discard.includes(s.xFirstCard)) ids.push(s.xFirstCard.id);
-      assert.equal(ids.length, 92, 'carte numeriche+Zapd: ' + ids.length);
-      assert.equal(new Set(ids).size, 92, 'duplicati');
+      assert.equal(ids.length, 93, 'carte numeriche+Zapd: ' + ids.length);
+      assert.equal(new Set(ids).size, 93, 'duplicati');
       const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
-      assert.equal(eids.length, 17); assert.equal(new Set(eids).size, 17);
+      assert.equal(eids.length, 15); assert.equal(new Set(eids).size, 15);
       for (const p of s.players) { assert.ok(p.hand.length <= 3 && p.eff.length <= 2); }
       assert.ok(s.zapPile.length === s.zapsDrawn);
       return bots[d.player].decide(game, d);
     });
     assert.ok(g.result.turns >= 5 && g.result.turns <= 14, 'turni ' + g.result.turns);
-    assert.equal(g.s.zapsDrawn, 12);
+    assert.equal(g.s.zapsDrawn, 13);
     tot += g.result.turns;
   }
   const avg = tot / 300;

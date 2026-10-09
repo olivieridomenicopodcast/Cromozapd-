@@ -17,7 +17,7 @@ test('AI: tutte le risposte sono legali (nessun avviso del motore) per ogni live
       const ai = lv.map((l, k) => FF.AI.create(l, 'x' + i + k));
       FF.drive(g, g.run(), (game, d) => ai[d.player].decide(game, d));
       assert.deepEqual(g.events.filter((e) => e.k === 'warn'), [], lv.join() + ' partita ' + i);
-      assert.equal(g.s.zapsDrawn, 12);
+      assert.equal(g.s.zapsDrawn, 13);
     }
   }
 });
@@ -73,11 +73,11 @@ test('AI: determinize conserva le carte e rispetta le conte (mani, mazzo, effett
       if (v.s.nextCenter) ids.push(v.s.nextCenter.id);
       if (v.s.center && !v.s.discard.includes(v.s.center)) ids.push(v.s.center.id);
       if (v.s.xFirstCard && !v.s.discard.includes(v.s.xFirstCard)) ids.push(v.s.xFirstCard.id);
-      assert.equal(new Set(ids).size, 92); assert.equal(ids.length, 92);
+      assert.equal(new Set(ids).size, 93); assert.equal(ids.length, 93);
       assert.deepEqual(v.s.players[d.player].hand, game.s.players[d.player].hand);
       assert.ok(v.s.players.every((p) => p.hand.every((c) => !c.z && c.v >= 1)), 'nelle mani non devono esserci Zapd');
       v.s.players.forEach((p, i) => { assert.equal(p.hand.length, game.s.players[i].hand.length); assert.equal(p.eff.length, game.s.players[i].eff.length); });
-      assert.equal(new Set([...v.s.effDeck, ...v.s.effDiscard, ...v.s.players.flatMap((p) => p.eff)].map((e) => e.id)).size, 17);
+      assert.equal(new Set([...v.s.effDeck, ...v.s.effDiscard, ...v.s.players.flatMap((p) => p.eff)].map((e) => e.id)).size, 15);
     }
     return ai.decide(game, d);
   });
