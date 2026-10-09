@@ -42,3 +42,4 @@ Questo elenco è il lavoro **già deciso ma non ancora fatto**. Si implementa tu
 - DECISO: **Sincero e Scambio forzato sono TOLTI** dal mazzo effetti (5 carte da sostituire: 3 + 2). Restano Reverse (3), Prossima carta (3) e i 6 modificatori ±n.
 - DECISO: se la Cromozapd esce come carta centrale, **sceglie la regola chi scopre la carta centrale** (da definire chi scopre la carta centrale in ogni turno).
 - Sostituti in discussione: Lente (guardi la carta coperta dell'escluso prima di giocare), Ripesca (scarti una carta e ne pesci un'altra), altre.
+- DECISO: **Cambio centrale scartata** (misure in DA_RICORDARE). Da ripensare: Lente (guardi la carta coperta dell'escluso, non puoi parlare) e un nuovo effetto di scambio con l'escluso (in discussione).
