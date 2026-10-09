@@ -161,6 +161,7 @@
       case 'effdraw': return false;
       case 'sincero': return false;
       case 'cambio': return null;
+      case 'baratto': return null;
       default: return null;
     }
   };
@@ -315,6 +316,46 @@
       return hand[bi].id;
     }
 
+    // variante: carta "Baratto" — peschi alla cieca una carta dall'escluso e gli dai una tua
+    function decideBaratto(game, d) {
+      const pid = d.player, s = game.s, hand = d.hand, ex = s.excluded;
+      if (P.samples <= 0 || rng() < P.random) return rng() < 0.3 ? hand[rnd(hand.length)].id : null;
+      const act = [0, 1, 2].filter((i) => i !== ex);
+      const tot = new Array(hand.length + 1).fill(0); let n = 0;
+      for (let k = 0; k < Math.max(4, Math.ceil(P.samples / 2)); k++) {
+        const g2 = AI.determinize(game, pid, rng);
+        const eh = g2.s.players[ex].hand;
+        let xcard = s.xFirstCard;
+        if (!xcard) {
+          if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
+          if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
+        }
+        if (!xcard) continue;
+        const pool = eh.filter((c) => c.id !== xcard.id);
+        if (!pool.length) continue;
+        n++;
+        const tk = pool[Math.floor(rng() * pool.length)];
+        for (let i = 0; i <= hand.length; i++) {
+          const g3 = g2.clone();
+          if (i > 0) {
+            const me = g3.s.players[pid], xo = g3.s.players[ex];
+            const gi = me.hand.findIndex((c) => c.id === hand[i - 1].id), ti = xo.hand.findIndex((c) => c.id === tk.id);
+            if (gi < 0 || ti < 0) continue;
+            const gc = me.hand[gi]; me.hand.splice(gi, 1, xo.hand[ti]); xo.hand.splice(ti, 1, gc);
+            const ei = me.eff.findIndex((e) => e.k === 'baratto'); if (ei >= 0) me.eff.splice(ei, 1);
+          }
+          const base = {};
+          for (const q of act) base[q] = heurPlay(g3, q, null, P.trust, rng, 0.05);
+          if (!base[act[0]] || !base[act[1]]) continue;
+          tot[i] += simulate(g3, base, xcard, pid, P);
+        }
+      }
+      if (!n) return null;
+      let bi = 0, bv = -Infinity;
+      tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
+      return bi === 0 ? null : hand[bi - 1].id;
+    }
+
     // variante: carta "Cambio centrale"
     function decideCambio(game, d) {
       const pid = d.player, s = game.s, hand = d.hand, ex = s.excluded;
@@ -406,6 +447,7 @@
           }
           case 'xplay': return decideXplay(game, d);
           case 'cambio': return decideCambio(game, d);
+          case 'baratto': return decideBaratto(game, d);
           case 'xdecl': return planXHidden(game, d).decl;
           case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?
             if (level === 'easy' && rng() < 0.5) return null;

@@ -350,7 +350,22 @@
     *cambioWindow() {
       const s = this.s; let b;
       for (const pid of this.actives()) {
-        const p = s.players[pid]; const card = p.eff.find((e) => e.k === 'cambio');
+        const p = s.players[pid];
+        const bar = p.eff.find((e) => e.k === 'baratto');
+        if (bar) {   // VARIANTE: Baratto — peschi alla cieca una carta dall'escluso e gliene dai una tua
+          const give = yield* this.ask(this._dec('baratto', pid, {}));
+          const gc = give != null ? p.hand.find((h) => h.id === give) : null;
+          const xh = s.players[s.excluded].hand, pool = xh.filter((c) => !s.xPick || c.id !== s.xPick.id);
+          if (gc && pool.length) {
+            const tk = pool[this.randInt(pool.length)];
+            p.eff.splice(p.eff.indexOf(bar), 1); s.effDiscard.push(bar);
+            p.hand.splice(p.hand.indexOf(gc), 1, tk); xh.splice(xh.indexOf(tk), 1, gc);
+            this.stat('effetto_giocato:baratto', pid); this.stat('baratto', pid);
+            b = this.say('effect', `🤝 ${this.pn(pid)} gioca BARATTO: pesca alla cieca una carta dalla mano di ${this.pn(s.excluded)} e gliene dà una sua.`, pid, { k: 'baratto' });
+            if (b) yield b;
+          }
+        }
+        const card = p.eff.find((e) => e.k === 'cambio');
         if (!card) continue;
         const raw = yield* this.ask(this._dec('cambio', pid, {}));
         const c = raw != null ? p.hand.find((h) => h.id === raw) : null;
@@ -634,6 +649,7 @@
           case 'xplay': return pick(d.hand).id;
           case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
           case 'cambio': return rng() < 0.3 ? pick(d.hand).id : null;
+          case 'baratto': return rng() < 0.3 ? pick(d.hand).id : null;
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;
           case 'correct': return rng() < 0.5 ? (game.rules.modFlex ? { id: d.opts[0].id, delta: d.opts[0].delta } : d.opts[0].id) : null;

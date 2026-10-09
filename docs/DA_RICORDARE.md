@@ -176,3 +176,11 @@ Misure (hard×3, mazzo effetti senza Sincero/Scambio forzato; 3 copie di Cambio 
 | X coperta + Traditore | 3 | 32,4% | 1,60 / 2,60 | 132,6 | 1,83 | 39% vs 31% |
 Lettura: l'IA usa il Cambio soprattutto per prendersi una centrale alta e mettere una carta bassa (la finestra scende, si sfora più spesso verso l'alto): peggiora la coppia e fa un favore a chi lo gioca. Non aiuta a "centrare" il range.
 Variante "la vecchia centrale si SCARTA" (`cambioDiscard:true`; la mano di chi gioca la carta scende a 2): X scoperta (200 partite): sforo 25,6% (sotto 1,47 / sopra 1,77), punti coppia 141,9, 1,72 cambi/partita, sforo nei turni con cambio 23% vs 26% senza. X coperta + Traditore (160 partite): sforo 29,9% (sotto 1,51 / sopra 2,30), punti coppia 134,0, 1,81 cambi/partita, sforo 30% con cambio vs 30% senza. Quindi con scarto la carta è quasi neutra (aiuta un po' a X scoperta, nulla a X coperta), a differenza della versione "in mano" che peggiora lo sforo di 2–4 punti.
+
+## Carta "Baratto" (simulazione; `effectCopies.baratto`, 0 di default)
+Istantanea, dopo che l'escluso ha giocato: un attivo pesca alla cieca una delle carte rimaste in mano all'escluso e gliene dà una sua a scelta (coperta). 3 copie (mazzo effetti senza Sincero/Scambio forzato/Cambio):
+| Versione | Sforo | Sotto / sopra | Punti coppia | Usi a partita | Punteggio di chi lo gioca − media degli altri |
+|---|---|---|---|---|---|
+| X scoperta, 200 partite (senza carta: 26,4%, 142,4) | 27,7% | 2,06 / 1,55 | 139,6 | 1,82 | +0,41 |
+| X coperta + Traditore, 160 partite (senza carta: 28,4%, 139,2) | 31,5% | 2,08 / 1,93 | 132,8 | 1,93 | +0,20 |
+Lettura: l'effetto è quasi neutro per chi lo gioca (+0,2/+0,4 su ~18 punti, nel rumore) e peggiora un po' i risultati della coppia (sforo +1/+3 punti): rimescolare le mani disturba la coordinazione. Come "riparare una mano scarsa" funziona poco con le IA.

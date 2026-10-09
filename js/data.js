@@ -20,6 +20,7 @@
     sincero: { id: 'sincero', kind: 'sincero', n: 'Sincero', i: '🗣️', s: 'Istantanea: modificatori dichiarati esatti', d: 'Entrambi gli attivi dichiarano il modificatore con un numero esatto; chi mente vale 0.' },
     swap: { id: 'swap', kind: 'fila', n: 'Scambio forzato', i: '🔁', s: 'Scambi la tua mano con quella dell\'escluso', d: 'Scambi le tue carte numeriche in mano con quelle dell\'escluso.' },
     cambio: { id: 'cambio', kind: 'cambio', n: 'Cambio centrale', i: '🔁', s: 'Sostituisci la carta centrale con una della tua mano (prendi la vecchia)', d: 'Istantanea, dopo che l\'escluso ha giocato la sua carta: metti scoperta una carta della tua mano al posto della carta centrale e prendi in mano la vecchia centrale. Il range si sposta.' },
+    baratto: { id: 'baratto', kind: 'baratto', n: 'Baratto', i: '🤝', s: 'Prendi alla cieca una carta dall\'escluso e dagliene una tua', d: 'Istantanea, dopo che l\'escluso ha giocato la sua carta: peschi alla cieca una delle carte rimaste nella mano dell\'escluso e gli dai in cambio una carta a tua scelta, coperta.' },
     annulla: { id: 'annulla', kind: 'annulla', n: 'Annulla', i: '🚫', s: 'Reattiva: annulla un effetto rivelato', d: 'Neutralizza un effetto in fila rivelato in questo turno.' },
   };
   const WIDEN = true; // regola di default: i modificatori allargano il range da entrambi i lati, di n × modScale (vedi DEFAULT_RULES)
@@ -59,7 +60,7 @@
     zapFlipsDir: true,      // ogni Zapd inverte anche il verso di rotazione (dopo aver fatto avanzare l'escluso)
     rotateEachTurn: true,   // l'escluso avanza di un posto a ogni turno (dal 2°), oltre che a ogni Zapd
     sincereZero: true,      // Sincero: il modificatore non corrispondente vale 0
-    effectCopies: { reverse: 3, next: 3, sincero: 3, swap: 2, annulla: 0, cambio: 0, lo1: 1, lo2: 1, lo3: 1, hi1: 1, hi2: 1, hi3: 1 },
+    effectCopies: { reverse: 3, next: 3, sincero: 3, swap: 2, annulla: 0, cambio: 0, baratto: 0, lo1: 1, lo2: 1, lo3: 1, hi1: 1, hi2: 1, hi3: 1 },
   };
   FF.LEVELS = { easy: 'Facile', medium: 'Media', hard: 'Difficile' };
 
