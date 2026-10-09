@@ -246,3 +246,5 @@ body { overflow-x: hidden; }
 .colbtn .cb-rule { font-size: 1.05rem; }
 .colbtn .cb-desc { font-size: .95rem; font-weight: 500; color: var(--ink); opacity: .85; }
 .announce.k-rule .aemoji { font-size: 2.2rem; }
+.podio { display: inline-block; min-width: 1.2em; padding: 0 5px; border-radius: 8px; font-size: .78em; font-weight: 900; background: #e3d6b0; color: #3b2a14; }
+.podio.p3 { background: #f2c14e; } .podio.p1 { background: #cdd3dc; }

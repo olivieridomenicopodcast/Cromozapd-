@@ -632,11 +632,11 @@
     }
     endDialog() {
       const g = this.game, r = g.result, s = g.s;
-      const rows = [0, 1, 2].map((p) => `<tr class="${r.winners.includes(p) && r.winner != null ? 'win' : ''}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td><td>${r.personal[p]}</td><td>${Math.round(100 * r.factor[p])}%</td><td><b>${r.scores[p].toFixed(1)}</b></td></tr>`).join('');
+      const rows = [0, 1, 2].map((p) => `<tr class="${r.winners.includes(p) && r.winner != null ? 'win' : ''}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td><td>${r.personal[p]}</td><td>${g.rules.scoring === 'podio' ? r.factor[p] : Math.round(100 * r.factor[p]) + '%'}</td><td><b>${g.rules.scoring === 'podio' ? Math.round(r.scores[p]) : r.scores[p].toFixed(1)}</b></td></tr>`).join('');
       const prow = [0, 1, 2].map((e) => `<span class="pairchip ${r.pairWinners.includes(e) && r.pairWinner != null ? 'win' : ''}">${FF.pairLabel(e)} <b>${r.pairPts[e]}</b></span>`).join('');
       const dlg = UI.modal(`<h2>🏁 Fine partita</h2>
         <div class="lbl">🤝 Vincitore di coppia</div><div class="pairs">${prow}</div><p>${r.pairWinner == null ? 'Pareggio tra coppie.' : `Vince la coppia <b>${FF.pairLabel(r.pairWinner)}</b>.`}</p>
-        <div class="lbl">🏆 Vincitore individuale</div><table class="scoretbl"><thead><tr><th></th><th>Personali</th><th>Fattore</th><th>Punti</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="lbl">🏆 Vincitore individuale</div><table class="scoretbl"><thead><tr><th></th><th>Personali</th><th>${g.rules.scoring === 'podio' ? 'Quota' : 'Fattore'}</th><th>Punti</th></tr></thead><tbody>${rows}</tbody></table>
         <p>${r.winner == null ? 'Pareggio individuale.' : `Vince <b>${esc(s.players[r.winner].name)}</b>.`} <span class="muted">(${r.turns} turni · seed ${esc(this.cfg.seed)})</span></p>
         <div class="btn-row"><button class="btn" data-a="log">📜 Cronaca</button><button class="btn" data-a="rev">▶ Rivedi</button><button class="btn" data-a="txt">⬇ Esporta</button><button class="btn primary grow" data-a="home">Menu principale</button></div>`, { dismiss: true });
       dlg.el.addEventListener('click', (e) => {

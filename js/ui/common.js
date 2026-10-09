@@ -114,7 +114,7 @@
     const S = FF.Sprites, R = FF.DEFAULT_RULES;
     const row = (ico, txt) => `<div class="lrow"><span class="lico">${ico}</span><span>${txt}</span></div>`;
     let h = '<div class="lgroup">Il senso del gioco</div>';
-    h += row('⚖️', '<b>Non tirare la corda.</b> La carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota. Una coppia che sfora fa 0: una carta alta in coppia è un rischio, non un regalo.');
+    h += row('⚖️', '<b>Non tirare la corda.</b> La carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota (il tuo podio). Una coppia che sfora fa 0: una carta alta in coppia è un rischio, non un regalo.');
     h += '<div class="lgroup">Colori = regole</div>';
     h += row('📜', 'La <b>Zapd</b> dice quale regola è in vigore (dal colore dominante); la regola <b>si attiva solo nei turni in cui la carta centrale è di quel colore</b>, altrimenti quel turno è normale.');
     h += COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return row(S.color(i), `<b>${c.n}</b> ${c.sym}${rl ? ` → ${rl.i} <b>${rl.n}</b>: ${rl.d}` : ''}`); }).join('');
@@ -128,7 +128,7 @@
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
     h += row('🐍', '<b>Carta Traditore</b>: se l\'escluso gioca un numero diverso da quello dichiarato ne pesca una (nessuna col Carnevale): toglie da 0 a 3 punti personali. Finito il mazzetto di 12, ogni tradimento costa 3.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
-    h += row('📊', '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
+    h += row('📊', R.scoring === 'podio' ? '<b>Quota a podio</b>: in ogni coppia 3 punti a chi ha messo più punti, 2 al secondo, 1 all\'ultimo (a pari merito si divide). Quota = somma dei 3 podi (da 3 a 9). Punteggio = personali × Quota.' : '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
     h += '<div class="lgroup">Carte-effetto (15)</div>';
     h += FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired && (!FF.EFFECTS[k].mod || k.endsWith('1'))).map((k) => {
       const e = EFFECTS[k];

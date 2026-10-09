@@ -140,7 +140,18 @@
 
     // ───────────────────────── punteggio ─────────────────────────
     // Fattore coppie: media dei contributi % nelle coppie con totale > 0 (frazione 0..1)
+    // Quota a PODIO: in ogni coppia 3 punti a chi ha messo di più, 2 al secondo, 1 all'ultimo (a pari merito si divide); coppia mai incassata: 2 a testa. Somma delle tre coppie (3..9)
+    podioIn(pid, e) {
+      const s = this.s;
+      if (s.pairPts[e] <= 0) return 2;
+      const mine = s.contrib[pid][e], all = [0, 1, 2].map((x) => s.contrib[x][e]);
+      const better = all.filter((x) => x > mine).length, equal = all.filter((x) => x === mine).length;
+      let pts = 0; for (let k = 0; k < equal; k++) pts += 3 - (better + k);
+      return pts / equal;
+    }
+    podio(pid) { return this.podioIn(pid, 0) + this.podioIn(pid, 1) + this.podioIn(pid, 2); }
     factor(pid) {
+      if (this.rules.scoring === 'podio') return this.podio(pid);
       const s = this.s; let sum = 0, n = 0;
       for (let e = 0; e < 3; e++) if (s.pairPts[e] > 0) { sum += s.contrib[pid][e] / s.pairPts[e]; n++; }
       return n ? sum / n : 0;
@@ -266,7 +277,7 @@
       };
       let b = this.say('end', `🏁 Fine partita (turno ${s.turn})! Coppie: ${[0, 1, 2].map((e) => `${pairLabel(e)} ${s.pairPts[e]}`).join(' · ')} → ${this.result.pairWinner == null ? 'PAREGGIO tra coppie' : 'vince la coppia ' + pairLabel(this.result.pairWinner)}.`);
       if (b) yield b;
-      b = this.say('end', `🏆 Individuale (punti personali × Fattore coppie): ${[0, 1, 2].map((i) => `${this.pn(i)} ${personal[i]} × ${(factor[i] * 100).toFixed(0)}% = ${scores[i].toFixed(1)}`).join(' · ')} → ${this.result.winner == null ? 'PAREGGIO' : 'vince ' + this.pn(this.result.winner)}.`);
+      b = this.say('end', `🏆 Individuale (punti personali × ${this.rules.scoring === 'podio' ? 'quota a podio' : 'Fattore coppie'}): ${[0, 1, 2].map((i) => `${this.pn(i)} ${personal[i]} × ${this.rules.scoring === 'podio' ? factor[i] : (factor[i] * 100).toFixed(0) + '%'} = ${scores[i].toFixed(this.rules.scoring === 'podio' ? 0 : 1)}`).join(' · ')} → ${this.result.winner == null ? 'PAREGGIO' : 'vince ' + this.pn(this.result.winner)}.`);
       if (b) yield b;
       return this.result;
     }

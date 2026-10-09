@@ -7,8 +7,8 @@
 ## 1. In breve
 **Esattamente 3 giocatori**: A, B, C (nell'ordine in cui siedono, in senso orario). Ogni turno due giocatori sono **attivi** e formano una **coppia**; il terzo è l'**escluso**. Le coppie possibili sono **AB, BC, AC**.
 La partita finisce quando esce l'ultima delle 13 carte **Zapd** (12 colorate + la **Cromozapd**): si gioca l'ultima mano, poi si conta.
-Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadra) e **vincitore individuale** (punti personali × Fattore coppie).
-**Il senso del gioco:** la carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota; una coppia che sfora fa 0. Giocare sempre carte alte non conviene, e nemmeno pensare solo a sé stessi (§11).
+Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadra) e **vincitore individuale** (punti personali × quota a podio).
+**Il senso del gioco:** la carta per sé è sempre tua, ma ogni punto che togli alla coppia ti fa scendere sul podio e abbassa la tua quota; una coppia che sfora fa 0. Giocare sempre carte alte non conviene, e nemmeno pensare solo a sé stessi (§11).
 
 ## 2. Componenti
 - **Mazzo principale: 93 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **12 carte Zapd** colorate (3 per colore) + **la Cromozapd** (in tutto 13 carte Zapd). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**. Il **colore della carta centrale** serve ad attivare la regola di colore (§7); per il resto il colore delle carte numeriche non conta.
@@ -40,8 +40,8 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 - **Range = carta centrale + carta dell'escluso** **[chiarito: idea di Niky, scelta dopo le simulazioni]**: va da *V* a *V + X*, dove *V* è il valore della carta centrale e *X* il valore della carta giocata dall'escluso. Esempio: centrale 6, l'escluso gioca 7 → range **6–13**. Gli estremi **sono inclusi**.
 - Si controlla la **somma delle due carte-per-la-coppia degli attivi**. Si può sforare **sia sopra sia sotto**.
 - **L'escluso decide la difficoltà**: una carta alta allarga il range (aiuta la coppia), una carta bassa lo stringe (le mette i bastoni tra le ruote). Ha solo le carte che ha in mano, quindi a volte è costretto ad aiutare (o a ostacolare) contro la sua volontà.
-- **Nel range** → la coppia incassa **la somma delle due carte-coppia + la carta dell'escluso**; la carta dell'escluso conta nel suo contributo % in quella coppia (non nei suoi punti personali).
-- **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**. Nessun vantaggio dallo sforo per l'escluso.
+- **Nel range** → la coppia incassa **la somma delle due carte-coppia + la carta dell'escluso**; la carta dell'escluso conta nei punti che lui mette in quella coppia, cioè nel suo podio (non nei suoi punti personali).
+- **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nei punti che nessuno mette in quella coppia**. Nessun vantaggio dallo sforo per l'escluso.
 - **Niente immunità di colore** **[chiarito]**: il colore delle carte non salva dallo sforo.
 - La **carta per sé** vale sempre il suo valore, anche se la coppia sfora.
 - **L'escluso dichiara e può tradire** **[chiarito]**: prima di mettere la X coperta dichiara un **numero esatto**. Al reveal, se la carta giocata ha un **valore diverso** da quello dichiarato (sforo o no), **pesca una carta Traditore** (nessuna con **Carnevale** attivo): il suo valore (0–3) si **toglie ai punti personali grezzi**, e la carta resta scoperta davanti a lui per tutta la partita. Se la coppia sfora per colpa degli attivi e l'escluso era stato onesto, non succede nulla. Finito il mazzetto Traditore (12 carte), **ogni nuovo tradimento costa 3** punti personali.
@@ -68,12 +68,20 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 | Giallo | **Effetti vietati** | In questo turno nessuno gioca **Reverse, Prossima carta e Baratto**; i **modificatori ±n si possono giocare**. L'escluso pesca comunque a fine turno. |
 
 ## 8. Punteggio finale
-- **Punti squadra** di ogni coppia = somma dei punti incassati (§5).
+- **Punti squadra** di ogni coppia = somma dei punti incassati (§5). **Vincitore di coppia**: la coppia con più punti squadra.
 - **Punti personali grezzi** = somma delle **carte per sé** giocate da attivo, **meno le carte Traditore** pescate.
-- **Contributo % in una coppia** = punti versati dal giocatore a quella coppia ÷ punti totali di quella coppia. Contano la carta-per-la-coppia (da attivo) e la carta da escluso, solo nei turni in cui la coppia ha incassato.
-- **Fattore coppie** = media (non pesata) dei contributi % nelle **3 coppie**, compresa quella a cui contribuisci da escluso. Una coppia con totale 0 si salta nella media; se sono tutte 0, il fattore è 0 **[interpretazione]**.
-- **Punteggio individuale = punti personali grezzi × Fattore coppie.**
-- **Vincitore di coppia**: la coppia con più punti squadra. **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
+- **Il podio di ogni coppia** **[chiarito: idea di Niky, provata in simulazione]**: nelle carte messe in una coppia (le carte-coppia dei due attivi e la carta dell'escluso, solo nei turni in cui la coppia ha incassato) si somma il **valore** delle carte di ciascun giocatore. Chi ha messo di più prende **3** punti di podio, il secondo **2**, l'ultimo **1**. A **pari merito** si divide (due primi a pari prendono 2,5 ciascuno e l'ultimo 1; tutti e tre pari prendono 2 a testa). Se una coppia non ha mai incassato, vale **2 a testa**.
+- **Quota** = somma dei tre podi (le tre coppie: AB, BC, AC), da 3 a 9; la media è 6.
+- **Punteggio individuale = punti personali grezzi × quota.** Non servono divisioni: solo somme, confronti tra tre mucchietti e una moltiplicazione.
+- **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
+- *Vecchia regola (ancora nel codice, parametro "Punteggio")*: Fattore coppie = media delle quote % nei punti delle tre coppie; punteggio = personali × Fattore.
+
+### Conta al tavolo, passo per passo
+1. Ogni coppia ha una zona con 3 posti (A, B, C): quando la coppia incassa, ognuno mette le sue carte nel proprio posto. Se sfora, le carte vanno negli scarti.
+2. A fine partita, in ogni zona sommi i **valori** delle carte di ogni posto.
+3. In ogni zona assegni il podio: 3 al posto con più punti, 2 al secondo, 1 all'ultimo (pari merito: si divide).
+4. Sommi i tre podi di ciascuno: è la tua quota.
+5. Sommi le tue carte per sé, togli le carte Traditore e moltiplichi per la quota.
 
 ## 9. Mazzetto Effetti (15 carte)
 Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
@@ -90,19 +98,19 @@ Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del su
 *Carte tolte nei playtest* **[chiarito]**: Sincero, Scambio forzato, Annulla (quasi mai giocata), Cambio centrale e Lente (provate in simulazione e scartate). Restano nel codice a 0 copie.
 
 ## 10. Cosa vede l'app e modalità
-Sempre sul tavolo: carta centrale e range del turno, colore dominante e regola in vigore, escluso e verso, Zapd uscite (su 13), punti squadra delle 3 coppie, punti personali e Fattore coppie di ognuno, carte Traditore, effetti in mano propri. Ogni evento ha un messaggio che spiega **cosa fa e perché**.
+Sempre sul tavolo: carta centrale e range del turno, colore dominante e regola in vigore, escluso e verso, Zapd uscite (su 13), punti squadra delle 3 coppie, punti personali, podio nelle 3 coppie e quota di ognuno, carte Traditore, effetti in mano propri. Ogni evento ha un messaggio che spiega **cosa fa e perché**.
 Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si può giocare tu + 2 AI, 2 umani + 1 AI (hotseat con schermata di passaggio), 3 umani (hotseat) o 3 AI da guardare. Nel simulatore il profilo A occupa un posto che ruota e gli altri due hanno il profilo B.
 
 ## 11. Non tirare la corda (il senso del gioco)
-Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni opposte.
+Il punteggio è **personali × quota a podio**: due numeri che si muovono in direzioni opposte.
 - **Spremere la coppia** (carte alte per la coppia) fa sforare: una coppia che sfora fa 0 e butta le tue carte migliori.
-- **Spremere sé stessi** (carte basse per la coppia, alte per sé) alza i personali ma fa crollare la tua quota nella coppia, quindi il Fattore.
+- **Spremere sé stessi** (carte basse per la coppia, alte per sé) alza i personali ma ti fa scendere sul podio delle coppie, quindi fa crollare la tua quota.
 
 *Esempio.* Carta centrale 4, l'escluso gioca un 3: range 4–7. A ha in mano 9, 8, 3 e B ha 7, 6, 2.
 - Se A gioca il 9 per la coppia e l'8 per sé e B il 7: somma 16 > 7, **sforo**. A ha fatto 8 punti personali, ma la coppia fa 0 e la sua quota non cresce.
 - Se invece A gioca il 3 per la coppia e il 9 per sé, B il 2 per la coppia e il 7 per sé: somma 5, **nel range**. La coppia incassa 3 + 2 + 3 (la carta dell'escluso) = 8, e A ha comunque +9 personali.
 
-*Misure* (3 IA difficili): chi pensa **solo a sé** vince il 10,3% delle partite (regole attuali, 300 partite); chi gioca **sempre le carte più alte** il 10% (misura fatta con la regola precedente); chi bilancia, circa il 33%.
+*Misure* (3 IA difficili, 200 partite, punteggio a podio): vedi §14 e docs/DA_RICORDARE.md.
 
 ## 12. Non ancora definito
 - Quanto spesso si attiva una regola di colore (circa 1 turno su 4) e se le 4 regole sono equilibrate: da vedere al playtest.
@@ -119,6 +127,7 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 | Carte in mano | **3** |
 | Effetti in mano al massimo | **2** |
 | Zapd per colore | **3** |
+| Punteggio | **podio** (3/2/1 per coppia, quota = somma dei tre podi) |
 | Cromozapd (13ª Zapd) | **sì** |
 | Colore dominante = regola in vigore | **sì** |
 | La regola si attiva solo se la carta centrale ha il colore dominante | **sì** |
@@ -141,7 +150,7 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 | Zapd da "Prossima carta" | Non specificato | Effetti dal turno dopo |
 | Verso di rotazione | Cambiava solo con Reverse | **Cambia anche a ogni Zapd** (voluto da Niky) |
 | Rotazione dell'escluso | Solo alle Zapd (lettura letterale del Design Doc) | **A ogni turno e a ogni Zapd** (voluto da Niky) |
-| Carta dell'escluso | Ambigua con lo sforo | **Decide il range** (X): dichiarata e giocata coperta, scoperta al reveal; conta per i punti della coppia e per il suo Fattore; 0 se la coppia sfora (voluto da Niky) |
+| Carta dell'escluso | Ambigua con lo sforo | **Decide il range** (X): dichiarata e giocata coperta, scoperta al reveal; conta per i punti della coppia e per il suo podio; 0 se la coppia sfora (voluto da Niky) |
 | Range | V … V + Base | **V … V + X** (X = carta dell'escluso) |
 | Tradimento | Libero e senza effetti | L'escluso che gioca un numero diverso da quello dichiarato pesca una **carta Traditore** (toglie 0–3 punti personali) |
 | Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Carnevale, Luce, Effetti vietati), attiva solo se la carta centrale è di quel colore; niente immunità |

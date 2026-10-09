@@ -58,6 +58,7 @@
     startDir: 1,            // verso iniziale (+1 = A→B→C)
     xInSum: false,           // variante: la carta dell'escluso conta nella somma controllata dal range (con 'xsum' no: la sua carta decide il range)
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
+    scoring: 'podio',       // 'podio' = ogni coppia dà 3/2/1 a chi ha messo di più/meno; quota = somma dei tre podi; punteggio = personali × quota. 'fattore' = vecchia regola (media delle quote %)
     colorRules: true,       // il colore dominante è la REGOLA IN VIGORE del turno (Silenzio, Carnevale, Luce, Effetti vietati)
     colorTrigger: true,     // la regola del colore dominante si attiva SOLO nei turni in cui la carta centrale è di quel colore (false = sempre)
     colorRuleMap: ['silenzio', 'carnevale', 'luce', 'effetti'],   // regola per colore: Rosso, Blu, Verde, Giallo

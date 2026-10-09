@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1, colorRules: false, immunity: true, cromozapd: false, xHidden: false, traitor: false }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1, colorRules: false, immunity: true, cromozapd: false, xHidden: false, traitor: false, scoring: 'fattore' }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -445,6 +445,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Carte in mano'), String(R.handSize));
   assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));
+  assert.equal(val('Punteggio'), R.scoring === 'podio' ? 'podio (3/2/1 per coppia, quota = somma dei tre podi)' : 'fattore');
   assert.equal(val('Cromozapd (13ª Zapd)'), R.cromozapd ? 'sì' : 'no');
   assert.equal(val('Colore dominante = regola in vigore'), R.colorRules ? 'sì' : 'no');
   assert.equal(val('La regola si attiva solo se la carta centrale ha il colore dominante'), R.colorTrigger ? 'sì' : 'no');
@@ -496,4 +497,21 @@ test('Carnevale (Blu): se l\'escluso gioca un numero diverso dal dichiarato non 
   assert.equal(g.s.rule, 'carnevale'); assert.equal(g.s.players[2].traitor.length, 0); assert.equal(g.stats.p[2].bugia_gratis_carnevale, 1);
   g = lie(1, [5, 0]);       // centrale di un altro colore → turno normale: pesca la carta Traditore
   assert.equal(g.s.rule, null); assert.equal(g.s.players[2].traitor.length, 1); assert.equal(g.s.players[2].traitor[0], 3);
+});
+
+test('punteggio a podio: 3/2/1 per coppia a chi ha messo di più, pari merito si divide, coppia a 0 vale 2 a testa; punteggio = personali × quota', () => {
+  const g = mk({ rules: { scoring: 'podio' } });
+  // AB: A 14, B 12, C 9 · BC: A 15, B 13, C 10 · AC: A 12, B 8, C 17 (esempio del regolamento)
+  const s = g.s; s.contrib = [[14, 15, 12], [12, 13, 8], [9, 10, 17]]; s.pairPts = [35, 38, 37];
+  // contrib[giocatore][escluso]: indice 0 = coppia con escluso A (BC)… per l'esempio basta l'ordinamento per colonna
+  const q = [0, 1, 2].map((p) => g.podio(p));
+  assert.deepEqual(q.map((x) => Math.round(x * 100) / 100), [8, 5, 5]);
+  s.players[0].personal = 44; s.players[1].personal = 53; s.players[2].personal = 43;
+  assert.deepEqual([0, 1, 2].map((p) => g.score(p)), [44 * 8, 53 * 5, 43 * 5]);
+  // pari merito: due a pari al primo posto prendono (3+2)/2 = 2,5 e l'ultimo 1
+  s.contrib = [[5, 5, 5], [5, 5, 5], [3, 3, 3]]; s.pairPts = [13, 13, 13];
+  assert.equal(g.podio(0), 7.5); assert.equal(g.podio(2), 3);
+  // una coppia mai incassata vale 2 a tutti
+  s.pairPts = [0, 13, 13]; s.contrib = [[0, 5, 5], [0, 5, 5], [0, 3, 3]];
+  assert.equal(g.podio(0), 2 + 2.5 + 2.5);
 });

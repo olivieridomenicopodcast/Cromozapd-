@@ -74,9 +74,11 @@
 
   // ───────────────────────── valutazione ─────────────────────────
   // Fattore coppie "morbido": le coppie ancora a 0 contano 1/3 (quota neutra) così le prime mosse non valgono 0 per forza
+  // con il punteggio a podio una quota % si traduce in un podio atteso (1..3) e il "fattore equivalente" è la somma dei podi / 18 (media 1/3)
+  const shareToPodio = (sh) => Math.max(1, Math.min(3, 2 + 6 * (sh - 1 / 3)));
   function softFactor(g, p) {
     const s = g.s; let sum = 0;
-    for (let e = 0; e < 3; e++) sum += s.pairPts[e] > 0 ? s.contrib[p][e] / s.pairPts[e] : 1 / 3;
+    for (let e = 0; e < 3; e++) { const sh = s.pairPts[e] > 0 ? s.contrib[p][e] / s.pairPts[e] : 1 / 3; sum += g.rules.scoring === 'podio' ? shareToPodio(sh) / 6 : sh; }
     return sum / 3;
   }
   // Punteggio PROIETTATO a fine partita: i punti personali e la quota in ogni coppia si diluiscono con i turni che restano.
@@ -86,7 +88,7 @@
     const s = g.s, turnsLeft = Math.max(0, g.totalZaps - s.zapsDrawn) * 1.03 + (s.zapsDrawn >= g.totalZaps ? 0 : 0.5);
     const Tf = turnsLeft * PROJ.pairPerTurn;
     let sum = 0;
-    for (let e = 0; e < 3; e++) sum += (s.contrib[p][e] + Tf / 3) / (s.pairPts[e] + Tf || 1);
+    for (let e = 0; e < 3; e++) { const sh = (s.contrib[p][e] + Tf / 3) / (s.pairPts[e] + Tf || 1); sum += g.rules.scoring === 'podio' ? shareToPodio(sh) / 6 : sh; }
     return (s.players[p].personal + turnsLeft * (2 / 3) * PROJ.selfAvg) * (sum / 3);
   }
   let useProj = true;

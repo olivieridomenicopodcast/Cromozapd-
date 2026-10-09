@@ -185,7 +185,8 @@
       `| punteggio A − media dei B | ${ci(s.diff)} | |`, '');
     L.push('## Vantaggio di posto', '', '| Posto | Vittorie individuali | Coppia (escluso) vincente |', '|---|---|---|');
     for (let p = 0; p < 3; p++) L.push(`| ${FF.SEATS[p]}${o.rules.startExcluded >= 0 && p === o.rules.startExcluded ? ' (escluso iniziale)' : ''} | ${pct(agg.seatWins[p] / n)} | ${pct(agg.pairWins[p] / n)} (${FF.pairLabel(p)}) |`);
-    L.push('', '## Punteggi medi', '', '| | Personali | Fattore coppie | Punteggio |', '|---|---|---|---|', `| A | ${f1(s.personalA)} | ${pct(s.factorA)} | ${f1(s.scoreA)} |`, `| B (media) | ${f1(s.personalB)} | ${pct(s.factorB)} | ${f1(s.scoreB)} |`,
+    const pod = ((o.rules && o.rules.scoring) || FF.DEFAULT_RULES.scoring) === 'podio', fq = (x) => (pod ? f1(x) : pct(x)), fs = (x) => (pod ? x.toFixed(0) : f1(x));
+    L.push('', '## Punteggi medi', '', `| | Personali | ${pod ? 'Quota a podio' : 'Fattore coppie'} | Punteggio |`, '|---|---|---|---|', `| A | ${f1(s.personalA)} | ${fq(s.factorA)} | ${fs(s.scoreA)} |`, `| B (media) | ${f1(s.personalB)} | ${fq(s.factorB)} | ${fs(s.scoreB)} |`,
       '', `Durata media ${f1(s.turns)} turni. Punti squadra totali per partita ${f1(s.pairPtsPerGame)}.`, '');
     L.push('## Come vanno i turni', '', `- Coppia nel range: ${pct(s.rangeRate)} · **sforo: ${pct(s.sforoRate)}**`,
       `- Dichiarazioni con numero tradite: ${pct(s.betrayRate)}`,

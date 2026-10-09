@@ -90,12 +90,13 @@
 
   // punteggi e contributi di tutti, sempre visibili
   UI.renderScores = function (el, g) {
-    const s = g.s;
-    const head = `<tr><th></th>${[0, 1, 2].map((e) => `<th title="Punti della coppia ${FF.pairLabel(e)}">${FF.pairLabel(e)}</th>`).join('')}<th title="Somma delle carte per sé, meno le carte Traditore">Pers.</th><th title="Media delle tue quote nelle 3 coppie">Fatt.</th><th title="Personali × Fattore">Punti</th></tr>`;
+    const s = g.s, pod = g.rules.scoring === 'podio';
+    const head = `<tr><th></th>${[0, 1, 2].map((e) => `<th title="Punti della coppia ${FF.pairLabel(e)}">${FF.pairLabel(e)}</th>`).join('')}<th title="Somma delle carte per sé, meno le carte Traditore">Pers.</th><th title="${pod ? 'Somma dei podi nelle 3 coppie (3 al primo, 2 al secondo, 1 all\'ultimo)' : 'Media delle tue quote nelle 3 coppie'}">${pod ? 'Quota' : 'Fatt.'}</th><th title="${pod ? 'Personali × Quota' : 'Personali × Fattore'}">Punti</th></tr>`;
     const pairRow = `<tr class="pairrow"><td>Coppia</td>${[0, 1, 2].map((e) => `<td><b>${s.pairPts[e]}</b></td>`).join('')}<td colspan="3" class="muted">squadra</td></tr>`;
-    const rows = [0, 1, 2].map((p) => `<tr class="pr${p}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td>${[0, 1, 2].map((e) => `<td>${s.pairPts[e] ? Math.round(100 * s.contrib[p][e] / s.pairPts[e]) + '%' : '–'}</td>`).join('')}<td>${s.players[p].personal}${s.players[p].traitor && s.players[p].traitor.length ? ` <span class="muted" title="Carte Traditore: −${s.players[p].traitor.reduce((a, b) => a + b, 0)}">🐍</span>` : ''}</td><td>${Math.round(100 * g.factor(p))}%</td><td><b>${g.score(p).toFixed(1)}</b></td></tr>`).join('');
+    const cell = (p, e) => (pod ? (s.pairPts[e] ? `${s.contrib[p][e]} <span class="podio p${String(g.podioIn(p, e)).replace('.', '_')}" title="podio: ${g.podioIn(p, e)}">${g.podioIn(p, e)}</span>` : '–') : (s.pairPts[e] ? Math.round(100 * s.contrib[p][e] / s.pairPts[e]) + '%' : '–'));
+    const rows = [0, 1, 2].map((p) => `<tr class="pr${p}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td>${[0, 1, 2].map((e) => `<td>${cell(p, e)}</td>`).join('')}<td>${s.players[p].personal}${s.players[p].traitor && s.players[p].traitor.length ? ` <span class="muted" title="Carte Traditore: −${s.players[p].traitor.reduce((a, b) => a + b, 0)}">🐍</span>` : ''}</td><td>${pod ? g.factor(p) : Math.round(100 * g.factor(p)) + '%'}</td><td><b>${pod ? Math.round(g.score(p)) : g.score(p).toFixed(1)}</b></td></tr>`).join('');
     el.innerHTML = `<table class="scoretbl"><thead>${head}</thead><tbody>${pairRow}${rows}</tbody></table>
-      <div class="small muted" style="margin-top:6px">Colonne AB / BC / AC: quota di ognuno nei punti di quella coppia (anche da escluso). Punti = personali × Fattore.</div>`;
+      <div class="small muted" style="margin-top:6px">${pod ? 'Colonne AB / BC / AC: i punti che ognuno ha messo in quella coppia (anche da escluso) e, in piccolo, il podio: 3 a chi ne ha messi di più, 2 al secondo, 1 all\'ultimo. Quota = somma dei tre podi. Punti = personali × Quota.' : 'Colonne AB / BC / AC: quota di ognuno nei punti di quella coppia (anche da escluso). Punti = personali × Fattore.'}</div>`;
   };
 
   // stati speciali: descritti sempre, anche quando non sono attivi
