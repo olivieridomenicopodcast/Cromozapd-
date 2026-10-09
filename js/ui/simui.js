@@ -27,7 +27,7 @@
   }
   const tile = (big, label, sub) => `<div class="tile"><div class="tbig">${big}</div><div class="tlab">${label}</div>${sub ? `<div class="tsub">${sub}</div>` : ''}</div>`;
   const parseParams = (txt) => { const o = {}; String(txt || '').split(/[,;\s]+/).filter(Boolean).forEach((p) => { const [k, v] = p.split('='); if (k && v != null) o[k] = v === 'true' ? true : v === 'false' ? false : Number(v); }); return Object.keys(o).length ? o : undefined; };
-  const PARAM_LIST = ['modScale', 'handSize', 'effectHandMax', 'zapPerColor', 'traitorOverflow', 'startExcluded', ...FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired).map((k) => 'effectCopies.' + k)];
+  const PARAM_LIST = ['modScale', 'handSize', 'zapPerColor', 'traitorOverflow', 'startExcluded', ...FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired).map((k) => 'effectCopies.' + k)];
 
   UI.openSim = function () {
     UI.screen('sim');

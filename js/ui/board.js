@@ -62,7 +62,7 @@
     return `<div class="seat s${pid} ${view.active === pid ? 'turn' : ''} ${isEx ? 'isex' : ''}" style="--sc:${S.SEATCOL[pid]}">
       <div class="shead">${S.seat(pid, 'sbadge')}<div class="sname"><b>${esc(p.name)}</b><span class="skind">${kind}</span></div>${role}</div>
       <div class="shand"><div class="hlabel">Mano (${p.hand.length})</div><div class="cardsrow">${hand || '<span class="muted small">vuota</span>'}</div></div>
-      <div class="shand"><div class="hlabel">Effetti (${p.eff.length}/${g.rules.effectHandMax})</div><div class="cardsrow">${eff || '<span class="muted small">nessuno</span>'}</div></div>
+      <div class="shand"><div class="hlabel">Effetti (${p.eff.length})</div><div class="cardsrow">${eff || '<span class="muted small">nessuno</span>'}</div></div>
       ${p.traitor && p.traitor.length ? `<div class="trait" title="Carte Traditore: tolgono punti personali">🐍 ${p.traitor.map((v) => `<span class="tcard">−${v}</span>`).join(' ')}</div>` : ''}
       ${played}</div>`;
   }

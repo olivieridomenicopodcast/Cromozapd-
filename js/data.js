@@ -50,7 +50,7 @@
   FF.DEFAULT_RULES = {
     base: 12,               // ampiezza del range: da V a V+base (la somma controllata è di 3 carte; deciso da Niky dopo le simulazioni)
     handSize: 3,            // carte numeriche in mano
-    effectHandMax: 2,       // carte-effetto in mano al massimo
+    effectHandMax: 99,      // carte-effetto in mano al massimo (99 = nessun limite)
     zapPerColor: 1,         // Zapd per colore (totale = 4 × questo + la Cromozapd = fine partita)
     scales: 2,              // scale da 1 a 10 per colore
     maxValue: 10,

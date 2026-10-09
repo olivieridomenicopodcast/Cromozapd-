@@ -86,7 +86,7 @@ Il turno in cui esce la **5ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si g
 5. Sommi le tue carte per sé, togli le carte Traditore e moltiplichi per la quota.
 
 ## 9. Mazzetto Effetti (15 carte)
-Solo l'**escluso** pesca una carta-effetto, **sempre** (non ha motivo di rifiutare), a fine del suo turno da escluso, se ne ha meno di 2 in mano e il mazzetto non è vuoto. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
+Solo l'**escluso** pesca una carta-effetto, **sempre** (non ha motivo di rifiutare), a fine del suo turno da escluso, se il mazzetto non è vuoto. Non può giocarne in quel turno. **Nessun limite** di carte-effetto in mano **[chiarito]**. Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo non si giocano Reverse, Prossima carta e Baratto (i modificatori sì).
 
 | Carta | Quando | Cosa fa |
 |---|---|---|
@@ -127,7 +127,6 @@ Il punteggio è **personali × quota a podio**: due numeri che si muovono in dir
 | Modificatori ±n: allargano il range di n × | **2** |
 | Escluso iniziale | **a sorte** |
 | Carte in mano | **3** |
-| Effetti in mano al massimo | **2** |
 | Zapd per colore | **1** |
 | Punteggio | **podio** (3/2/1 per coppia, quota = somma dei tre podi) |
 | Cromozapd (5ª Zapd) | **sì** |

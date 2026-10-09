@@ -9,7 +9,7 @@
 
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
-    ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
+    ['handSize', 'Carte numeriche in mano'], 
     ['zapPerColor', 'Zapd per colore'], ['cromozapd', 'Carta Cromozapd (5ª Zapd)'], ['colorRules', 'Il colore dominante è la regola in vigore'], ['immunity', 'Immunità del colore dominante (vecchia regola)'],
     ['traitor', 'Carte Traditore (X coperta)'], ['traitorOverflow', 'Valore di ogni Traditore dopo il mazzetto'], ['barattoSee', 'Baratto: chi lo gioca vede la mano dell\'escluso'],
     ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
@@ -335,7 +335,7 @@
     pname(pid) { return this.game.s.players[pid].name; }
     handStrip(d) {
       return `<div class="lbl">La tua mano</div><div class="cardsrow big">${d.hand.map((c) => UI.cardHTML(c)).join('')}</div>
-        <div class="lbl">I tuoi effetti (${d.eff.length}/${this.game.rules.effectHandMax})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
+        <div class="lbl">I tuoi effetti (${d.eff.length})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
     }
     ctxLine(d) {
       const g = this.game, ex = d.excluded, st = g.s, xm = st.xmode, rl = g.rules.colorRules && st.rule ? FF.COLOR_RULES[st.rule] : null;
@@ -584,7 +584,7 @@
       const left = this.game.s.effDeck.length;
       return new Promise((resolve) => {
         this.setAction(`<h3>🎴 ${esc(this.pname(d.player))}: pesca un effetto?</h3>
-          <p>Sei l'escluso di questo turno: puoi pescare <b>1 carta</b> dal Mazzetto Effetti (restano ${left}). La vedrai solo tu. Non puoi giocarla adesso, solo da attivo nei prossimi turni. Ne hai ${d.eff.length}/${this.game.rules.effectHandMax}.</p>
+          <p>Sei l'escluso di questo turno: puoi pescare <b>1 carta</b> dal Mazzetto Effetti (restano ${left}). La vedrai solo tu. Non puoi giocarla adesso, solo da attivo nei prossimi turni. Ne hai ${d.eff.length}.</p>
           <div class="actrow"><div>${S.backEffect('big')}</div><div class="grow cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('')}</div></div>
           <div class="btn-row"><button class="btn" id="e-no">Non pesco</button><button class="btn primary grow" id="e-yes">Pesca una carta-effetto</button></div>`);
         $('#e-no').onclick = () => resolve(false); $('#e-yes').onclick = () => resolve(true);

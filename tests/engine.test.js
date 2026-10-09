@@ -314,16 +314,16 @@ test('Annulla non può bersagliare Sincero (non è in fila)', () => {
   assert.deepEqual(d.targets.map((t) => t.k), ['hi1']);
 });
 
-test('l\'escluso pesca sempre un effetto (max 2 in mano) senza che gli venga chiesto, e non può giocarne; gli attivi no', () => {
+test('l\'escluso pesca sempre un effetto (nessun limite in mano) senza che gli venga chiesto, e non può giocarne; gli attivi no', () => {
   let g = mk({ effDeck: ['swap', 'next', 'reverse'], eff: [[], [], ['annulla']] });
   let p = turn(g);
   assert.ok(!p.log.some((d) => d.type === 'effdraw'));
   assert.equal(g.s.players[2].eff.length, 2);
   assert.equal(g.s.players[0].eff.length, 0);
-  // già a 2: non gli viene nemmeno chiesto
+  // già a 2: pesca comunque (nessun limite)
   g = mk({ effDeck: ['swap', 'next'], eff: [[], [], ['annulla', 'swap']] });
   p = turn(g);
-  assert.equal(g.s.players[2].eff.length, 2);
+  assert.equal(g.s.players[2].eff.length, 3);
   // l'escluso non riceve la domanda "play" (ha solo xplay)
   assert.ok(!p.log.some((d) => d.type === 'play' && d.player === 2));
 });
@@ -377,7 +377,7 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
       assert.equal(new Set(ids).size, 85, 'duplicati');
       const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
       assert.equal(eids.length, 15); assert.equal(new Set(eids).size, 15);
-      for (const p of s.players) { assert.ok(p.hand.length <= 3 && p.eff.length <= 2); }
+      for (const p of s.players) { assert.ok(p.hand.length <= 3); }
       assert.ok(s.zapPile.length === s.zapsDrawn);
       return bots[d.player].decide(game, d);
     });
@@ -444,7 +444,6 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Range'), 'da V a V + X'); assert.equal(R.rangeMode, 'xsum');
   assert.equal(val('Modificatori ±n: allargano il range di n ×'), String(R.modScale));
   assert.equal(val('Carte in mano'), String(R.handSize));
-  assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));
   assert.equal(val('Punteggio'), R.scoring === 'podio' ? 'podio (3/2/1 per coppia, quota = somma dei tre podi)' : 'fattore');
   assert.equal(val('Cromozapd (5ª Zapd)'), R.cromozapd ? 'sì' : 'no');
