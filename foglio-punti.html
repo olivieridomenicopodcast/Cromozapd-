@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cromozapd — Foglio punti</title>
+<style>
+  :root { --ink: #1b1b1b; --line: #222; --soft: #f1f1f1; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif; color: var(--ink); background: #e7e7e7; font-size: 15px; line-height: 1.35; }
+  .bar { max-width: 210mm; margin: 12px auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 0 12px; }
+  .bar button, .bar a { font: inherit; font-weight: 800; padding: 10px 16px; border-radius: 10px; border: 2px solid #333; background: #fff; cursor: pointer; text-decoration: none; color: #111; }
+  .bar button.primary { background: #ffd54a; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto 14px; background: #fff; padding: 9mm 10mm; box-shadow: 0 2px 8px rgba(0,0,0,.25); page-break-after: always; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+  h1 small { font-size: 13px; font-weight: 500; }
+  .head { border-bottom: 3px solid var(--line); padding-bottom: 5px; margin-bottom: 6px; }
+  .head h1 { white-space: nowrap; }
+  .names { font-size: 14px; margin-top: 6px; white-space: nowrap; } .names span { display: inline-block; min-width: 40mm; border-bottom: 1.5px solid var(--line); height: 1.3em; vertical-align: bottom; margin: 0 6px 0 3px; }
+  .note { border: 1.5px solid var(--line); background: var(--soft); border-radius: 6px; padding: 4px 8px; font-size: 12.5px; margin: 5px 0; }
+  .step { margin-top: 7px; }
+  .step > .t { display: flex; gap: 8px; align-items: center; font-weight: 900; font-size: 15px; background: #222; color: #fff; padding: 3px 9px; border-radius: 6px 6px 0 0; }
+  .step > .t b { background: #ffd54a; color: #111; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+  .step > .t span { font-weight: 500; font-size: 12.5px; opacity: .95; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1.5px solid var(--line); padding: 2px 6px; text-align: center; }
+  th { background: var(--soft); font-size: 12px; }
+  td.w { height: 11.5mm; }
+  td.who { width: 17mm; font-weight: 900; font-size: 16px; background: var(--soft); }
+  td.vals { text-align: left; font-size: 15px; color: #0b3a8c; font-weight: 700; }
+  td.num { width: 17mm; font-size: 16px; color: #0b3a8c; font-weight: 800; }
+  td.sum { width: 24mm; font-size: 17px; color: #0b3a8c; font-weight: 900; }
+  td.pod { width: 20mm; font-size: 17px; color: #0b3a8c; font-weight: 900; }
+  .zone { margin-top: 5px; }
+  .zone .zt { background: #d9d9d9; border: 1.5px solid var(--line); border-bottom: 0; font-weight: 900; padding: 2px 8px; display: flex; justify-content: space-between; font-size: 13.5px; }
+  .tot { text-align: right; font-weight: 900; border: 1.5px solid var(--line); border-top: 0; padding: 3px 8px; font-size: 14px; }
+  .tot span { display: inline-block; min-width: 24mm; border-bottom: 2px solid var(--line); text-align: center; color: #0b3a8c; font-size: 17px; }
+  .big td { height: 15mm; font-size: 20px; }
+  .op { width: 9mm; font-size: 20px; font-weight: 900; background: var(--soft); }
+  .final { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .final div { border: 2px solid var(--line); border-radius: 6px; padding: 5px 8px; font-weight: 800; }
+  .final span { display: block; border-bottom: 2px solid var(--line); height: 1.5em; margin-top: 3px; color: #0b3a8c; font-size: 17px; font-weight: 900; }
+  .calc { font-size: 12px; margin-top: 5px; border: 1.5px dashed #555; border-radius: 6px; padding: 4px 8px; }
+  .example { color: #0b3a8c; }
+  .ex-tag { display: inline-block; background: #ffd54a; border: 2px solid #333; border-radius: 6px; padding: 1px 8px; font-weight: 900; font-size: 13px; margin-left: 8px; }
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    body { background: #fff; } .bar { display: none; }
+    .page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; overflow: hidden; }
+  }
+</style>
+</head>
+<body>
+<div class="bar">
+  <button class="primary" onclick="window.print()">🖨️ Stampa il foglio</button>
+  <a href="./">← Torna al gioco</a>
+  <span style="font-size:13px">Stampa in A4 fronte-retro (pagine 1 e 2). Le pagine 3 e 4 sono un esempio già compilato.</span>
+</div>
+<div id="pages"></div>
+<script>
+(function () {
+  'use strict';
+  // dati dell'esempio compilato (stessi numeri del regolamento, §8)
+  const EX = {
+    zones: {
+      AB: { A: [[3, 5, 2, 4]], B: [[2, 6, 4]], C: [[3, 1, 5]] },
+      BC: { A: [[6, 2, 4, 3]], B: [[4, 3, 6]], C: [[5, 2, 3]] },
+      AC: { A: [[5, 4, 3]], B: [[3, 5]], C: [[6, 4, 2, 5]] },
+    },
+    self: { A: [9, 7, 8, 6, 10, 5], B: [8, 9, 7, 8, 10, 6, 5], C: [7, 9, 6, 8, 5, 10] },
+    traitor: { A: [1], B: [], C: [2, 0] },
+  };
+  const S = (a) => a.reduce((x, y) => x + y, 0);
+  const ZONES = [['AB', 'A e B in coppia, C escluso', 'C'], ['BC', 'B e C in coppia, A escluso', 'A'], ['AC', 'A e C in coppia, B escluso', 'B']];
+
+  function compute() {
+    const z = {};
+    for (const [k] of ZONES) {
+      const rows = { A: null, B: null, C: null };
+      for (const p of 'ABC') { const cards = EX.zones[k][p][0]; rows[p] = { cards, n: cards.length, sum: S(cards) }; }
+      // podio: più punti; a pari punti meno carte; altrimenti si divide
+      const key = (p) => [rows[p].sum, -rows[p].n];
+      const cmp = (a, b) => (a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1]);
+      for (const p of 'ABC') {
+        const mine = key(p), all = ['A', 'B', 'C'].map(key);
+        const better = all.filter((x) => cmp(x, mine) > 0).length, eq = all.filter((x) => cmp(x, mine) === 0).length;
+        let pts = 0; for (let i = 0; i < eq; i++) pts += 3 - (better + i);
+        rows[p].pod = pts / eq;
+      }
+      z[k] = { rows, tot: S(['A', 'B', 'C'].map((p) => rows[p].sum)) };
+    }
+    return z;
+  }
+
+  function header(example, part) {
+    return `<div class="head"><h1>CROMOZAPD <small>— Foglio punti · ${part}</small>${example ? '<span class="ex-tag">ESEMPIO COMPILATO</span>' : ''}</h1>
+        <div class="names">Data <span></span> &nbsp; A <span>${example ? 'Niky' : ''}</span> B <span>${example ? 'Erika' : ''}</span> C <span>${example ? 'Rodolfo' : ''}</span></div></div>`;
+  }
+  const fmt = (x) => String(x).replace('.', ',');
+
+  // facciata 1: le tre zone
+  function front(example) {
+    const z = example ? compute() : null;
+    let h = `<div class="page ${example ? 'example' : ''}">` + header(example, 'facciata 1: le zone');
+    h += `<div class="note"><b>Durante la partita</b> non scrivi niente: quando una coppia incassa, ognuno mette le sue carte (le due carte-coppia degli attivi e la carta dell'escluso) nel <b>proprio posto</b> della zona di quella coppia. Se la coppia sfora, le carte vanno negli scarti. Le carte per sé restano coperte davanti a ognuno; le carte Traditore stanno scoperte.</div>
+      <div class="note" style="background:#fff7d6"><b>A fine partita</b> segui i passi <b>nell'ordine</b> (questa facciata è il passo 1; il resto è sul retro). Scrivi nelle caselle e usa la calcolatrice dove serve.</div>`;
+    h += `<div class="step"><div class="t"><b>1</b>Le tre zone <span>— per ogni posto: scrivi i valori delle carte, conta quante sono, somma</span></div>`;
+    for (const [k, desc] of ZONES) {
+      h += `<div class="zone"><div class="zt"><span>ZONA ${k}</span><span style="font-weight:500">${desc}</span></div><table><thead><tr><th></th><th>Valori delle carte (es. 3+5+2)</th><th>N° carte</th><th>SOMMA</th><th>PODIO</th></tr></thead><tbody>`;
+      for (const p of 'ABC') {
+        const r = example ? z[k].rows[p] : null;
+        h += `<tr><td class="w who">${p}</td><td class="vals">${r ? r.cards.join(' + ') : ''}</td><td class="num">${r ? r.n : ''}</td><td class="sum">${r ? r.sum : ''}</td><td class="pod">${r ? fmt(r.pod) : ''}</td></tr>`;
+      }
+      h += `</tbody></table><div class="tot">TOTALE ZONA ${k} (somma delle tre SOMME) <span>${example ? z[k].tot : ''}</span></div></div>`;
+    }
+    h += `<div class="note" style="margin-top:6px"><b>PODIO</b> (lo scrivi dopo aver compilato tutta la zona): <b>3</b> a chi ha la SOMMA più alta, <b>2</b> al secondo, <b>1</b> all'ultimo.<br><b>Stessa somma?</b> Vale chi ha meno carte (colonna N° carte).<br><b>Stessa somma e stesso numero di carte?</b> Si divide: 2,5 e 2,5 (se sono i primi due) oppure 1,5 e 1,5 (se sono gli ultimi due).<br><b>Zona senza carte</b> (la coppia non ha mai incassato): 2 a testa.</div></div></div>`;
+    return h;
+  }
+
+  // facciata 2: quota, personali, punteggio, vincitori
+  function back(example) {
+    const z = example ? compute() : null;
+    let h = `<div class="page ${example ? 'example' : ''}">` + header(example, 'facciata 2: quota e punteggio');
+    h += `<div class="step"><div class="t"><b>2</b>La QUOTA <span>— somma dei tre podi di ognuno (li copi dal passo 1)</span></div><table class="big"><thead><tr><th></th><th>Podio AB</th><th class="op"></th><th>Podio BC</th><th class="op"></th><th>Podio AC</th><th class="op"></th><th>QUOTA</th></tr></thead><tbody>`;
+    for (const p of 'ABC') {
+      const q = example ? ZONES.map(([k]) => z[k].rows[p].pod) : null;
+      h += `<tr><td class="who">${p}</td><td class="sum">${q ? fmt(q[0]) : ''}</td><td class="op">+</td><td class="sum">${q ? fmt(q[1]) : ''}</td><td class="op">+</td><td class="sum">${q ? fmt(q[2]) : ''}</td><td class="op">=</td><td class="sum">${q ? fmt(S(q)) : ''}</td></tr>`;
+    }
+    h += `</tbody></table></div>`;
+    h += `<div class="step"><div class="t"><b>3</b>I PUNTI PERSONALI <span>— somma i valori delle tue carte per sé, togli le carte Traditore</span></div><table class="big"><thead><tr><th></th><th>Somma delle carte per sé</th><th class="op"></th><th>Somma delle carte Traditore</th><th class="op"></th><th>PERSONALI</th></tr></thead><tbody>`;
+    for (const p of 'ABC') {
+      const sv = example ? S(EX.self[p]) : '', tv = example ? S(EX.traitor[p]) : '';
+      h += `<tr><td class="who">${p}</td><td class="sum">${sv}</td><td class="op">−</td><td class="sum">${tv}</td><td class="op">=</td><td class="sum">${example ? sv - tv : ''}</td></tr>`;
+    }
+    h += `</tbody></table></div>`;
+    h += `<div class="step"><div class="t"><b>4</b>Il PUNTEGGIO <span>— PERSONALI × QUOTA (con la calcolatrice)</span></div><table class="big"><thead><tr><th></th><th>PERSONALI</th><th class="op"></th><th>QUOTA</th><th class="op"></th><th>PUNTEGGIO</th></tr></thead><tbody>`;
+    for (const p of 'ABC') {
+      const pe = example ? S(EX.self[p]) - S(EX.traitor[p]) : '', q = example ? S(ZONES.map(([k]) => z[k].rows[p].pod)) : '';
+      h += `<tr><td class="who">${p}</td><td class="sum">${pe}</td><td class="op">×</td><td class="sum">${example ? fmt(q) : ''}</td><td class="op">=</td><td class="sum" style="font-size:20px">${example ? pe * q : ''}</td></tr>`;
+    }
+    h += `</tbody></table></div>`;
+    const win = example ? { ind: 'A (Niky) — 352 punti', pair: 'BC (Erika e Rodolfo) — 38 punti' } : { ind: '', pair: '' };
+    h += `<div class="step"><div class="t"><b>5</b>I VINCITORI</div><div class="final"><div>Vincitore individuale: il PUNTEGGIO più alto<span>${win.ind}</span></div><div>Vincitore di coppia: il TOTALE ZONA più alto<span>${win.pair}</span></div></div></div>
+      <div class="calc"><b>Calcolatrice, in pratica.</b> (1) Per ogni posto di ogni zona digita i valori delle carte con il + e premi = (9 somme). (2) Per ogni zona somma le tre SOMME (3 totali). (3) Il podio si vede a occhio confrontando le tre SOMME. (4) La quota è la somma di tre numeri per ognuno. (5) I personali sono la somma delle carte per sé meno i Traditori. (6) Moltiplica personali × quota. In tutto circa 25 somme e 3 moltiplicazioni.</div></div>`;
+    return h;
+  }
+  document.getElementById('pages').innerHTML = front(false) + back(false) + front(true) + back(true);
+})();
+</script>
+</body>
+</html>

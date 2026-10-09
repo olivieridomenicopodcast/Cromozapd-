@@ -70,16 +70,18 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 ## 8. Punteggio finale
 - **Punti squadra** di ogni coppia = somma dei punti incassati (§5). **Vincitore di coppia**: la coppia con più punti squadra.
 - **Punti personali grezzi** = somma delle **carte per sé** giocate da attivo, **meno le carte Traditore** pescate.
-- **Il podio di ogni coppia** **[chiarito: idea di Niky, provata in simulazione]**: nelle carte messe in una coppia (le carte-coppia dei due attivi e la carta dell'escluso, solo nei turni in cui la coppia ha incassato) si somma il **valore** delle carte di ciascun giocatore. Chi ha messo di più prende **3** punti di podio, il secondo **2**, l'ultimo **1**. A **pari merito** si divide (due primi a pari prendono 2,5 ciascuno e l'ultimo 1; tutti e tre pari prendono 2 a testa). Se una coppia non ha mai incassato, vale **2 a testa**.
+- **Il podio di ogni coppia** **[chiarito: idea di Niky, provata in simulazione]**: nelle carte messe in una coppia (le carte-coppia dei due attivi e la carta dell'escluso, solo nei turni in cui la coppia ha incassato) si somma il **valore** delle carte di ciascun giocatore. Chi ha messo di più prende **3** punti di podio, il secondo **2**, l'ultimo **1**. A **pari merito di punti** vale chi ha messo **meno carte** (ha giocato carte più alte); solo se anche le carte sono uguali si divide (due primi a pari prendono 2,5 ciascuno e l'ultimo 1; tutti e tre pari prendono 2 a testa). Se una coppia non ha mai incassato, vale **2 a testa**.
 - **Quota** = somma dei tre podi (le tre coppie: AB, BC, AC), da 3 a 9; la media è 6.
 - **Punteggio individuale = punti personali grezzi × quota.** Non servono divisioni: solo somme, confronti tra tre mucchietti e una moltiplicazione.
 - **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
 - *Vecchia regola (ancora nel codice, parametro "Punteggio")*: Fattore coppie = media delle quote % nei punti delle tre coppie; punteggio = personali × Fattore.
 
 ### Conta al tavolo, passo per passo
+*C'è un **foglio punti da stampare** (`foglio-punti.html`, dalla schermata iniziale dell'app): 2 facciate A4 da compilare e, nelle pagine 3-4, un esempio già compilato.*
+
 1. Ogni coppia ha una zona con 3 posti (A, B, C): quando la coppia incassa, ognuno mette le sue carte nel proprio posto. Se sfora, le carte vanno negli scarti.
 2. A fine partita, in ogni zona sommi i **valori** delle carte di ogni posto.
-3. In ogni zona assegni il podio: 3 al posto con più punti, 2 al secondo, 1 all'ultimo (pari merito: si divide).
+3. In ogni zona assegni il podio: 3 al posto con più punti, 2 al secondo, 1 all'ultimo (pari punti: vince chi ha meno carte; se anche le carte sono uguali, si divide).
 4. Sommi i tre podi di ciascuno: è la tua quota.
 5. Sommi le tue carte per sé, togli le carte Traditore e moltiplichi per la quota.
 

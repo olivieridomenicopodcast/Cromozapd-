@@ -218,3 +218,6 @@ Regole di colore ora: Rosso Silenzio, Blu Carnevale, Verde Luce, Giallo Effetti 
 ## Punteggio a PODIO (scoring:'podio', default): 3/2/1 per coppia, quota = somma dei tre podi, punteggio = personali × quota
 Misure (hard×3, 300 partite): sforo 31,2%, punti coppia 133,9, modificatori decisivi 1,31; difficile vs 2 medie 45,6% (41,0–50,2), media vs 2 facili 56,0% (51,4–60,5); egoista semplice 15,2%; estremi (200 partite, un giocatore estremo contro 2 difficili): sempre le carte più alte 12,5%, coppia bassa + sé alto 5,8%. Stesso vincitore della formula a % nel 78% delle partite (prova su 200). Posti A/B/C 25,2/41,6/33,2% su 300 partite: da ricontrollare con più partite.
 Controllo dei posti con il podio su 1000 partite (hard×3): A 31,3% / B 33,1% / C 35,6%: il 41,6% di B su 300 partite era rumore.
+
+## Podio: pari merito = vince chi ha messo MENO CARTE (deciso da Niky); foglio punti stampabile
+Il motore conta anche il numero di carte messe in ogni coppia (contribN); a pari punti vale chi ne ha messe meno; se anche le carte sono uguali si divide. `foglio-punti.html` (2 facciate A4 da compilare + 2 di esempio già compilato, link dalla schermata iniziale) guida la conta passo per passo.

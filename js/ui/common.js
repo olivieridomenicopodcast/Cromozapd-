@@ -128,7 +128,7 @@
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
     h += row('🐍', '<b>Carta Traditore</b>: se l\'escluso gioca un numero diverso da quello dichiarato ne pesca una (nessuna col Carnevale): toglie da 0 a 3 punti personali. Finito il mazzetto di 12, ogni tradimento costa 3.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
-    h += row('📊', R.scoring === 'podio' ? '<b>Quota a podio</b>: in ogni coppia 3 punti a chi ha messo più punti, 2 al secondo, 1 all\'ultimo (a pari merito si divide). Quota = somma dei 3 podi (da 3 a 9). Punteggio = personali × Quota.' : '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
+    h += row('📊', R.scoring === 'podio' ? '<b>Quota a podio</b>: in ogni coppia 3 punti a chi ha messo più punti, 2 al secondo, 1 all\'ultimo (a pari punti vince chi ha messo meno carte). Quota = somma dei 3 podi (da 3 a 9). Punteggio = personali × Quota.' : '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
     h += '<div class="lgroup">Carte-effetto (15)</div>';
     h += FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired && (!FF.EFFECTS[k].mod || k.endsWith('1'))).map((k) => {
       const e = EFFECTS[k];

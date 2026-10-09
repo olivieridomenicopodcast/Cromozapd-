@@ -68,7 +68,7 @@
         deck: t.deck.slice(), discard: t.discard.slice(), zapPile: t.zapPile.slice(), effDeck: t.effDeck.slice(), effDiscard: t.effDiscard.slice(),
         traitorDeck: (t.traitorDeck || []).slice(),
         players: t.players.map((p) => Object.assign({}, p, { hand: p.hand.slice(), eff: p.eff.slice(), traitor: (p.traitor || []).slice() })),
-        pending: t.pending.slice(), cromoPending: t.cromoPending ? Object.assign({}, t.cromoPending) : null, pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()),
+        pending: t.pending.slice(), cromoPending: t.cromoPending ? Object.assign({}, t.cromoPending) : null, pairPts: t.pairPts.slice(), contrib: t.contrib.map((r) => r.slice()), contribN: (t.contribN || [[0, 0, 0], [0, 0, 0], [0, 0, 0]]).map((r) => r.slice()),
         decls: t.decls.slice(), lastPlay: t.lastPlay ? Object.assign({}, t.lastPlay, { fila: t.lastPlay.fila.map((f) => Object.assign({}, f)) }) : null,
       });
       return g;
@@ -101,7 +101,8 @@
       s.rule = null; s.ruleLatent = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.carnival = false;
       s.xDecl = null; s.traitorDeck = this.rules.traitor ? this._shuffle(this.rules.traitorCards.slice()) : [];
       s.pairPts = [0, 0, 0];          // indicizzato per ESCLUSO: coppia = gli altri due
-      s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso]
+      s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso] = punti messi in quella coppia
+      s.contribN = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contribN[giocatore][escluso] = NUMERO di carte messe (serve per i pari merito del podio)
       return s;
     }
 
@@ -144,8 +145,11 @@
     podioIn(pid, e) {
       const s = this.s;
       if (s.pairPts[e] <= 0) return 2;
-      const mine = s.contrib[pid][e], all = [0, 1, 2].map((x) => s.contrib[x][e]);
-      const better = all.filter((x) => x > mine).length, equal = all.filter((x) => x === mine).length;
+      // ordine: più punti messi; a pari punti, MENO carte; se anche le carte sono uguali, pari merito (si divide)
+      const key = (x) => [s.contrib[x][e], -(s.contribN ? s.contribN[x][e] : 0)];
+      const cmp = (a, b) => (a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1]);
+      const mine = key(pid), all = [0, 1, 2].map(key);
+      const better = all.filter((k) => cmp(k, mine) > 0).length, equal = all.filter((k) => cmp(k, mine) === 0).length;
       let pts = 0; for (let k = 0; k < equal; k++) pts += 3 - (better + k);
       return pts / equal;
     }
@@ -589,6 +593,7 @@
       if (scored) {
         s.pairPts[ex] += pts;
         s.contrib[a][ex] += ca.v; s.contrib[c2][ex] += cb.v; s.contrib[ex][ex] += xcard.v;
+        s.contribN[a][ex]++; s.contribN[c2][ex]++; s.contribN[ex][ex]++;
       }
       this.stat('punti_coppia', -1, pts);
       const why = R.rangeOutside ? (inRange ? `${sum} è fuori dalla zona vietata ${min}–${max}` : immune ? `${sum} è dentro la zona vietata ${min}–${max}, ma` + ` entrambe le carte sono del colore dominante: niente perdita` : `${sum} è DENTRO la zona vietata ${min}–${max} → SFORO`) : inRange ? `${sum} è dentro il range ${min}–${max}` : immune ? `${sum} è fuori dal range ${min}–${max}, ma entrambe le carte sono del colore dominante (${this.col(s.dominant)}): niente perdita` : `${sum} è ${sum < min ? 'sotto' : 'sopra'} il range ${min}–${max} → SFORO`;

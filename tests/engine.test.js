@@ -508,10 +508,24 @@ test('punteggio a podio: 3/2/1 per coppia a chi ha messo di più, pari merito si
   assert.deepEqual(q.map((x) => Math.round(x * 100) / 100), [8, 5, 5]);
   s.players[0].personal = 44; s.players[1].personal = 53; s.players[2].personal = 43;
   assert.deepEqual([0, 1, 2].map((p) => g.score(p)), [44 * 8, 53 * 5, 43 * 5]);
-  // pari merito: due a pari al primo posto prendono (3+2)/2 = 2,5 e l'ultimo 1
-  s.contrib = [[5, 5, 5], [5, 5, 5], [3, 3, 3]]; s.pairPts = [13, 13, 13];
+  // pari merito di punti e di carte: due a pari al primo posto prendono (3+2)/2 = 2,5 e l'ultimo 1
+  s.contribN = [[2, 2, 2], [2, 2, 2], [2, 2, 2]]; s.contrib = [[5, 5, 5], [5, 5, 5], [3, 3, 3]]; s.pairPts = [13, 13, 13];
   assert.equal(g.podio(0), 7.5); assert.equal(g.podio(2), 3);
+  // pari merito di punti ma con meno carte: vince chi ha messo meno carte
+  s.contribN = [[4, 4, 4], [3, 3, 3], [2, 2, 2]]; s.contrib = [[12, 12, 12], [12, 12, 12], [9, 9, 9]]; s.pairPts = [33, 33, 33];
+  assert.equal(g.podio(1), 9); assert.equal(g.podio(0), 6); assert.equal(g.podio(2), 3);
   // una coppia mai incassata vale 2 a tutti
-  s.pairPts = [0, 13, 13]; s.contrib = [[0, 5, 5], [0, 5, 5], [0, 3, 3]];
+  s.contribN = [[2, 2, 2], [2, 2, 2], [2, 2, 2]]; s.pairPts = [0, 13, 13]; s.contrib = [[0, 5, 5], [0, 5, 5], [0, 3, 3]];
   assert.equal(g.podio(0), 2 + 2.5 + 2.5);
+});
+
+test('foglio punti stampabile: esiste, spiega il podio e il pari merito, ha un esempio compilato che torna con il regolamento', () => {
+  const fs = require('fs'), path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'foglio-punti.html'), 'utf8');
+  for (const t of ['Foglio punti', 'PODIO', 'QUOTA', 'PERSONALI', 'PUNTEGGIO', 'Vale chi ha meno carte', 'ESEMPIO COMPILATO', 'Zona senza carte']) assert.ok(html.includes(t), t + ' manca nel foglio');
+  // l'esempio del foglio e quello del regolamento usano gli stessi numeri e danno 8, 5, 5 → 352, 265, 215
+  assert.ok(html.includes('A: [[3, 5, 2, 4]]') && html.includes('C: [[6, 4, 2, 5]]'));
+  const g = mk({ rules: { scoring: 'podio' } }), s = g.s;
+  s.contrib = [[14, 15, 12], [12, 13, 8], [9, 10, 17]]; s.pairPts = [35, 38, 37]; s.contribN = [[4, 4, 3], [3, 3, 2], [3, 3, 4]];
+  assert.deepEqual([0, 1, 2].map((p) => g.podio(p)), [8, 5, 5]);
 });
