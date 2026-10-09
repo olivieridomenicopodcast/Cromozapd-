@@ -336,7 +336,7 @@
           if (i > 0) {
             const me = g3.s.players[pid], idx = me.hand.findIndex((c) => c.id === hand[i - 1].id);
             if (idx < 0) continue;
-            const c = me.hand[idx]; me.hand.splice(idx, 1, g3.s.center); g3.s.center = c;
+            const c = me.hand[idx]; if (game.rules.cambioDiscard) { me.hand.splice(idx, 1); g3.s.discard.push(g3.s.center); } else me.hand.splice(idx, 1, g3.s.center); g3.s.center = c;
             const ei = me.eff.findIndex((e) => e.k === 'cambio'); if (ei >= 0) me.eff.splice(ei, 1);
           }
           const base = {};

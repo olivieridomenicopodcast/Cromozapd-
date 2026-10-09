@@ -48,6 +48,7 @@
     rangeOutside: false,    // VARIANTE (solo simulazione): la somma deve stare FUORI dal range [V, V+Base] per incassare
     rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base
     pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
+    cambioDiscard: false,   // VARIANTE (carta Cambio centrale): true = la vecchia centrale si scarta (la mano di chi la gioca scende a 2) invece di andare in mano
     xHidden: false,         // VARIANTE (solo simulazione, con rangeMode 'xsum'): l'escluso DICHIARA un numero esatto, gioca coperto, X si scopre al reveal
     traitor: false,         // VARIANTE (con xHidden): se l'escluso gioca un numero diverso da quello dichiarato pesca una carta Traditore: ne toglie il valore ai suoi punti personali
     traitorCards: [1, 2, 2, 3, 3, 4, 5, 6],   // mazzetto Traditore (si pesca senza reinserimento)

@@ -356,10 +356,10 @@
         const c = raw != null ? p.hand.find((h) => h.id === raw) : null;
         if (!c) continue;
         p.eff.splice(p.eff.indexOf(card), 1); s.effDiscard.push(card);
-        const old = s.center; p.hand.splice(p.hand.indexOf(c), 1, old); s.center = c;
+        const old = s.center; if (this.rules.cambioDiscard) { p.hand.splice(p.hand.indexOf(c), 1); s.discard.push(old); } else p.hand.splice(p.hand.indexOf(c), 1, old); s.center = c;
         this.stat('effetto_giocato:cambio', pid); this.stat('cambio_centrale', pid);
         const rg = s.xFirstCard ? FF.rangeBase(this.rules, c.v, s.xFirstCard.v) : null;
-        b = this.say('effect', `🔁 ${this.pn(pid)} gioca CAMBIO CENTRALE: mette il ${FF.cardName(c)} al posto del ${FF.cardName(old)} (che prende in mano). Nuova centrale: ${c.v}${rg ? ` → range ${rg[0]}–${rg[1]}` : ''}.`, pid, { k: 'cambio', center: c });
+        b = this.say('effect', `🔁 ${this.pn(pid)} gioca CAMBIO CENTRALE: mette il ${FF.cardName(c)} al posto del ${FF.cardName(old)} (${this.rules.cambioDiscard ? 'che si scarta' : 'che prende in mano'}). Nuova centrale: ${c.v}${rg ? ` → range ${rg[0]}–${rg[1]}` : ''}.`, pid, { k: 'cambio', center: c });
         if (b) yield b;
       }
     }
