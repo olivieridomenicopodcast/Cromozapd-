@@ -196,3 +196,6 @@ Lettura: vedere la carta dell'escluso non compensa il costo di non poter parlare
 
 ## Valutazione finale delle regole implementate (regolamento v0.2; hard×3, 300 partite)
 Sforo 32,1% (sotto 1,96 / sopra 1,98), punti coppia 133,5, posti A/B/C 30,3/32,3/37,3%, modificatori decisivi 1,13 / inutili 0,97 / non bastano 0,19 a partita, tradimenti dichiarati 1,3%. Dilemma: egoista semplice vince il 9,7% (Fattore 25,8% contro 37,1%). Livelli: difficile vs 2 medie 44,4% (39,9–49,1%, +2,18 punti), media vs 2 facili 55,3% (50,7–59,9%, +3,86). Da rivedere al playtest: equilibrio fra le 4 regole di colore (Luce toglie il bluff all'escluso), colore delle carte numeriche senza ruolo, posto C leggermente avvantaggiato (37%).
+
+## Regole di colore con attivazione (la regola vale solo se la carta centrale ha il colore dominante) — hard×3, 300 partite
+Sforo 31,7% (sotto 1,91 / sopra 1,98), punti coppia 133,6, posti A/B/C 28,0/38,3/33,7% (rumore: 300 partite), modificatori decisivi 1,30 / inutili 1,43 / non bastano 0,25, egoista vince 10,3% (Fattore 25,9% contro 37,1%), difficile vs 2 medie 44,7% (40,1–49,3%, +1,90), media vs 2 facili 53,3% (48,7–57,9%, +4,00). La regola attiva circa 1 turno su 4 (parametro `colorTrigger`, true di default).

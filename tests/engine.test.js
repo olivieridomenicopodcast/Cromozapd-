@@ -447,6 +447,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));
   assert.equal(val('Cromozapd (13ª Zapd)'), R.cromozapd ? 'sì' : 'no');
   assert.equal(val('Colore dominante = regola in vigore'), R.colorRules ? 'sì' : 'no');
+  assert.equal(val('La regola si attiva solo se la carta centrale ha il colore dominante'), R.colorTrigger ? 'sì' : 'no');
   assert.equal(val('Immunità del colore dominante'), R.immunity ? 'sì' : 'no');
   assert.equal(val('Carte nel mazzetto Traditore'), String(R.traitorCards.length));
   assert.equal(val('Valore di ogni Traditore dopo il mazzetto'), String(R.traitorOverflow));
@@ -463,4 +464,21 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   FF.COLORS.forEach((c, i) => { const rl = FF.COLOR_RULES[R.colorRuleMap[i]]; assert.ok(md.includes('| ' + c.n + ' | **' + rl.n + '**'), c.n + ' → ' + rl.n); });
   assert.equal(R.effectCopies.sincero + R.effectCopies.swap + R.effectCopies.annulla, 0);
   for (const e of Object.values(FF.EFFECTS).filter((x) => !x.mod && !x.retired)) assert.ok(md.includes('**' + e.n + '**'), e.n + ' manca nel regolamento');
+});
+
+test('regole di colore: si attivano solo se la carta centrale ha il colore dominante; Silenzio, Luce, Effetti vietati cambiano il turno', () => {
+  const run = (dom, ctr, over) => {
+    const g = mk({ rules: Object.assign({ rangeMode: 'xsum', colorRules: true, colorTrigger: true, immunity: false, xHidden: true, traitor: true }, over || {}), center: ctr, dom });
+    const p = turn(g, { x: 0 }); return { g, p };
+  };
+  let r = run(0, [5, 0]);
+  assert.equal(r.g.s.rule, 'silenzio'); assert.ok(r.g.s.silent); assert.ok(!r.p.log.some((d) => d.type === 'declare' || d.type === 'xdecl'));
+  r = run(0, [5, 1]);
+  assert.equal(r.g.s.ruleLatent, 'silenzio'); assert.equal(r.g.s.rule, null); assert.ok(r.p.log.some((d) => d.type === 'xdecl')); assert.ok(r.p.log.some((d) => d.type === 'declare'));
+  r = run(2, [5, 2]);
+  assert.equal(r.g.s.rule, 'luce'); assert.equal(r.g.s.xmode, 'first'); assert.ok(r.p.log.some((d) => d.type === 'xplay' && d.first));
+  r = run(3, [5, 3]);
+  assert.equal(r.g.s.rule, 'effetti'); assert.ok(r.g.s.noEff);
+  r = run(0, [5, 1], { colorTrigger: false });
+  assert.equal(r.g.s.rule, 'silenzio');
 });

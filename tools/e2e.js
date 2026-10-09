@@ -24,14 +24,14 @@ fs.mkdirSync(out, { recursive: true });
   await p.click('#su-go');
   const shots = {}; const seen = {}; let steps = 0, decisions = 0;
   const snap = async (name) => { if (shots[name]) return; shots[name] = 1; await p.screenshot({ path: `${out}/${mobile ? 'm-' : 'd-'}${name}.png`, fullPage: true }); };
-  const click = async (sel) => { const e = await p.$(sel); if (e && await e.isVisible()) { await e.click({ timeout: 2000 }); return true; } return false; };
+  const click = async (sel) => { try { const e = await p.$(sel); if (e && await e.isVisible()) { await e.click({ timeout: 2000 }); return true; } } catch (err) { /* il pannello si è già ridisegnato */ } return false; };
   for (; steps < 6000; steps++) {
     if (await p.$('.dlg:has-text("Fine partita")')) { await snap('fine'); break; }
     if (await click('[data-x]')) { await snap('cover'); continue; }
     if (await p.$('#a-no') && await p.$('#a-yes')) { decisions++; await snap('sincero'); await click(mode === 'hotseat' ? '#a-yes' : '#a-no'); continue; }
-    if (await p.$('#x-ok')) { decisions++; const b = await p.$('#g-action .numrow button.inhand'); if (b) await b.click(); await snap('escluso-dichiara'); await click('#x-ok'); continue; }
-    if (await p.$('#b-no')) { decisions++; await snap('baratto'); if (Math.random() < 0.5) { const t = await p.$('#g-action [data-take]'); const gv = await p.$('#g-action [data-give]'); if (t && gv) { await t.click(); await gv.click(); await click('#b-ok'); continue; } } await click('#b-no'); continue; }
-    if (await p.$('#g-action [data-col]')) { decisions++; await snap('scelta-colore'); const cs = await p.$$('#g-action [data-col]'); await cs[Math.floor(Math.random() * cs.length)].click(); continue; }
+    if (await p.$('#x-ok')) { decisions++; const b = await p.$('#g-action .numrow button.inhand'); if (b) await b.click({ timeout: 2000 }).catch(() => {}); await snap('escluso-dichiara'); await click('#x-ok'); continue; }
+    if (await p.$('#b-no')) { decisions++; await snap('baratto'); if (Math.random() < 0.5) { const t = await p.$('#g-action [data-take]'); const gv = await p.$('#g-action [data-give]'); if (t && gv) { await t.click({ timeout: 2000 }).catch(() => {}); await gv.click({ timeout: 2000 }).catch(() => {}); await click('#b-ok').catch(() => {}); continue; } } await click('#b-no'); continue; }
+    if (await p.$('#g-action [data-col]')) { decisions++; await snap('scelta-colore'); const cs = await p.$$('#g-action [data-col]'); await cs[Math.floor(Math.random() * cs.length)].click({ timeout: 2000 }).catch(() => {}); continue; }
     if (await p.$('#d-ok')) { decisions++; await snap('dichiara'); await p.click('[data-num="7"]').catch(() => {}); await click('#d-ok'); continue; }
     if (await p.$('#p-ok')) {
       decisions++;

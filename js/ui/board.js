@@ -11,6 +11,16 @@
   const pile = (cls, spr, n, label, sub) => `<div class="pile ${cls}"><div class="pilecards">${spr}<span class="pcount">${n}</span></div><div class="plabel">${label}</div>${sub ? `<div class="psub">${sub}</div>` : ''}</div>`;
 
   const ruleOf = (g) => (g.rules.colorRules ? FF.COLOR_RULES[FF.ruleOf(g.rules, g.s.dominant)] : null);
+  // la regola del colore dominante vale solo se la carta centrale è di quel colore
+  function ruleText(g, center) {
+    const rl = ruleOf(g); if (!rl) return null;
+    const dom = COLORS[g.s.dominant].n;
+    if (!g.rules.colorTrigger) return { rl, on: true, txt: `<b>${rl.i} ${rl.n}</b>: ${rl.s}` };
+    if (!center) return { rl, on: null, txt: `Regola del ${dom}: <b>${rl.i} ${rl.n}</b>. Si attiva solo se la carta centrale è ${dom}.` };
+    return center.c === g.s.dominant
+      ? { rl, on: true, txt: `<b>${rl.i} ${rl.n}</b> ATTIVA: ${rl.s}` }
+      : { rl, on: false, txt: `La regola del ${dom} è ${rl.i} ${rl.n}, ma la carta centrale è ${COLORS[center.c].n}: <b>nessuna regola</b> in questo turno.` };
+  }
 
   function zapBar(g) {
     const s = g.s, tot = g.totalZaps; let h = '';
@@ -71,7 +81,7 @@
       <div class="tbl-mid">
         <div class="centerblock"><div class="clabel">Carta centrale</div>${tab.center ? UI.cardHTML(tab.center, { cls: 'bigcard' }) : '<div class="emptyslot big"></div>'}</div>
         ${rangeBox(g, tab)}
-        <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">${ruleOf(g) ? `<b>${ruleOf(g).i} ${ruleOf(g).n}</b>: ${ruleOf(g).s}` : 'Se le 2 carte-coppia sono di questo colore: nessuno sforo'}</div></div>
+        <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">${ruleText(g, tab.center) ? ruleText(g, tab.center).txt : 'Se le 2 carte-coppia sono di questo colore: nessuno sforo'}</div></div>
         <div class="dirblock"><div class="clabel">Verso</div>${S.dir(s.dir, 'dirbig')}<div class="psub">${g.rules.rotateEachTurn ? `Al prossimo turno il gettone passa a <b>${FF.SEATS[nextEx]}</b>; ogni Zapd lo sposta ancora e inverte il verso` : `Prossima Zapd: il gettone passa a <b>${FF.SEATS[nextEx]}</b>`}</div></div>
         ${s.nextCenter ? `<div class="nextblock"><div class="clabel">Messa da parte</div>${nc}<div class="psub">centrale del turno dopo</div></div>` : ''}
       </div>
@@ -94,7 +104,7 @@
     const item = (ico, title, state, on, desc) => `<div class="state ${on ? 'on' : 'off'}"><div class="sico">${ico}</div><div><div class="stitle">${title} <span class="sbadge2 ${on ? 'on' : ''}">${state}</span></div><div class="sdesc">${desc}</div></div></div>`;
     const rl = ruleOf(g);
     el.innerHTML = [
-      item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, rl ? `È la regola in vigore: ${rl.i} <b>${rl.n}</b> — ${rl.d} Cambia a ogni Zapd.` : 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
+      item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, rl ? `Dice qual è la regola: ${rl.i} <b>${rl.n}</b> — ${rl.d} La regola si attiva solo nei turni in cui la carta centrale è di questo colore (ora: ${g.s.rule ? 'ATTIVA' : 'non attiva'}). Cambia a ogni Zapd.` : 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
       item(S.dir(s.dir, 'stico'), 'Verso di rotazione', s.dir > 0 ? '↻ A→B→C' : '↺ A→C→B', true, g.rules.rotateEachTurn ? `L'escluso ora è ${FF.SEATS[ex]}. Passa al giocatore dopo (${FF.SEATS[FF.mod3(ex + s.dir)]}) a ogni nuovo turno e a ogni Zapd; ogni Zapd (e Reverse) inverte il verso.` : `L'escluso ora è ${FF.SEATS[ex]}. A ogni Zapd passa a ${FF.SEATS[FF.mod3(ex + s.dir)]}. Reverse inverte il verso.`),
       item('🔮', 'Carta messa da parte', s.nextCenter ? FF.cardName(s.nextCenter) : 'nessuna', !!s.nextCenter, s.nextCenter ? 'Sarà la carta centrale del turno dopo (la pesca centrale viene saltata).' : 'Prossima carta ne mette una da parte: diventa la centrale del turno dopo.'),
       item('⚡', 'Zapd', `${s.zapsDrawn}/${g.totalZaps}`, s.zapsDrawn >= g.totalZaps - 2, s.zapsDrawn >= g.totalZaps ? 'Uscite tutte: è l\'ultimo turno.' : `Ne mancano ${g.totalZaps - s.zapsDrawn}${g.rules.cromozapd && !g.s.zapPile.some((z) => z.cromo) ? ' (una è la 🌈 Cromozapd: tutti passano la mano e chi la pesca sceglie la regola)' : ''}: la partita finisce con l\'uscita dell\'ultima (si gioca quel turno per intero).`),

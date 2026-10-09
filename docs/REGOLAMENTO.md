@@ -11,12 +11,12 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 **Il senso del gioco:** la carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota; una coppia che sfora fa 0. Giocare sempre carte alte non conviene, e nemmeno pensare solo a sé stessi (§11).
 
 ## 2. Componenti
-- **Mazzo principale: 93 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **12 carte Zapd** colorate (3 per colore) + **la Cromozapd** (in tutto 13 carte Zapd). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**. Il colore delle carte numeriche non ha alcun ruolo **[chiarito: resta aperto, vedi §12]**; i colori contano solo nelle Zapd.
+- **Mazzo principale: 93 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **12 carte Zapd** colorate (3 per colore) + **la Cromozapd** (in tutto 13 carte Zapd). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**. Il **colore della carta centrale** serve ad attivare la regola di colore (§7); per il resto il colore delle carte numeriche non conta.
 - **Mazzetto Effetti**, separato, solo funzione (nessun valore numerico): vedi §9. **15 carte**.
 - **Mazzetto Traditore**: 12 carte con un valore da 0 a 3 (0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3), vedi §5.
 - **Carta centrale**: la carta numerica scoperta che definisce il range del turno.
 - **Gettone escluso** (uno solo) e **carte identità** con la freccia del verso di rotazione. Nell'app sono mostrati sul tavolo.
-- **Colore dominante**: il colore dell'ultima Zapd; decide la **regola in vigore** (§7).
+- **Colore dominante**: il colore dell'ultima Zapd; dice **quale regola** è in vigore (§7), che si attiva solo quando la carta centrale è di quel colore.
 
 ## 3. Preparazione
 1. Si mescola il mazzo e si pesca finché esce la **prima Zapd colorata**: il suo colore è il **colore dominante di partenza**. Poi si rimescola tutto (Zapd comprese).
@@ -26,11 +26,11 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 
 ## 4. Il turno
 0. **Rotazione.** Dal 2° turno il gettone escluso avanza di un posto (§6).
-1. **Pesca.** Chi ha meno di 3 carte numeriche pesca fino a 3 (di norma attivo +2, escluso +1; in ordine A, B, C). Poi si rivela la **carta centrale** (la prossima numerica; se c'è una "Prossima carta" giocata il turno prima, è quella). **[chiarito]** Se esce una Zapd la si risolve subito (§6) e si **ripesca** finché la mano è di 3 carte (o finché esce una numerica, per la centrale). Se esce la Cromozapd, a pesca finita se ne applica l'effetto (§6). I ruoli del turno e la **regola in vigore** (§7) si fissano a pesca finita.
-2. **L'escluso fa la sua mossa** **[chiarito: idea di Niky]**. La carta che gioca, la **X**, decide il range del turno (§5). Di norma **dichiara un numero esatto** (può mentire, §5) e mette la X **coperta**; sotto **Luce** la gioca per prima, **scoperta**; sotto **Silenzio** non dichiara nulla.
+1. **Pesca.** Chi ha meno di 3 carte numeriche pesca fino a 3 (di norma attivo +2, escluso +1; in ordine A, B, C). Poi si rivela la **carta centrale** (la prossima numerica; se c'è una "Prossima carta" giocata il turno prima, è quella). **[chiarito]** Se esce una Zapd la si risolve subito (§6) e si **ripesca** finché la mano è di 3 carte (o finché esce una numerica, per la centrale). Se esce la Cromozapd, a pesca finita se ne applica l'effetto (§6). I ruoli del turno e la **regola attiva** (§7: serve che la carta centrale abbia il colore dominante) si fissano a pesca finita.
+2. **L'escluso fa la sua mossa** **[chiarito: idea di Niky]**. La carta che gioca, la **X**, decide il range del turno (§5). Di norma **dichiara un numero esatto** (può mentire, §5) e mette la X **coperta**; se è attiva la regola **Luce** la gioca per prima, **scoperta**; se è attiva **Silenzio** non dichiara nulla.
 3. **Effetti istantanei**: chi ha un **Baratto** può giocarlo ora (§9).
-4. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§9). Il tradimento tra attivi è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Sotto **Silenzio** nessuno dichiara. Nell'hotseat si parla anche a voce.
-5. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto in fila** (3ª; non sotto **Effetti vietati**).
+4. **Discussione di coppia.** Solo i due attivi; l'escluso non partecipa. Nell'app ogni attivo può fare una **dichiarazione** al compagno: un numero (la carta che dice di giocare per la coppia) oppure "Niente"; ed eventualmente un'indicazione **vaga** sul proprio modificatore (§9). Il tradimento tra attivi è libero e senza penalità: puoi giocare altro da ciò che hai dichiarato. Tutto finisce nella cronaca. Con **Silenzio** attivo nessuno dichiara. Nell'hotseat si parla anche a voce.
+5. **Gioco coperto.** Ogni attivo gioca, in quest'ordine: **carta per la coppia**, **carta per sé**, ed eventualmente una **carta-effetto in fila** (3ª; non con **Effetti vietati** attivo).
 6. **Reveal.** Si scoprono le carte coperte degli attivi **e la X dell'escluso**.
 7. **Risoluzione**: effetti in fila (Reverse, Prossima carta, modificatori), range e punti (§5), eventuale carta Traditore, poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§9).
 
@@ -44,21 +44,23 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 - **Fuori range (sforo, sopra o sotto)** → la coppia incassa **0**. La carta dell'escluso vale 0 per la coppia e **non conta nel contributo % di nessuno**. Nessun vantaggio dallo sforo per l'escluso.
 - **Niente immunità di colore** **[chiarito]**: il colore delle carte non salva dallo sforo.
 - La **carta per sé** vale sempre il suo valore, anche se la coppia sfora.
-- **L'escluso dichiara e può tradire** **[chiarito]**: prima di mettere la X coperta dichiara un **numero esatto**. Al reveal, se la carta giocata ha un **valore diverso** da quello dichiarato (sforo o no), **pesca una carta Traditore** (2 sotto **Giuramento**): il suo valore (0–3) si **toglie ai punti personali grezzi**, e la carta resta scoperta davanti a lui per tutta la partita. Se la coppia sfora per colpa degli attivi e l'escluso era stato onesto, non succede nulla. Finito il mazzetto Traditore (12 carte), **ogni nuovo tradimento costa 3** punti personali.
+- **L'escluso dichiara e può tradire** **[chiarito]**: prima di mettere la X coperta dichiara un **numero esatto**. Al reveal, se la carta giocata ha un **valore diverso** da quello dichiarato (sforo o no), **pesca una carta Traditore** (2 con **Giuramento** attivo): il suo valore (0–3) si **toglie ai punti personali grezzi**, e la carta resta scoperta davanti a lui per tutta la partita. Se la coppia sfora per colpa degli attivi e l'escluso era stato onesto, non succede nulla. Finito il mazzetto Traditore (12 carte), **ogni nuovo tradimento costa 3** punti personali.
 
 ## 6. Escluso, verso, Zapd e Cromozapd
 - **Rotazione a ogni turno [chiarito]**: il gettone escluso **avanza di un posto a ogni nuovo turno** (dal 2° turno; nel 1° l'escluso è quello estratto a sorte), nel verso di rotazione. **Poi**, se durante la pesca escono Zapd, avanza **ancora** di un posto per ogni Zapd. Quindi nello stesso turno può avanzare di 1, 2, 3… posti.
-- Quando una Zapd colorata viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** (e quindi la regola in vigore) e il **gettone escluso avanza di un altro posto nel verso di rotazione** (oltre alla rotazione del turno) **e poi il verso di rotazione si inverte** [chiarito]; l'ordine "prima avanza, poi inverte" è un'**[interpretazione]**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
+- Quando una Zapd colorata viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** (e quindi cambia la regola in vigore) e il **gettone escluso avanza di un altro posto nel verso di rotazione** (oltre alla rotazione del turno) **e poi il verso di rotazione si inverte** [chiarito]; l'ordine "prima avanza, poi inverte" è un'**[interpretazione]**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
 - Se in un turno escono più Zapd, ognuna si risolve in ordine, ognuna con il verso che c'è in quel momento.
 - **Zapd da "Prossima carta"** **[chiarito]**: si risolve subito ma colore ed escluso valgono **dal turno dopo**; la partita finisce comunque se era l'ultima.
-- **Cromozapd** (la 13ª Zapd, una sola) **[chiarito: idea di Niky]**: sposta il gettone e inverte il verso come le altre Zapd, **non cambia il colore da sola**. A pesca finita **tutti passano la propria mano di carte numeriche al giocatore successivo** (nel verso di rotazione già invertito; le carte-effetto restano a chi le ha) e **chi l'ha pescata sceglie il colore dominante**, cioè la regola in vigore. Se esce come **carta centrale** sceglie chi la scopre (chi era escluso nel turno precedente); se esce da "Prossima carta" sceglie chi ha giocato l'effetto, dal turno dopo.
+- **Cromozapd** (la 13ª Zapd, una sola) **[chiarito: idea di Niky]**: sposta il gettone e inverte il verso come le altre Zapd, **non cambia il colore da sola**. A pesca finita **tutti passano la propria mano di carte numeriche al giocatore successivo** (nel verso di rotazione già invertito; le carte-effetto restano a chi le ha) e **chi l'ha pescata sceglie il colore dominante**, cioè quale regola è in vigore. Se esce come **carta centrale** sceglie chi la scopre (chi era escluso nel turno precedente); se esce da "Prossima carta" sceglie chi ha giocato l'effetto, dal turno dopo.
 - **Fine partita**: finisce al termine del turno in cui è uscita l'**ultima Zapd** (tutte e 13 sono nel mazzo).
 - Se il mazzo finisse, si rimescolano gli scarti numerici **[interpretazione]**.
 
 ## 7. Le regole di colore
-Il **colore dominante** (quello dell'ultima Zapd, o scelto con la Cromozapd) decide una **regola in vigore** fino alla prossima Zapd:
+- Il **colore dominante** (quello dell'ultima Zapd, o scelto con la Cromozapd) dice **quale regola è in vigore** fino alla prossima Zapd **[chiarito: era l'idea di Niky fin dall'inizio]**.
+- La regola però **si attiva solo nei turni in cui la carta centrale è di quel colore**. Negli altri turni non c'è nessuna regola e si gioca il turno normale (l'escluso dichiara, gioca coperta, ecc.). Con 4 colori succede circa 1 turno su 4.
+- Il colore delle carte serve anche a ricordare, a colpo d'occhio, quale Zapd è in vigore.
 
-| Colore | Regola | Cosa cambia |
+| Colore | Regola | Cosa cambia (quando è attiva) |
 |---|---|---|
 | Rosso | **Silenzio** | L'escluso non dichiara e gli attivi non fanno dichiarazioni. La X resta coperta fino al reveal: nessuno può tradire, nessuno può fidarsi. |
 | Blu | **Giuramento** | Come il turno normale, ma chi tradisce pesca **2 carte Traditore** invece di 1. |
@@ -74,7 +76,7 @@ Il **colore dominante** (quello dell'ultima Zapd, o scelto con la Cromozapd) dec
 - **Vincitore di coppia**: la coppia con più punti squadra. **Vincitore individuale**: chi ha il punteggio più alto. In caso di parità si dichiara **pareggio** **[interpretazione]**.
 
 ## 9. Mazzetto Effetti (15 carte)
-Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Sotto **Effetti vietati** nessuna carta-effetto si gioca.
+Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del suo turno da escluso. Non può giocarne in quel turno. **Massimo 2 carte-effetto in mano.** Gli effetti in fila si giocano da **attivo**, in 3ª posizione; il Baratto è istantaneo. Si gioca **al massimo una carta-effetto in fila per turno** **[interpretazione]**. Tutti gli effetti sono rivelati nel reveal; gli scarti non tornano in gioco. Con **Effetti vietati** attivo nessuna carta-effetto si gioca.
 
 | Carta | Quando | Cosa fa |
 |---|---|---|
@@ -100,14 +102,13 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 - Se A gioca il 9 per la coppia e l'8 per sé e B il 7: somma 16 > 7, **sforo**. A ha fatto 8 punti personali, ma la coppia fa 0 e la sua quota non cresce.
 - Se invece A gioca il 3 per la coppia e il 9 per sé, B il 2 per la coppia e il 7 per sé: somma 5, **nel range**. La coppia incassa 3 + 2 + 3 (la carta dell'escluso) = 8, e A ha comunque +9 personali.
 
-*Misure* (3 IA difficili): chi pensa **solo a sé** vince il 9,7% delle partite (regole attuali, 300 partite); chi gioca **sempre le carte più alte** il 10% (misura fatta con la regola precedente); chi bilancia, circa il 33%.
+*Misure* (3 IA difficili): chi pensa **solo a sé** vince il 10,3% delle partite (regole attuali, 300 partite); chi gioca **sempre le carte più alte** il 10% (misura fatta con la regola precedente); chi bilancia, circa il 33%.
 
 ## 12. Non ancora definito
-- **Il colore delle carte numeriche** non ha ruolo: resta aperto (ora contano solo i colori delle Zapd).
+- Quanto spesso si attiva una regola di colore (circa 1 turno su 4) e se le 4 regole sono equilibrate: da vedere al playtest.
 - Sforo ~30% con le AI, posti equilibrati; da riverificare con i playtest umani. Le AI da escluso giocano per lo più carte alte e mentono poco con questo mazzetto Traditore (circa 1 turno da escluso su 6): da vedere se gli umani ostacolano o mentono di più.
 - I modificatori ±n (allargano ×2) sono decisivi circa 1,3 volte a partita: da osservare al playtest.
 - Numero definitivo di copie di ogni effetto e valori del mazzetto Traditore.
-- Con **Luce** l'escluso perde il bluff: da vedere se le regole di colore sono equilibrate fra loro.
 
 ## 13. Parametri (valori di partenza)
 | Parametro | Valore |
@@ -120,6 +121,7 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 | Zapd per colore | **3** |
 | Cromozapd (13ª Zapd) | **sì** |
 | Colore dominante = regola in vigore | **sì** |
+| La regola si attiva solo se la carta centrale ha il colore dominante | **sì** |
 | Immunità del colore dominante | **no** |
 | Carte nel mazzetto Traditore | **12** |
 | Valore di ogni Traditore dopo il mazzetto | **3** |
@@ -142,7 +144,7 @@ Il punteggio è **personali × Fattore**: due numeri che si muovono in direzioni
 | Carta dell'escluso | Ambigua con lo sforo | **Decide il range** (X): dichiarata e giocata coperta, scoperta al reveal; conta per i punti della coppia e per il suo Fattore; 0 se la coppia sfora (voluto da Niky) |
 | Range | V … V + Base | **V … V + X** (X = carta dell'escluso) |
 | Tradimento | Libero e senza effetti | L'escluso che gioca un numero diverso da quello dichiarato pesca una **carta Traditore** (toglie 0–3 punti personali) |
-| Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Giuramento, Luce, Effetti vietati); niente immunità |
+| Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Giuramento, Luce, Effetti vietati), attiva solo se la carta centrale è di quel colore; niente immunità |
 | Zapd | 12 | **13**: la Cromozapd fa passare le mani e fa scegliere il colore |
 | Modificatori −n / +n | Abbassano il minimo / alzano il massimo | **±n allargano il range di 2n per lato** |
 | Mazzetto Effetti | 20 carte (con Sincero, Scambio forzato, Annulla) | **15 carte** (Reverse, Prossima carta, ±n, Baratto) |
@@ -158,5 +160,5 @@ Le AI non fanno parte delle regole, ma conviene saperlo quando si legge la crona
 - **Facile**: gioca spesso a caso e può mentire a caso nelle dichiarazioni.
 - **Media**: simula poche mani possibili, qualche errore; è sempre sincera con il compagno e con gli attivi.
 - **Difficile**: simula molte mani possibili, si fida delle dichiarazioni, usa gli effetti quando servono. Da escluso può **mentire** quando il guadagno atteso supera il costo della carta Traditore.
-- **Quanto sono diversi** (regole attuali, posti alternati, intervallo di confidenza 95%): Difficile contro due Medie vince il 44,4% delle partite (attesi 33,3%; 39,9–49,1%, +2,2 punti), Media contro due Facili il 55,3% (50,7–59,9%, +3,9 punti). Tre Difficili: sforo ~32%, posti A/B/C 30,3/32,3/37,3% su 300 partite.
-- **Il dilemma c'è**: un giocatore che pensa solo a sé (carta più alta per sé, più bassa per la coppia) contro due Difficili vince il 9,7% delle partite (attesi 33,3%): più punti personali ma Fattore 25,8% contro 37,1%.
+- **Quanto sono diversi** (regole attuali, posti alternati, intervallo di confidenza 95%): Difficile contro due Medie vince il 44,7% delle partite (attesi 33,3%; 40,1–49,3%, +1,9 punti), Media contro due Facili il 53,3% (48,7–57,9%, +4,0 punti). Tre Difficili: sforo ~32%, posti A/B/C 28,0/38,3/33,7% su 300 partite.
+- **Il dilemma c'è**: un giocatore che pensa solo a sé (carta più alta per sé, più bassa per la coppia) contro due Difficili vince il 10,3% delle partite (attesi 33,3%): più punti personali ma Fattore 25,9% contro 37,1%.

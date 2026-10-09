@@ -338,11 +338,11 @@
         <div class="lbl">I tuoi effetti (${d.eff.length}/${this.game.rules.effectHandMax})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
     }
     ctxLine(d) {
-      const g = this.game, ex = d.excluded, st = g.s, xm = st.xmode, rl = g.rules.colorRules ? FF.COLOR_RULES[st.rule] : null;
+      const g = this.game, ex = d.excluded, st = g.s, xm = st.xmode, rl = g.rules.colorRules && st.rule ? FF.COLOR_RULES[st.rule] : null;
       const xk = d.xcard ? d.xcard.v : undefined;
       const [lo, hi] = FF.rangeBase(g.rules, d.center.v, xk);
       const rtxt = xm && !d.xcard ? `range da <b>${d.center.v}</b> a <b>${d.center.v} + X</b> (carta dell'escluso${d.xdecl != null ? `, dichiarata: ${d.xdecl}` : ''})` : `range <b>${lo}–${hi}</b>${xm ? ` (V ${d.center.v} + X ${d.xcard.v})` : ''}`;
-      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → ${rtxt}${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · ${rl ? `📜 <b>${rl.i} ${rl.n}</b>` : `🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b>`} · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
+      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → ${rtxt}${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · ${rl ? `📜 <b>${rl.i} ${rl.n}</b>` : g.rules.colorRules ? '📜 nessuna regola' : `🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b>`} · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
     }
 
     // l'escluso dichiara il numero che giocherà (potrà mentire, a suo rischio)
@@ -393,7 +393,7 @@
       const R = this.game.rules;
       return new Promise((resolve) => {
         this.setAction(`<h3>🌈 ${esc(this.pname(d.player))}: scegli il colore dominante</h3>
-          <p>Hai pescato la <b>Cromozapd</b>: tutti hanno passato la mano al giocatore successivo. Ora scegli il colore dominante: decide la <b>regola in vigore</b> fino alla prossima Zapd.</p>
+          <p>Hai pescato la <b>Cromozapd</b>: tutti hanno passato la mano al giocatore successivo. Ora scegli il colore dominante: decide <b>quale regola</b> vale fino alla prossima Zapd, e si attiva nei turni in cui la carta centrale è di quel colore.</p>
           ${this.handStrip(d)}
           <div class="colorpick">${FF.COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return `<button class="btn colbtn" data-col="${i}" style="--dc:${S.COL[i]}">${S.color(i, 'domsym')}<span class="cb-name">${c.n}</span>${rl ? `<span class="cb-rule">${rl.i} <b>${rl.n}</b></span><span class="cb-desc">${rl.d}</span>` : ''}</button>`; }).join('')}</div>`);
         $$('#g-action [data-col]').forEach((b) => (b.onclick = () => resolve(Number(b.dataset.col))));

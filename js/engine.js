@@ -98,7 +98,7 @@
       s.turn = 0; s.phase = 'setup'; s.over = false;
       s.center = null; s.nextCenter = null;
       s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null;
-      s.rule = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.oath = false;
+      s.rule = null; s.ruleLatent = null; s.xmode = null; s.cromoPending = null; s.prevExcluded = mod3(s.excluded - s.dir); s.noEff = false; s.silent = false; s.oath = false;
       s.xDecl = null; s.traitorDeck = this.rules.traitor ? this._shuffle(this.rules.traitorCards.slice()) : [];
       s.pairPts = [0, 0, 0];          // indicizzato per ESCLUSO: coppia = gli altri due
       s.contrib = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; // contrib[giocatore][escluso]
@@ -203,7 +203,7 @@
       const col = Number.isInteger(pick) && pick >= 0 && pick < 4 ? pick : s.dominant;
       s.dominant = col;
       const rl = FF.COLOR_RULES[FF.ruleOf(this.rules, col)];
-      b = this.say('zap', `🌈 ${this.pn(cp.who)} sceglie il colore dominante: ${this.col(col)}${rl ? ` → regola in vigore: ${rl.i} ${rl.n} (${rl.s})` : ''}.`, cp.who, { color: col });
+      b = this.say('zap', `🌈 ${this.pn(cp.who)} sceglie il colore dominante: ${this.col(col)}${rl ? ` → la regola è ${rl.i} ${rl.n} (${rl.s}); si attiva nei turni in cui la carta centrale è ${this.col(col)}` : ''}.`, cp.who, { color: col });
       if (b) yield b;
     }
 
@@ -301,11 +301,15 @@
       if (s.cromoPending) yield* this.resolveCromo();   // Cromozapd uscita in questa pesca: passa le mani e si sceglie il colore
       const ex = s.excluded, act = this.actives();
       // regola in vigore: dipende dal colore dominante
-      s.rule = FF.ruleOf(R, s.dominant); s.xmode = FF.xmodeFor(R, s.rule);
+      // il colore dominante (ultima Zapd) dice QUALE regola è in vigore; la regola vale solo se la carta centrale è di quel colore
+      s.ruleLatent = FF.ruleOf(R, s.dominant);
+      s.rule = s.ruleLatent && (!R.colorTrigger || s.center.c === s.dominant) ? s.ruleLatent : null;
+      s.xmode = FF.xmodeFor(R, s.rule);
       s.silent = s.rule === 'silenzio'; s.oath = s.rule === 'giuramento'; s.noEff = s.rule === 'effetti';
-      if (s.rule) {
-        const rl = FF.COLOR_RULES[s.rule];
-        b = this.say('rule', `📜 Regola in vigore (colore ${this.col(s.dominant)}): ${rl.i} ${rl.n} — ${rl.d}`, -1, { rule: s.rule });
+      if (s.ruleLatent) {
+        const rl = FF.COLOR_RULES[s.ruleLatent];
+        if (s.rule) { this.stat('regola_attiva:' + s.rule, -1); b = this.say('rule', `📜 La carta centrale è ${this.col(s.center.c)}, come il colore dominante: si attiva la regola ${rl.i} ${rl.n} — ${rl.d}`, -1, { rule: s.rule }); }
+        else { this.stat('regola_non_attiva', -1); b = this.say('rule', `📜 La regola del colore dominante ${this.col(s.dominant)} è ${rl.i} ${rl.n}, ma la carta centrale è ${this.col(s.center.c)}: in questo turno nessuna regola.`, -1, { rule: null, latent: s.ruleLatent }); }
         if (b) yield b;
       }
       const XF = s.xmode === 'first'; s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]

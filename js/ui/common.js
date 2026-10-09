@@ -116,10 +116,11 @@
     let h = '<div class="lgroup">Il senso del gioco</div>';
     h += row('⚖️', '<b>Non tirare la corda.</b> La carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota. Una coppia che sfora fa 0: una carta alta in coppia è un rischio, non un regalo.');
     h += '<div class="lgroup">Colori = regole</div>';
+    h += row('📜', 'La <b>Zapd</b> dice quale regola è in vigore (dal colore dominante); la regola <b>si attiva solo nei turni in cui la carta centrale è di quel colore</b>, altrimenti quel turno è normale.');
     h += COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return row(S.color(i), `<b>${c.n}</b> ${c.sym}${rl ? ` → ${rl.i} <b>${rl.n}</b>: ${rl.d}` : ''}`); }).join('');
     h += '<div class="lgroup">Carte e segni</div>';
-    h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande. Il colore non conta (contano solo i colori delle Zapd).');
-    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante (cioè la regola in vigore), fa avanzare l\'escluso di un altro posto e inverte il verso. 12 colorate (3 per colore).');
+    h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande. Il colore serve per la regola: se la carta centrale ha il colore dominante, la regola è attiva.');
+    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante (cioè quale regola è in vigore), fa avanzare l\'escluso di un altro posto e inverte il verso. 12 colorate (3 per colore).');
     h += row(S.card({ z: true, cromo: true, c: -1 }, 'tiny'), '<b>Cromozapd</b> (la 13ª Zapd): tutti passano la mano al giocatore successivo, poi chi l\'ha pescata sceglie il colore dominante, cioè la regola. Se esce come carta centrale sceglie chi la scopre.');
     h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno: dichiara un numero e gioca coperta 1 carta che <b>decide il range</b>.');
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
