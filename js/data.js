@@ -79,7 +79,8 @@
     const [a, b] = FF.rangeBase(rules, v, x), nn = m ? m.n * (rules.modScale || 1) : 0, md = rules.modMode || 'range';
     return [a - (md === 'widen' ? nn : md === 'range' && m && m.dir === 'lo' ? nn : 0), b + (md === 'widen' ? nn : md === 'range' && m && m.dir === 'hi' ? nn : 0)];
   };
-  FF.rangeBase = (rules, v, x) => (rules.rangeMode === 'xcard' ? [Math.max(1, v - (x || 0)), v + (x || 0)] : rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : rules.rangeMode === 'double' ? [v, 2 * v] : [v, v + rules.base]);
+  FF.xFirst = (rules) => rules.rangeMode === 'xcard' || rules.rangeMode === 'xsum';
+  FF.rangeBase = (rules, v, x) => (rules.rangeMode === 'xsum' ? [v, v + (x || 0)] : rules.rangeMode === 'xcard' ? [Math.max(1, v - (x || 0)), v + (x || 0)] : rules.rangeMode === 'pivot' ? [rules.pivot - v, rules.pivot + v] : rules.rangeMode === 'double' ? [v, 2 * v] : [v, v + rules.base]);
   FF.cardName = (c) => (c.z ? `⚡Zapd ${FF.COLORS[c.c].i}` : `${c.v}${FF.COLORS[c.c].i}`);
   FF.effName = (e) => `${FF.EFFECTS[e.k].i} ${FF.EFFECTS[e.k].n}`;
 })(typeof window !== 'undefined' ? window : globalThis);

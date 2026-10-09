@@ -276,9 +276,9 @@
       } else s.center = yield* this.drawNumeric(false, null);
       if (!s.center) { s.over = true; this.emit('warn', '⚠ Carte finite: partita conclusa.'); return; }
       const ex = s.excluded, act = this.actives();
-      const XF = R.rangeMode === 'xcard'; s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
+      const XF = FF.xFirst(R); s.xFirstCard = null;   // VARIANTE (solo simulazione): l'escluso gioca per primo, scoperto, e la sua carta X decide il range [V−X, V+X]
       if (XF) {
-        b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)}. Il range lo decide la carta dell'escluso: da V−X a V+X. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
+        b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)}. Il range lo decide la carta dell'escluso (X): ${R.rangeMode === 'xsum' ? 'da V a V+X' : 'da V−X a V+X'}. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
         if (b) yield b;
         const xd = yield* this.ask(this._dec('xplay', ex, { decls: [], first: true }));
         const xh = s.players[ex].hand, xi = Math.max(0, xh.findIndex((c) => c.id === xd));

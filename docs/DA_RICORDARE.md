@@ -126,3 +126,8 @@ Le IA giocano la stessa carta-coppia (~4,3) anche nei turni "gratis": non sfrutt
 Idea di Niky: dopo la carta centrale V, l'escluso gioca per primo (scoperta) la carta X; range = [V−X, V+X] (minimo 1); gli attivi giocano dopo; la carta dell'escluso conta ancora per i punti della coppia e per il suo Fattore; il range controlla la somma delle 2 carte-coppia.
 Misure (hard×3, 200 partite): sforo 12,2% (sotto 0,15 / sopra 1,52 a partita), punti coppia 161, posti 29,0/35,5/35,5%, egoista vince 18,2%, difficile vs media 41,0%, media vs facile 50,7%, modificatori decisivi 0,96/partita.
 Comportamento delle IA da escluso: giocano quasi sempre carte alte (X=8–10 in ~49% dei turni; X=1 solo ~7%); con X=1 la coppia sta comunque nel range il 62% delle volte (mano di 3 carte + coordinazione). La sabotatura quindi quasi non conviene (l'escluso guadagna quota con carte alte). Sotto si sfora quasi mai (1,2% dei turni).
+
+## Variante "range = carta centrale + carta dell'escluso" (solo simulazione, `rangeMode:'xsum'`)
+Range = [V, V+X], con X la carta giocata per prima (scoperta) dall'escluso; somma controllata = 2 carte-coppia; la carta dell'escluso conta come ora per punti coppia e Fattore.
+Misure (hard×3, 200 partite): sforo 27,9% (sotto 2,10 / sopra 1,55 per partita: bilanciato), punti coppia 138, posti 25,0/38,0/37,0% (A basso: da ricontrollare con più partite), egoista vince 19,1%, difficile vs media 43,3%, media vs facile 52,0%, modificatori decisivi 1,43/partita.
+L'escluso gioca ancora per lo più carte alte (X=8–10 ~37% dei turni, X=1 ~7%); con X=1 la coppia sta nel range il 48%.
