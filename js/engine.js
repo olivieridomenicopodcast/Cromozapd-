@@ -484,16 +484,15 @@
         }
       }
       const scored = inRange || immune;
-      if (FF.xHidden(R)) {   // dichiarato vs giocato; se mente e la coppia sfora → carta Traditore
+      if (FF.xHidden(R)) {   // dichiarato vs giocato; se mente (sfori o no) → carta Traditore
         const lied = xcard.v !== s.xDecl;
         this.stat(lied ? 'escluso_mente' : 'escluso_onesto', ex);
-        if (lied && scored) this.stat('bugia_senza_conseguenze', ex);
-        if (lied && !scored) {
+        if (lied) {
           this.stat('bugia_scoperta', ex);
           if (R.traitor && s.traitorDeck.length) {
             const tv = s.traitorDeck.splice(this.randInt(s.traitorDeck.length), 1)[0];
             xp.traitor.push(tv); xp.personal -= tv; this.stat('carta_traditore', ex, tv);
-            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}, e la coppia ha sforato: pesca una carta TRADITORE da ${tv} (−${tv} ai punti personali).`, ex, { traitor: tv });
+            b = this.say('score', `🐍 ${this.pn(ex)} aveva dichiarato ${s.xDecl} ma ha giocato ${xcard.v}: pesca una carta TRADITORE da ${tv} (−${tv} ai punti personali).`, ex, { traitor: tv });
             if (b) yield b;
           }
         }

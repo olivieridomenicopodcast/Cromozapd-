@@ -48,7 +48,7 @@
     rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base
     pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
     xHidden: false,         // VARIANTE (solo simulazione, con rangeMode 'xsum'): l'escluso DICHIARA un numero esatto, gioca coperto, X si scopre al reveal
-    traitor: false,         // VARIANTE (con xHidden): se l'escluso ha mentito e la coppia sfora pesca una carta Traditore: ne toglie il valore ai suoi punti personali
+    traitor: false,         // VARIANTE (con xHidden): se l'escluso gioca un numero diverso da quello dichiarato pesca una carta Traditore: ne toglie il valore ai suoi punti personali
     traitorCards: [1, 2, 2, 3, 3, 4, 5, 6],   // mazzetto Traditore (si pesca senza reinserimento)
     modMode: 'widen',       // VARIANTE (solo simulazione) modificatori ±: 'range' (−n abbassa il minimo, +n alza il massimo), 'shift' (−n/+n spostano la somma), 'widen' (allargano il range da entrambi i lati)
     modTiming: 'blind',     // VARIANTE (solo simulazione): 'blind' = il modificatore si gioca coperto in 3ª posizione; 'after' = si gioca DOPO il reveal, a somma nota, per correggere uno sforo (sposta la somma di ±n)

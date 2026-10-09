@@ -134,7 +134,7 @@ L'escluso gioca ancora per lo più carte alte (X=8–10 ~37% dei turni, X=1 ~7%)
 - Controllo del posto A con 1000 partite (hard×3, seed sx0–sx999): xsum A 33,0% / B 32,6% / C 34,4%; perno 15 (regola attuale) A 35,9% / B 33,6% / C 30,5%. Il 25% visto con 200 partite era rumore.
 
 ## Variante "escluso dichiara e può tradire" (solo simulazione: `rangeMode:'xsum'`, `xHidden:true`, `traitor:true`)
-Regole simulate: l'escluso DICHIARA un numero esatto, poi gioca coperto la carta X (si scopre al reveal; range V..V+X). Se la coppia sta nel range (o è immune) non succede niente anche se ha mentito. Se la coppia sfora: il suo X vale 0 come oggi; se aveva mentito pesca una carta Traditore (mazzetto 1,2,2,3,3,4,5,6, senza reinserimento) e il valore si toglie ai suoi punti personali grezzi.
+Regole simulate: l'escluso DICHIARA un numero esatto, poi gioca coperto la carta X (si scopre al reveal; range V..V+X). (Prima versione, SBAGLIATA rispetto all'intenzione di Niky: la penalità scattava solo se mentiva E la coppia sforava; ora scatta sempre se gioca un numero diverso dal dichiarato.) Se la coppia sfora: il suo X vale 0 come oggi; se aveva mentito pesca una carta Traditore (mazzetto 1,2,2,3,3,4,5,6, senza reinserimento) e il valore si toglie ai suoi punti personali grezzi.
 Misure (hard×3, 240 partite per riga; il posto A in "nolie" non mente mai, le IA mentono con una loro euristica di valore atteso):
 | Penalità | Chi | Bugie/partita (totale) | Scoperte | Vittorie A/B/C | Punteggio A/B/C |
 |---|---|---|---|---|---|
@@ -142,3 +142,5 @@ Misure (hard×3, 240 partite per riga; il posto A in "nolie" non mente mai, le I
 | 1–6 | A onesto | 5,09 | 1,02 | 35,0/31,7/33,4% | 17,98/18,06/18,04 |
 | ×2 (2–12) | A onesto | 4,48 | 0,90 | 38,8/32,5/28,7% | 18,20/17,43/17,52 |
 Lettura: con la penalità 1–6 mentire è quasi neutro (circa 80% delle bugie non ha conseguenze perché la coppia resta nel range); con il doppio essere onesti inizia a convenire (+0,7 punti). Sforo ~30% (sotto 2,2 / sopra 1,7), poco diverso da X scoperta (27,9%). Limite: le IA hanno fiducia fissa (0,85), gli umani imparano a non fidarsi.
+
+Correzione (penalità SEMPRE quando gioca un numero diverso dal dichiarato, sforo o no; mazzetto 1,2,2,3,3,4,5,6; hard×3, 240 partite): le bugie crollano a 0,18 a partita (circa 1,5% dei turni da escluso, 12 dichiarazioni oneste a partita); sforo 30,5% (sotto 2,0 / sopra 2,0); vittorie A/B/C 32,9/34,1/32,9%; con A onesto 35,8/32,5/31,6%. Con questa penalità nessuno mente: la dichiarazione dell'escluso diventa praticamente una dichiarazione vera.
