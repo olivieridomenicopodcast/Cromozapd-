@@ -169,5 +169,5 @@ Le AI non fanno parte delle regole, ma conviene saperlo quando si legge la crona
 - **Facile**: gioca spesso a caso e può mentire a caso nelle dichiarazioni.
 - **Media**: simula poche mani possibili, qualche errore; è sempre sincera con il compagno e con gli attivi.
 - **Difficile**: simula molte mani possibili, si fida delle dichiarazioni, usa gli effetti quando servono. Da escluso può **mentire** quando il guadagno atteso supera il costo della carta Traditore.
-- **Quanto sono diversi** (regole attuali, posti alternati, intervallo di confidenza 95%): Difficile contro due Medie vince il 44,7% delle partite (attesi 33,3%; 40,1–49,3%, +1,9 punti), Media contro due Facili il 53,3% (48,7–57,9%, +4,0 punti). Tre Difficili: sforo ~32%, posti A/B/C 28,0/38,3/33,7% su 300 partite.
-- **Il dilemma c'è**: un giocatore che pensa solo a sé (carta più alta per sé, più bassa per la coppia) contro due Difficili vince il 10,3% delle partite (attesi 33,3%): più punti personali ma Fattore 25,9% contro 37,1%.
+- **Quanto sono diversi** (punteggio a podio, posti alternati, intervallo di confidenza 95%): Difficile contro due Medie vince il 45,6% delle partite (attesi 33,3%; 41,0–50,2%), Media contro due Facili il 56,0% (51,4–60,5%). Tre Difficili: sforo ~31%, posti A/B/C 31,3/33,1/35,6% su 1000 partite.
+- **Il dilemma c'è**: contro due Difficili, chi gioca sempre le carte più alte vince il 12,5% delle partite, chi pensa solo a sé (carta bassa per la coppia, la più alta per sé) il 5,8%, un egoista semplice il 15,2% (attesi 33,3%).
