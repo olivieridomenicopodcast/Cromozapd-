@@ -199,3 +199,13 @@ Sforo 32,1% (sotto 1,96 / sopra 1,98), punti coppia 133,5, posti A/B/C 30,3/32,3
 
 ## Regole di colore con attivazione (la regola vale solo se la carta centrale ha il colore dominante) — hard×3, 300 partite
 Sforo 31,7% (sotto 1,91 / sopra 1,98), punti coppia 133,6, posti A/B/C 28,0/38,3/33,7% (rumore: 300 partite), modificatori decisivi 1,30 / inutili 1,43 / non bastano 0,25, egoista vince 10,3% (Fattore 25,9% contro 37,1%), difficile vs 2 medie 44,7% (40,1–49,3%, +1,90), media vs 2 facili 53,3% (48,7–57,9%, +4,00). La regola attiva circa 1 turno su 4 (parametro `colorTrigger`, true di default).
+
+## Le 4 regole di colore, una per una (regola SEMPRE attiva, hard×3, 200 partite; "abilità" = vittorie di un Difficile contro 2 Medie, 200 partite, atteso 33,3%)
+| Regola | Sforo | Sotto / sopra | Punti coppia | Bugie dell'escluso a partita | Punti Traditore persi | Effetti giocati | Modificatori decisivi | Abilità |
+|---|---|---|---|---|---|---|---|---|
+| Nessuna (turno normale) | 30,9% | 1,74 / 2,08 | 136 | 2,36 | 3,50 | 8,09 | 1,32 | 48,5% |
+| Silenzio | 33,4% | 2,28 / 1,83 | 134 | 0 | 0 | 8,07 | 0,93 | 42,0% |
+| Giuramento | 30,0% | 1,89 / 1,80 | 138 | 0,21 | 0,60 | 7,95 | 1,42 | 49,5% |
+| Luce | 27,2% | 1,94 / 1,42 | 143 | 0 | 0 | 7,33 | 1,79 | 48,0% |
+| Effetti vietati | 45,3% | 2,06 / 3,54 | 106 | 2,07 | 2,94 | 0 | 0 | 44,8% |
+Lettura: Effetti vietati è di gran lunga la più pesante (sforo +14 punti, punti coppia −30: i modificatori sono la rete di sicurezza); Luce è la più facile; Silenzio peggiora la coordinazione e premia meno l'abilità; Giuramento per le IA è quasi invisibile (non mentono più: 0,21 bugie a partita). Con la regola attiva circa 1 turno su 4 gli effetti si diluiscono.
