@@ -144,3 +144,12 @@ Misure (hard×3, 240 partite per riga; il posto A in "nolie" non mente mai, le I
 Lettura: con la penalità 1–6 mentire è quasi neutro (circa 80% delle bugie non ha conseguenze perché la coppia resta nel range); con il doppio essere onesti inizia a convenire (+0,7 punti). Sforo ~30% (sotto 2,2 / sopra 1,7), poco diverso da X scoperta (27,9%). Limite: le IA hanno fiducia fissa (0,85), gli umani imparano a non fidarsi.
 
 Correzione (penalità SEMPRE quando gioca un numero diverso dal dichiarato, sforo o no; mazzetto 1,2,2,3,3,4,5,6; hard×3, 240 partite): le bugie crollano a 0,18 a partita (circa 1,5% dei turni da escluso, 12 dichiarazioni oneste a partita); sforo 30,5% (sotto 2,0 / sopra 2,0); vittorie A/B/C 32,9/34,1/32,9%; con A onesto 35,8/32,5/31,6%. Con questa penalità nessuno mente: la dichiarazione dell'escluso diventa praticamente una dichiarazione vera.
+
+### Ricerca del valore delle carte Traditore (hard×3, 200 partite per riga, tutti possono mentire; penalità sempre se il numero giocato ≠ dichiarato)
+| Mazzetto Traditore | Media | Bugie a partita (su ~12 turni da escluso) | Penalità totale a partita | Sforo |
+|---|---|---|---|---|
+| 0,0,0,1,1,1,1,2 | 0,75 | 6,13 (circa 1 turno su 2) | 4,17 | 29,9% |
+| **0,1,1,1,2,2,2,3** | **1,5** | **2,14 (circa 1 turno su 6)** | 3,32 | 30,9% |
+| 1,1,2,2,2,3,3,4 | 2,25 | 0,63 (circa 1 turno su 19) | 1,48 | 30,2% |
+| 1,2,2,3,3,4,5,6 | 3,4 | 0,18 (circa 1 turno su 67) | 0,65 | 30,5% |
+Per far mentire ogni tanto (1 turno su 5–6) il mazzetto 0,1,1,1,2,2,2,3 è il candidato. Lo 0 dà il caso "ti è andata bene" voluto da Niky.
