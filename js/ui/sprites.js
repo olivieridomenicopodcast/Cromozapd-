@@ -60,6 +60,7 @@
       case 'next': return g('<rect x="6" y="12" width="26" height="38" rx="4" fill="#8a96a8" stroke="#445" stroke-width="2"/><rect x="20" y="8" width="26" height="38" rx="4" fill="#fff" stroke="#445" stroke-width="2"/><text x="33" y="35" font-size="24" font-weight="900" fill="#6b3fa0" text-anchor="middle" ' + FONT + '>?</text><polygon points="44,50 58,50 51,58" fill="#6b3fa0" transform="rotate(-90 51 52)"/>');
       case 'sincero': return g('<path d="M6 8h48a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H26l-12 12v-12H6a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4z" fill="#f2a63b" stroke="#8a5a00" stroke-width="2.5"/><text x="30" y="33" font-size="22" font-weight="900" fill="#fff" text-anchor="middle" ' + FONT + '>=7</text>');
       case 'swap': return g('<rect x="4" y="10" width="20" height="28" rx="3" fill="#e9eef7" stroke="#445" stroke-width="2"/><rect x="36" y="22" width="20" height="28" rx="3" fill="#cfe3d3" stroke="#445" stroke-width="2"/><path d="M26 18h14l-4-5M34 44H20l4 5" fill="none" stroke="#6b3fa0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>');
+      case 'baratto': return g('<rect x="2" y="8" width="22" height="30" rx="3" fill="#e9eef7" stroke="#445" stroke-width="2"/><rect x="36" y="22" width="22" height="30" rx="3" fill="#cfe3d3" stroke="#445" stroke-width="2"/><path d="M10 46 L30 54 M30 54 l-9 0 M30 54 l-3 -8" stroke="#6b3fa0" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M50 14 L30 6 M30 6 l9 0 M30 6 l3 8" stroke="#6b3fa0" stroke-width="4" stroke-linecap="round" fill="none"/>');
       case 'annulla': return g('<circle cx="30" cy="30" r="22" fill="none" stroke="#c92a2a" stroke-width="7"/><line x1="14" y1="46" x2="46" y2="14" stroke="#c92a2a" stroke-width="7" stroke-linecap="round"/>');
     }
     return '';
@@ -88,6 +89,13 @@
       <text x="50" y="118" font-size="17" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="2">ZAPD</text>
       ${sym(c, 18, 20, 8, COL[c], '#fff')}${sym(c, 82, 20, 8, COL[c], '#fff')}`, `Zapd ${FF.COLORS[c].n}`);
   }
+  def('zapd-cromo', '0 0 100 140', () => `
+    <rect x="2" y="2" width="96" height="136" rx="10" fill="#1d1b2e" stroke="#f2e6c9" stroke-width="5"/>
+    <rect x="10" y="10" width="80" height="120" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.5" opacity="0.7"/>
+    ${[0, 1, 2, 3].map((c) => sym(c, 26 + (c % 2) * 48, 30 + Math.floor(c / 2) * 80, 10, COL[c], '#fff')).join('')}
+    ${bolt(50, 70, 1.25, '#ffd84a', '#fff3b0')}
+    <text x="50" y="100" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">CROMO</text>
+    <text x="50" y="114" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle" ${FONT} letter-spacing="1">ZAPD</text>`, 'Cromozapd');
   def('back', '0 0 100 140', () => `
     <rect x="2" y="2" width="96" height="136" rx="10" fill="#2c3e6b" stroke="#f2e6c9" stroke-width="4"/>
     <rect x="11" y="11" width="78" height="118" rx="6" fill="none" stroke="#f2e6c9" stroke-width="1.6" opacity="0.8"/>
@@ -99,8 +107,9 @@
     <text x="50" y="82" font-size="40" font-weight="900" fill="#f2e6c9" text-anchor="middle" ${FONT}>✦</text>
     <text x="50" y="112" font-size="11" font-weight="800" fill="#f2e6c9" text-anchor="middle" ${FONT}>EFFETTI</text>`, 'Dorso Mazzetto Effetti');
   for (const k of FF.EFFECT_IDS) {
+    if (FF.EFFECTS[k].retired && !['sincero', 'swap', 'annulla'].includes(k)) continue;   // cambio/lente: solo prove di simulazione, senza carta
     const e = FF.EFFECTS[k], head = e.kind === 'sincero' ? '#e08a1e' : e.kind === 'annulla' ? '#b92d2d' : '#6b3fa0';
-    const kindTxt = e.kind === 'sincero' ? 'ISTANTANEA' : e.kind === 'annulla' ? 'REATTIVA' : 'IN FILA';
+    const kindTxt = e.kind === 'sincero' || e.kind === 'baratto' ? 'ISTANTANEA' : e.kind === 'annulla' ? 'REATTIVA' : 'IN FILA';
     def(`eff-${k}`, '0 0 100 140', () => `
       <rect x="2" y="2" width="96" height="136" rx="10" fill="#f6ecd2" stroke="${head}" stroke-width="4"/>
       <path d="M2 12a10 10 0 0 1 10-10h76a10 10 0 0 1 10 10v26H2z" fill="${head}"/>
@@ -131,7 +140,7 @@
     const [, , w, h] = d.vb.split(' ').map(Number);
     return `<?xml version="1.0" encoding="UTF-8"?>\n<svg ${S.xmlns} viewBox="${d.vb}" width="${w * 3}" height="${h * 3}" role="img" aria-label="${d.label}">${d.body()}</svg>\n`;
   };
-  S.cardId = (c) => (c.z ? `zapd-${FF.COLORS[c.c].id}` : `card-${c.v}-${FF.COLORS[c.c].id}`);
+  S.cardId = (c) => (c.cromo ? 'zapd-cromo' : c.z ? `zapd-${FF.COLORS[c.c].id}` : `card-${c.v}-${FF.COLORS[c.c].id}`);
   S.card = (c, cls, attrs) => S.svg(S.cardId(c), 'crd ' + (cls || ''), attrs);
   S.effect = (k, cls, attrs) => S.svg('eff-' + k, 'crd eff ' + (cls || ''), attrs);
   S.back = (cls) => S.svg('back', 'crd back ' + (cls || ''));

@@ -1,3 +1,5 @@
+# STATO: tutto ciò che è in questo elenco è stato IMPLEMENTATO nell'app e nel regolamento (v0.2) — vedi docs/REGOLAMENTO.md.
+
 # Da implementare nell'app e nel regolamento (deciso da Niky, in attesa della decisione sui colori)
 
 Questo elenco è il lavoro **già deciso ma non ancora fatto**. Si implementa tutto insieme dopo aver deciso le regole dei colori.

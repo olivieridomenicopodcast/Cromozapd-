@@ -1,5 +1,5 @@
 /* Service worker: l'app funziona offline. Cache "stale-while-revalidate" sui file locali. */
-const CACHE = 'cromozapd-playtest-v2';
+const CACHE = 'cromozapd-playtest-v3';
 const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './css/style.css',
   './js/data.js', './js/engine.js', './js/ai.js', './js/sim.js', './js/rulebook.js',
   './js/ui/sprites.js', './js/ui/common.js', './js/ui/board.js', './js/ui/play.js', './js/ui/simui.js', './js/ui/rules.js', './js/ui/main.js'];

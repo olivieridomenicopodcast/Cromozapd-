@@ -234,3 +234,15 @@ body { overflow-x: hidden; }
 .gtable { width: 100%; border-collapse: collapse; font-size: .88rem; } .gtable th, .gtable td { padding: 5px 6px; border-bottom: 1px solid var(--paper2); text-align: left; white-space: nowrap; }
 .card textarea { width: 100%; }
 @media (max-width: 640px) { .barrow { grid-template-columns: 78px 1fr 54px; } }
+
+/* ── regole di colore, Cromozapd, carte Traditore ── */
+.zslot.on.cromo { background: conic-gradient(#d9433b, #eab51f, #2e9d57, #2f6fd1, #d9433b); font-size: 1rem; }
+.trait { margin-top: 6px; font-size: 1.05rem; font-weight: 800; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tcard { display: inline-block; padding: 2px 9px; border-radius: 8px; background: #3a1f4d; color: #f2e6c9; border: 2px solid #b48bd9; font-weight: 900; }
+.colorpick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+.colbtn { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; border-left: 10px solid var(--dc); min-height: 112px; white-space: normal; }
+.colbtn .domsym { width: 34px; height: 34px; }
+.colbtn .cb-name { font-weight: 900; font-size: 1.1rem; }
+.colbtn .cb-rule { font-size: 1.05rem; }
+.colbtn .cb-desc { font-size: .95rem; font-weight: 500; color: var(--ink); opacity: .85; }
+.announce.k-rule .aemoji { font-size: 2.2rem; }

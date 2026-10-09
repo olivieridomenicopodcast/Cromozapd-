@@ -193,3 +193,6 @@ Istantanea, dopo che l'escluso ha messo la sua carta coperta: chi la gioca la gu
 | Lente 3 | 31,6% | 2,03 / 2,06 | 132,2 | 1,00 | 0,33 a partita | −0,10 |
 | Lente 3 + Baratto 2 (vista) | 30,7% | 1,88 / 2,08 | 135,8 | 1,03 | 0,40 a partita | −0,21 |
 Lettura: vedere la carta dell'escluso non compensa il costo di non poter parlare (la coppia si coordina peggio: sforo +2/+3 punti); un uso su tre smaschera davvero una bugia. Vantaggio personale nullo o leggermente negativo.
+
+## Valutazione finale delle regole implementate (regolamento v0.2; hard×3, 300 partite)
+Sforo 32,1% (sotto 1,96 / sopra 1,98), punti coppia 133,5, posti A/B/C 30,3/32,3/37,3%, modificatori decisivi 1,13 / inutili 0,97 / non bastano 0,19 a partita, tradimenti dichiarati 1,3%. Dilemma: egoista semplice vince il 9,7% (Fattore 25,8% contro 37,1%). Livelli: difficile vs 2 medie 44,4% (39,9–49,1%, +2,18 punti), media vs 2 facili 55,3% (50,7–59,9%, +3,86). Da rivedere al playtest: equilibrio fra le 4 regole di colore (Luce toglie il bluff all'escluso), colore delle carte numeriche senza ruolo, posto C leggermente avvantaggiato (37%).

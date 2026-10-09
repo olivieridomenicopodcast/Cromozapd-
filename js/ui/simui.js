@@ -27,7 +27,7 @@
   }
   const tile = (big, label, sub) => `<div class="tile"><div class="tbig">${big}</div><div class="tlab">${label}</div>${sub ? `<div class="tsub">${sub}</div>` : ''}</div>`;
   const parseParams = (txt) => { const o = {}; String(txt || '').split(/[,;\s]+/).filter(Boolean).forEach((p) => { const [k, v] = p.split('='); if (k && v != null) o[k] = v === 'true' ? true : v === 'false' ? false : Number(v); }); return Object.keys(o).length ? o : undefined; };
-  const PARAM_LIST = ['base', 'handSize', 'effectHandMax', 'zapPerColor', 'startExcluded', ...FF.EFFECT_IDS.map((k) => 'effectCopies.' + k)];
+  const PARAM_LIST = ['modScale', 'handSize', 'effectHandMax', 'zapPerColor', 'traitorOverflow', 'startExcluded', ...FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired).map((k) => 'effectCopies.' + k)];
 
   UI.openSim = function () {
     UI.screen('sim');
@@ -44,7 +44,7 @@
       <details class="adv"><summary>⚙ Varianti di regole</summary>${UI.rulesFields('sm-r-', last.rules)}</details>
       <div class="btn-row"><button class="btn primary" id="sm-run">▶ Avvia simulazione</button><button class="btn" id="sm-back">← Indietro</button></div>
       <hr><h3>🧪 Esperimento sulle regole</h3><p class="small muted">Ripete la simulazione cambiando un solo parametro e confronta i risultati.</p>
-      <div class="rowgrid"><div class="field"><label>Parametro</label><select id="sm-ep">${PARAM_LIST.map((p) => `<option value="${p}" ${p === (last.ep || 'base') ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+      <div class="rowgrid"><div class="field"><label>Parametro</label><select id="sm-ep">${PARAM_LIST.map((p) => `<option value="${p}" ${p === (last.ep || 'modScale') ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
       <div class="field"><label>Valori (separati da virgola)</label><input type="text" id="sm-ev" value="${esc(last.ev || '5,7,10,13')}"></div></div>
       <div class="btn-row"><button class="btn" id="sm-exp">🧪 Avvia esperimento</button></div>
       <hr><h3>🔬 Analisi delle carte-effetto "forzate"</h3><p class="small muted">Per ogni carta-effetto, il profilo A parte con quella carta in mano (stesso seed con e senza): misura quanto rende, anche se l'AI non la sceglierebbe da sola.</p>

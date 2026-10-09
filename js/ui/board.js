@@ -10,24 +10,31 @@
 
   const pile = (cls, spr, n, label, sub) => `<div class="pile ${cls}"><div class="pilecards">${spr}<span class="pcount">${n}</span></div><div class="plabel">${label}</div>${sub ? `<div class="psub">${sub}</div>` : ''}</div>`;
 
+  const ruleOf = (g) => (g.rules.colorRules ? FF.COLOR_RULES[FF.ruleOf(g.rules, g.s.dominant)] : null);
+
   function zapBar(g) {
     const s = g.s, tot = g.totalZaps; let h = '';
     for (let i = 0; i < tot; i++) {
       const z = s.zapPile[i];
-      h += z ? `<span class="zslot on" style="--zc:${S.COL[z.c]}" title="Zapd ${COLORS[z.c].n}">${COLORS[z.c].sym}</span>` : '<span class="zslot" title="Zapd ancora nel mazzo">⚡</span>';
+      h += z ? (z.cromo ? '<span class="zslot on cromo" title="Cromozapd">🌈</span>' : `<span class="zslot on" style="--zc:${S.COL[z.c]}" title="Zapd ${COLORS[z.c].n}">${COLORS[z.c].sym}</span>`) : '<span class="zslot" title="Zapd ancora nel mazzo">⚡</span>';
     }
     return `<div class="zapbar"><div class="plabel">⚡ Zapd uscite ${s.zapsDrawn}/${tot}</div><div class="zslots">${h}</div></div>`;
   }
 
   function rangeBox(g, tab) {
     const s = g.s, c = tab && tab.center; if (!c) return '<div class="rangebox muted">Il range apparirà con la carta centrale.</div>';
-    const sc = tab && tab.score, xf = FF.xFirst(g.rules), xv = tab && tab.xcard ? tab.xcard.v : undefined;
-    if (xf && xv == null) return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia</div><div class="rnums"><b>${c.v}</b><span class="rline"></span><b>${c.v} + X</b></div><div class="rsub">X = la carta che gioca l'escluso, scoperta, per prima</div></div>`;
-    const [b0, b1] = FF.rangeBase(g.rules, c.v, xv), min = sc ? sc.min : b0, max = sc ? sc.max : b1;
+    const sc = tab && tab.score, hidden = s.xmode === 'hidden', first = s.xmode === 'first', xv = tab && tab.xcard ? tab.xcard.v : undefined;
+    const xmode = !!s.xmode;
+    if (xmode && xv == null && !sc) {
+      const decl = hidden && s.xDecl != null ? ` L'escluso ha dichiarato <b>${s.xDecl}</b>, ma può mentire.` : '';
+      return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia</div><div class="rnums"><b>${c.v}</b><span class="rline"></span><b>${c.v} + X</b></div><div class="rsub">${hidden ? `X = la carta che l'escluso ha giocato <b>coperta</b>: si scopre al reveal.${decl}${s.silent ? ' <b>Silenzio:</b> nessuna dichiarazione.' : ''}` : "X = la carta che gioca l'escluso, scoperta, per prima"}</div></div>`;
+    }
+    const xx = sc ? (sc.xv != null ? sc.xv : xv) : xv;
+    const [b0, b1] = FF.rangeBase(g.rules, c.v, xx), min = sc ? sc.min : b0, max = sc ? sc.max : b1;
     const mods = sc && (min !== b0 || max !== b1) ? ` <span class="modnote">(con i modificatori)</span>` : '';
     let verdict = '';
     if (sc) verdict = `<div class="verdict ${sc.scored ? (sc.inRange ? 'ok' : 'imm') : 'ko'}">Somma ${sc.sum}: ${sc.inRange ? '✔ nel range' : sc.scored ? '🛡 immune (colore dominante)' : '💥 SFORO'}</div>`;
-    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia${g.rules.xInSum ? ' + la carta dell\'escluso' : ''}</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}${xf ? ` + X=${xv}` : g.rules.rangeMode === 'pivot' ? ', centrato su ' + g.rules.pivot : ', Base ' + g.rules.base})${mods}</div>${verdict}</div>`;
+    return `<div class="rangebox"><div class="rtitle">Range: la somma delle 2 carte-coppia${g.rules.xInSum ? ' + la carta dell\'escluso' : ''}</div><div class="rnums"><b>${min}</b><span class="rline"></span><b>${max}</b></div><div class="rsub">da ${min} a ${max} compresi (V=${c.v}${xmode ? ` + X=${xx}` : g.rules.rangeMode === 'pivot' ? ', centrato su ' + g.rules.pivot : ', Base ' + g.rules.base})${mods}</div>${verdict}</div>`;
   }
 
   function seatBox(g, pid, view) {
@@ -45,6 +52,7 @@
       <div class="shead">${S.seat(pid, 'sbadge')}<div class="sname"><b>${esc(p.name)}</b><span class="skind">${kind}</span></div>${role}</div>
       <div class="shand"><div class="hlabel">Mano (${p.hand.length})</div><div class="cardsrow">${hand || '<span class="muted small">vuota</span>'}</div></div>
       <div class="shand"><div class="hlabel">Effetti (${p.eff.length}/${g.rules.effectHandMax})</div><div class="cardsrow">${eff || '<span class="muted small">nessuno</span>'}</div></div>
+      ${p.traitor && p.traitor.length ? `<div class="trait" title="Carte Traditore: tolgono punti personali">🐍 ${p.traitor.map((v) => `<span class="tcard">−${v}</span>`).join(' ')}</div>` : ''}
       ${played}</div>`;
   }
 
@@ -63,7 +71,7 @@
       <div class="tbl-mid">
         <div class="centerblock"><div class="clabel">Carta centrale</div>${tab.center ? UI.cardHTML(tab.center, { cls: 'bigcard' }) : '<div class="emptyslot big"></div>'}</div>
         ${rangeBox(g, tab)}
-        <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">Se le 2 carte-coppia sono di questo colore: nessuno sforo</div></div>
+        <div class="domblock"><div class="clabel">Colore dominante</div><div class="domcol" style="--dc:${S.COL[s.dominant]}">${S.color(s.dominant, 'domsym')}<b>${COLORS[s.dominant].n}</b></div><div class="psub">${ruleOf(g) ? `<b>${ruleOf(g).i} ${ruleOf(g).n}</b>: ${ruleOf(g).s}` : 'Se le 2 carte-coppia sono di questo colore: nessuno sforo'}</div></div>
         <div class="dirblock"><div class="clabel">Verso</div>${S.dir(s.dir, 'dirbig')}<div class="psub">${g.rules.rotateEachTurn ? `Al prossimo turno il gettone passa a <b>${FF.SEATS[nextEx]}</b>; ogni Zapd lo sposta ancora e inverte il verso` : `Prossima Zapd: il gettone passa a <b>${FF.SEATS[nextEx]}</b>`}</div></div>
         ${s.nextCenter ? `<div class="nextblock"><div class="clabel">Messa da parte</div>${nc}<div class="psub">centrale del turno dopo</div></div>` : ''}
       </div>
@@ -73,9 +81,9 @@
   // punteggi e contributi di tutti, sempre visibili
   UI.renderScores = function (el, g) {
     const s = g.s;
-    const head = `<tr><th></th>${[0, 1, 2].map((e) => `<th title="Punti della coppia ${FF.pairLabel(e)}">${FF.pairLabel(e)}</th>`).join('')}<th title="Somma delle carte per sé">Pers.</th><th title="Media delle tue quote nelle 3 coppie">Fatt.</th><th title="Personali × Fattore">Punti</th></tr>`;
+    const head = `<tr><th></th>${[0, 1, 2].map((e) => `<th title="Punti della coppia ${FF.pairLabel(e)}">${FF.pairLabel(e)}</th>`).join('')}<th title="Somma delle carte per sé, meno le carte Traditore">Pers.</th><th title="Media delle tue quote nelle 3 coppie">Fatt.</th><th title="Personali × Fattore">Punti</th></tr>`;
     const pairRow = `<tr class="pairrow"><td>Coppia</td>${[0, 1, 2].map((e) => `<td><b>${s.pairPts[e]}</b></td>`).join('')}<td colspan="3" class="muted">squadra</td></tr>`;
-    const rows = [0, 1, 2].map((p) => `<tr class="pr${p}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td>${[0, 1, 2].map((e) => `<td>${s.pairPts[e] ? Math.round(100 * s.contrib[p][e] / s.pairPts[e]) + '%' : '–'}</td>`).join('')}<td>${s.players[p].personal}</td><td>${Math.round(100 * g.factor(p))}%</td><td><b>${g.score(p).toFixed(1)}</b></td></tr>`).join('');
+    const rows = [0, 1, 2].map((p) => `<tr class="pr${p}"><td>${S.seat(p, 'tinyseat')} ${esc(s.players[p].name)}</td>${[0, 1, 2].map((e) => `<td>${s.pairPts[e] ? Math.round(100 * s.contrib[p][e] / s.pairPts[e]) + '%' : '–'}</td>`).join('')}<td>${s.players[p].personal}${s.players[p].traitor && s.players[p].traitor.length ? ` <span class="muted" title="Carte Traditore: −${s.players[p].traitor.reduce((a, b) => a + b, 0)}">🐍</span>` : ''}</td><td>${Math.round(100 * g.factor(p))}%</td><td><b>${g.score(p).toFixed(1)}</b></td></tr>`).join('');
     el.innerHTML = `<table class="scoretbl"><thead>${head}</thead><tbody>${pairRow}${rows}</tbody></table>
       <div class="small muted" style="margin-top:6px">Colonne AB / BC / AC: quota di ognuno nei punti di quella coppia (anche da escluso). Punti = personali × Fattore.</div>`;
   };
@@ -84,13 +92,12 @@
   UI.renderStates = function (el, g) {
     const s = g.s, ex = s.excluded;
     const item = (ico, title, state, on, desc) => `<div class="state ${on ? 'on' : 'off'}"><div class="sico">${ico}</div><div><div class="stitle">${title} <span class="sbadge2 ${on ? 'on' : ''}">${state}</span></div><div class="sdesc">${desc}</div></div></div>`;
-    const sinc = s.sincero != null;
+    const rl = ruleOf(g);
     el.innerHTML = [
-      item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
+      item(S.color(s.dominant, 'stico'), 'Colore dominante', COLORS[s.dominant].n, true, rl ? `È la regola in vigore: ${rl.i} <b>${rl.n}</b> — ${rl.d} Cambia a ogni Zapd.` : 'Se entrambe le carte-coppia degli attivi sono di questo colore la coppia non perde mai per sforo. Cambia a ogni Zapd.'),
       item(S.dir(s.dir, 'stico'), 'Verso di rotazione', s.dir > 0 ? '↻ A→B→C' : '↺ A→C→B', true, g.rules.rotateEachTurn ? `L'escluso ora è ${FF.SEATS[ex]}. Passa al giocatore dopo (${FF.SEATS[FF.mod3(ex + s.dir)]}) a ogni nuovo turno e a ogni Zapd; ogni Zapd (e Reverse) inverte il verso.` : `L'escluso ora è ${FF.SEATS[ex]}. A ogni Zapd passa a ${FF.SEATS[FF.mod3(ex + s.dir)]}. Reverse inverte il verso.`),
-      item('🗣️', 'Sincero', sinc ? 'ATTIVO' : 'non attivo', sinc, sinc ? `Giocato da ${s.players[s.sincero].name}: i modificatori vanno dichiarati con un numero esatto; chi mente vale 0.` : 'Se qualcuno lo gioca a inizio turno, i due attivi dichiarano il modificatore con un numero esatto; chi poi gioca altro lo vede valere 0.'),
       item('🔮', 'Carta messa da parte', s.nextCenter ? FF.cardName(s.nextCenter) : 'nessuna', !!s.nextCenter, s.nextCenter ? 'Sarà la carta centrale del turno dopo (la pesca centrale viene saltata).' : 'Prossima carta ne mette una da parte: diventa la centrale del turno dopo.'),
-      item('⚡', 'Zapd', `${s.zapsDrawn}/${g.totalZaps}`, s.zapsDrawn >= g.totalZaps - 2, s.zapsDrawn >= g.totalZaps ? 'Uscite tutte: è l\'ultimo turno.' : `Ne mancano ${g.totalZaps - s.zapsDrawn}: la partita finisce con l'uscita dell'ultima (si gioca quel turno per intero).`),
+      item('⚡', 'Zapd', `${s.zapsDrawn}/${g.totalZaps}`, s.zapsDrawn >= g.totalZaps - 2, s.zapsDrawn >= g.totalZaps ? 'Uscite tutte: è l\'ultimo turno.' : `Ne mancano ${g.totalZaps - s.zapsDrawn}${g.rules.cromozapd && !g.s.zapPile.some((z) => z.cromo) ? ' (una è la 🌈 Cromozapd: tutti passano la mano e chi la pesca sceglie la regola)' : ''}: la partita finisce con l\'uscita dell\'ultima (si gioca quel turno per intero).`),
     ].join('');
   };
 

@@ -10,8 +10,9 @@
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
     ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
-    ['zapPerColor', 'Zapd per colore'], ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['xInSum', 'La carta dell\'escluso conta nella somma del range'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
-    ['sincereZero', 'Sincero: il modificatore sbagliato vale 0'],
+    ['zapPerColor', 'Zapd per colore'], ['cromozapd', 'Carta Cromozapd (13ª Zapd)'], ['colorRules', 'Il colore dominante è la regola in vigore'], ['immunity', 'Immunità del colore dominante (vecchia regola)'],
+    ['traitor', 'Carte Traditore (X coperta)'], ['traitorOverflow', 'Valore di ogni Traditore dopo il mazzetto'], ['barattoSee', 'Baratto: chi lo gioca vede la mano dell\'escluso'],
+    ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
   ];
   UI.rulesFields = function (prefix, values) {
     const v = Object.assign({}, FF.DEFAULT_RULES, values || {});
@@ -23,7 +24,7 @@
       else h += `<label for="${prefix}${k}">${label} <span class="muted">(std ${def})</span></label><input type="number" id="${prefix}${k}" data-rule="${k}" value="${v[k]}" min="${k === 'startDir' || k === 'startExcluded' ? -1 : 0}">`;
     }
     h += '<div class="rg-title">Copie nel Mazzetto Effetti</div>';
-    for (const k of FF.EFFECT_IDS) h += `<label for="${prefix}c-${k}">${EFFECTS[k].n} <span class="muted">(std ${FF.DEFAULT_RULES.effectCopies[k]})</span></label><input type="number" id="${prefix}c-${k}" data-copy="${k}" value="${copies[k]}" min="0">`;
+    for (const k of FF.EFFECT_IDS.filter((x) => !EFFECTS[x].retired)) h += `<label for="${prefix}c-${k}">${EFFECTS[k].n} <span class="muted">(std ${FF.DEFAULT_RULES.effectCopies[k]})</span></label><input type="number" id="${prefix}c-${k}" data-copy="${k}" value="${copies[k]}" min="0">`;
     return h + '</div>';
   };
   UI.readRules = function (container) {
@@ -55,7 +56,7 @@
       <select id="su-k${i}" aria-label="Tipo del giocatore ${FF.SEATS[i]}">${kindOpts(kinds[i])}</select>
       <input type="text" id="su-n${i}" value="${esc(names[i] || '')}" maxlength="16" aria-label="Nome del giocatore ${FF.SEATS[i]}"></div>`).join('');
     el.innerHTML = `<div class="wrap narrow"><div class="card"><h2>${P.title}</h2>
-      <p class="small muted">I tre posti A, B, C siedono in senso orario. L'escluso iniziale è A. Gli umani giocano sullo stesso dispositivo: quando serve compare una schermata di passaggio, così l'altro non vede la mano.</p>
+      <p class="small muted">I tre posti A, B, C siedono in senso orario. L'escluso iniziale è estratto a sorte. Gli umani giocano sullo stesso dispositivo: quando serve compare una schermata di passaggio, così l'altro non vede la mano.</p>
       <div class="field"><label>Giocatori</label>${seatRows}</div>
       <div class="field"><label>Messaggi delle mosse</label><div class="seg" id="su-speed">${Object.entries(SPEEDS).map(([k, v]) => `<button data-v="${k}" class="${k === speedDef ? 'sel' : ''}">${v}</button>`).join('')}</div></div>
       <div class="field"><label for="su-seed">Seed (vuoto = casuale)</label><div class="inline"><input type="text" id="su-seed" placeholder="es. prova-1" value="${esc(last.seed || '')}"><button class="btn" id="su-dice" title="Genera un seed">🎲</button></div></div>
@@ -83,7 +84,7 @@
   };
 
   // ───────────────────────── sessione ─────────────────────────
-  const WEIGHT = { turn: 0.5, phase: 0.6, sys: 0.5, center: 1.2, zap: 1.3, reveal: 1.4, score: 1.4, effect: 1.3, declare: 1.1, warn: 0.8, end: 1, note: 0, draw: 0.6, roles: 0.9, effdraw: 0.8 };
+  const WEIGHT = { turn: 0.5, phase: 0.6, sys: 0.5, center: 1.2, zap: 1.3, reveal: 1.4, score: 1.4, effect: 1.3, declare: 1.1, warn: 0.8, end: 1, note: 0, draw: 0.6, roles: 0.9, effdraw: 0.8, rule: 1.1 };
   const NEXT_TXT = {
     draw: 'Poi: si rivela la carta centrale, l\'escluso gioca per primo la sua carta (scoperta) e così si fissa il range.',
     discuss: 'Poi: i due attivi giocano coperte la carta per la coppia, quella per sé ed eventualmente un effetto.',
@@ -186,7 +187,7 @@
       if (ev.k === 'center' && ev.d && ev.d.x) { t.xcard = ev.d.card; t.played[ev.p] = { couple: ev.d.card }; }
       else if (ev.k === 'center' && ev.d) t.center = ev.d.center;
       else if (ev.k === 'reveal' && ev.d) {
-        if (ev.d.x) t.played[ev.p] = { couple: ev.d.card };
+        if (ev.d.x) { t.played[ev.p] = { couple: ev.d.card }; t.xcard = ev.d.card; }
         else if (ev.d.play) t.played[ev.p] = { couple: ev.d.play.couple, self: ev.d.play.self, eff: ev.d.play.eff };
       } else if (ev.k === 'score' && ev.d && ev.d.sum != null) t.score = Object.assign({ inRange: ev.d.sum >= ev.d.min && ev.d.sum <= ev.d.max }, ev.d);
     }
@@ -213,7 +214,8 @@
       else if (ev.k === 'phase') icon = `<span class="aemoji">${{ discuss: '🗨️', play: '🂠', reveal: '🔎', resolve: '⚖️' }[d.phase] || '▶'}</span>`;
       else if (ev.k === 'end') icon = '<span class="aemoji">🏆</span>';
       else if (ev.k === 'center' && d.center) icon = `<span class="amini">${S.card(d.center)}</span>`;
-      else if (ev.k === 'zap') icon = `<span class="amini">${S.card({ z: true, c: d.zap })}</span>`;
+      else if (ev.k === 'zap' && d.zap != null) icon = `<span class="amini">${S.card({ z: true, c: d.zap, cromo: d.cromo })}</span>`;
+      else if (ev.k === 'rule' && d.rule) icon = `<span class="aemoji">${FF.COLOR_RULES[d.rule].i}</span>`;
       else if (ev.k === 'reveal' && d.play) icon = `<span class="aminis">${[d.play.couple, d.play.self].map((c) => `<span class="amini">${S.card(c)}</span>`).join('')}${d.play.eff ? `<span class="amini">${S.effect(d.play.eff.k)}</span>` : ''}</span>`;
       else if (ev.k === 'reveal' && d.card) icon = `<span class="amini">${S.card(d.card)}</span>`;
       else if (ev.k === 'effect' && d.k) icon = `<span class="amini">${S.effect(d.k)}</span>`;
@@ -229,7 +231,7 @@
       const n = this.game.s.players[d.player].name;
       return {
         sincero: `${n}: hai la carta Sincero — vuoi giocarla?`, declare: `${n}: dichiara qualcosa al compagno (non è vincolante)`, play: `${n}: scegli le tue carte (coperte)`,
-        xplay: d.first ? `${n}: sei l'escluso — gioca per prima la carta che decide il range` : `${n}: sei l'escluso — scegli la carta per la coppia ${FF.pairLabel(d.excluded)}`, annulla: `${n}: vuoi giocare Annulla?`, effdraw: `${n}: vuoi pescare una carta-effetto?`,
+        xplay: d.first ? `${n}: sei l'escluso — gioca per prima la carta che decide il range` : d.early ? `${n}: sei l'escluso — metti coperta la carta che decide il range` : `${n}: sei l'escluso — scegli la carta per la coppia ${FF.pairLabel(d.excluded)}`, annulla: `${n}: vuoi giocare Annulla?`, xdecl: `${n}: sei l'escluso — dichiara il numero che giocherai`, baratto: `${n}: hai un Baratto — vuoi giocarlo?`, colorpick: `${n}: sei tu a scegliere il colore (Cromozapd)`, effdraw: `${n}: vuoi pescare una carta-effetto?`,
       }[d.type] || `Tocca a ${n}`;
     }
     async pace(ev) {
@@ -311,6 +313,9 @@
         case 'declare': ans = await this.declarePanel(d); break;
         case 'play': ans = await this.playPanel(d, false); break;
         case 'xplay': ans = await this.playPanel(d, true); break;
+        case 'xdecl': ans = await this.xdeclPanel(d); break;
+        case 'baratto': ans = await this.barattoPanel(d); break;
+        case 'colorpick': ans = await this.colorPanel(d); break;
         case 'annulla': ans = await this.annullaPanel(d); break;
         case 'effdraw': ans = await this.effdrawPanel(d); break;
         default: ans = null;
@@ -333,9 +338,66 @@
         <div class="lbl">I tuoi effetti (${d.eff.length}/${this.game.rules.effectHandMax})</div><div class="cardsrow big">${d.eff.map((c) => UI.cardHTML(c)).join('') || '<span class="muted">nessuno</span>'}</div>`;
     }
     ctxLine(d) {
-      const g = this.game, ex = d.excluded, xf = FF.xFirst(g.rules), [lo, hi] = FF.rangeBase(g.rules, d.center.v, d.xcard ? d.xcard.v : undefined);
-      const rtxt = xf && !d.xcard ? `range da <b>${d.center.v}</b> a <b>${d.center.v} + la carta dell'escluso</b>` : `range <b>${lo}–${hi}</b>${xf ? ` (V ${d.center.v} + X ${d.xcard.v})` : ''}`;
-      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → ${rtxt}${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · 🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b> · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
+      const g = this.game, ex = d.excluded, st = g.s, xm = st.xmode, rl = g.rules.colorRules ? FF.COLOR_RULES[st.rule] : null;
+      const xk = d.xcard ? d.xcard.v : undefined;
+      const [lo, hi] = FF.rangeBase(g.rules, d.center.v, xk);
+      const rtxt = xm && !d.xcard ? `range da <b>${d.center.v}</b> a <b>${d.center.v} + X</b> (carta dell'escluso${d.xdecl != null ? `, dichiarata: ${d.xdecl}` : ''})` : `range <b>${lo}–${hi}</b>${xm ? ` (V ${d.center.v} + X ${d.xcard.v})` : ''}`;
+      return `<div class="ctx">🎯 Centrale <b>${FF.cardName(d.center)}</b> → ${rtxt}${g.rules.xInSum ? ' (somma delle 3 carte)' : ''} · ${rl ? `📜 <b>${rl.i} ${rl.n}</b>` : `🎨 dominante <b>${COLORS[d.dominant].i} ${COLORS[d.dominant].n}</b>`} · coppia <b>${FF.pairLabel(ex)}</b> (escluso ${FF.SEATS[ex]})${d.sincero ? ' · 🗣️ <b>Sincero attivo</b>' : ''}</div>`;
+    }
+
+    // l'escluso dichiara il numero che giocherà (potrà mentire, a suo rischio)
+    xdeclPanel(d) {
+      const R = this.game.rules, gs = this.game.s, max = R.maxValue, nT = gs.oath ? 2 : 1;
+      return new Promise((resolve) => {
+        let num = null;
+        const render = () => {
+          this.setAction(`<h3>🚪 ${esc(this.pname(d.player))}: cosa dichiari agli attivi?</h3>${this.ctxLine(d)}
+            <p>Sei l'escluso: la carta che metterai <b>coperta</b> decide il range (da ${d.center.v} a ${d.center.v} + la tua carta). <b>Dichiara il numero che giocherai</b>: i due attivi si fideranno, o no.</p>
+            ${gs.oath ? '<div class="infobox">📜 <b>Giuramento</b>: se poi giochi un numero diverso pescherai <b>2 carte Traditore</b> invece di 1.</div>' : ''}
+            ${this.handStrip(d)}
+            <div class="lbl">Il numero che dichiari</div>
+            <div class="numrow">${Array.from({ length: max }, (_, i) => i + 1).map((n) => `<button class="${num === n ? 'sel' : ''} ${d.hand.some((c) => c.v === n) ? 'inhand' : ''}" data-num="${n}">${n}</button>`).join('')}</div>
+            <div class="small muted">Il bordo pieno indica un numero che hai in mano. Se giochi un numero <b>diverso</b> da quello dichiarato pescherai ${nT === 1 ? 'una carta Traditore' : '2 carte Traditore'}: ogni carta toglie da 0 a 3 punti personali (restano ${gs.traitorDeck.length} carte nel mazzetto${gs.traitorDeck.length ? '' : '; finito: ogni nuovo tradimento costa ' + R.traitorOverflow}).</div>
+            <div class="btn-row"><button class="btn primary grow" id="x-ok" ${num == null ? 'disabled' : ''}>${num == null ? 'Scegli un numero' : 'Dichiara ' + num}</button></div>`);
+          $$('#g-action [data-num]').forEach((b) => (b.onclick = () => { num = Number(b.dataset.num); render(); }));
+          $('#x-ok').onclick = () => resolve(num);
+        };
+        render();
+      });
+    }
+
+    // Baratto: l'escluso ti mostra la mano rimasta; scegli una carta da prendere e una tua da dargli
+    barattoPanel(d) {
+      const gs = this.game.s, card = d.eff.find((e) => e.k === 'baratto'), ex = d.excluded;
+      return new Promise((resolve) => {
+        let give = null, take = null;
+        const render = () => {
+          this.setAction(`<h3>🤝 ${esc(this.pname(d.player))}: giocare Baratto?</h3>${this.ctxLine(d)}
+            <div class="actrow"><div>${UI.cardHTML(card, { cls: 'big' })}</div><div class="grow"><p>${esc(this.pname(ex))} ha già messo la sua carta per il range. Ti <b>mostra le carte che gli sono rimaste</b>: ne scegli una da prendere e gli dai in cambio una tua (coperta). Solo tu vedi la sua mano.</p></div></div>
+            <div class="lbl">Le carte di ${esc(this.pname(ex))} — tocca quella che prendi</div>
+            <div class="cardsrow big">${d.xhand.map((c) => `<button class="cardbtn selectable ${take === c.id ? 'used' : ''}" data-take="${c.id}">${S.card(c)}</button>`).join('') || '<span class="muted">nessuna carta rimasta</span>'}</div>
+            <div class="lbl">La tua mano — tocca quella che dai</div>
+            <div class="cardsrow big">${d.hand.map((c) => `<button class="cardbtn selectable ${give === c.id ? 'used' : ''}" data-give="${c.id}">${S.card(c)}</button>`).join('')}</div>
+            <div class="btn-row"><button class="btn" id="b-no">Non gioco il Baratto</button><button class="btn primary grow" id="b-ok" ${give != null && take != null ? '' : 'disabled'}>${give != null && take != null ? 'Scambia' : 'Scegli le due carte'}</button></div>`);
+          $$('#g-action [data-take]').forEach((b) => (b.onclick = () => { take = Number(b.dataset.take); render(); }));
+          $$('#g-action [data-give]').forEach((b) => (b.onclick = () => { give = Number(b.dataset.give); render(); }));
+          $('#b-no').onclick = () => resolve(null);
+          $('#b-ok').onclick = () => resolve({ give, take });
+        };
+        render();
+      });
+    }
+
+    // Cromozapd: chi l'ha pescata sceglie il colore dominante, cioè la regola in vigore
+    colorPanel(d) {
+      const R = this.game.rules;
+      return new Promise((resolve) => {
+        this.setAction(`<h3>🌈 ${esc(this.pname(d.player))}: scegli il colore dominante</h3>
+          <p>Hai pescato la <b>Cromozapd</b>: tutti hanno passato la mano al giocatore successivo. Ora scegli il colore dominante: decide la <b>regola in vigore</b> fino alla prossima Zapd.</p>
+          ${this.handStrip(d)}
+          <div class="colorpick">${FF.COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return `<button class="btn colbtn" data-col="${i}" style="--dc:${S.COL[i]}">${S.color(i, 'domsym')}<span class="cb-name">${c.n}</span>${rl ? `<span class="cb-rule">${rl.i} <b>${rl.n}</b></span><span class="cb-desc">${rl.d}</span>` : ''}</button>`; }).join('')}</div>`);
+        $$('#g-action [data-col]').forEach((b) => (b.onclick = () => resolve(Number(b.dataset.col))));
+      });
     }
 
     sinceroPanel(d) {
@@ -389,17 +451,35 @@
       const effReason = (e) => {
         const k = EFFECTS[e.k];
         if (excl) return 'L\'escluso non può giocare effetti in questo turno.';
+        if (this.game.s.noEff) return '📜 Regola in vigore: Effetti vietati. In questo turno nessuno gioca carte-effetto.';
+        if (k.kind === 'baratto') return 'Il Baratto si gioca subito dopo la carta dell\'escluso: te lo chiederò io, prima della discussione.';
         if (k.kind === 'sincero') return 'Sincero è istantanea: si gioca prima della discussione.';
         if (k.kind === 'annulla') return 'Annulla è reattiva: la potrai giocare dopo il reveal.';
         return '';
       };
       return new Promise((resolve) => {
+        const gs = this.game.s;
+        // probabilità stimata di restare nel range: il compagno gioca la carta dichiarata (o una a caso), l'escluso la sua X (nota, dichiarata o ignota)
+        const estProb = (mine, pnum, xk, m) => {
+          const all = Array.from({ length: R.maxValue }, (_, i) => i + 1);
+          const xs = xk != null ? [xk] : all, ps = pnum != null ? [pnum] : all;
+          let ok = 0, n = 0;
+          for (const x of xs) for (const q of ps) { n++; const [lo, hi] = FF.rangeFor(R, d.center.v, m, x); if (mine + q >= lo && mine + q <= hi) ok++; }
+          return ok / n;
+        };
         const preview = () => {
           const X = R.xInSum;
           if (excl && d.first) {
             const cx = sel.couple != null ? cardById(sel.couple) : null;
             const rows = d.hand.map((c) => `<span class="${cx && cx.id === c.id ? 'good' : ''}">${c.v} → ${d.center.v}–${d.center.v + c.v}</span>`).join(' · ');
-            return `<div class="pv"><div>Come escluso giochi <b>per primo, scoperta</b>, 1 carta: <b>decide il range</b> da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Carta alta = range largo (aiuti la coppia), carta bassa = range stretto (metti i bastoni tra le ruote). La tua carta conta anche per i punti della coppia e per il tuo Fattore, se la coppia non sfora; il colore non conta.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}</div>`;
+            return `<div class="pv"><div>📜 <b>Luce</b>: giochi <b>per primo, scoperta</b>, 1 carta: <b>decide il range</b> da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Carta alta = range largo (aiuti la coppia), carta bassa = range stretto (metti i bastoni tra le ruote). La tua carta conta anche per i punti della coppia e per il tuo Fattore, se la coppia non sfora.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}</div>`;
+          }
+          if (excl && d.early) {
+            const cx = sel.couple != null ? cardById(sel.couple) : null;
+            const rows = d.hand.map((c) => `<span class="${cx && cx.id === c.id ? 'good' : ''}">${c.v} → ${d.center.v}–${d.center.v + c.v}</span>`).join(' · ');
+            const nT = gs.oath ? 2 : 1, left = gs.traitorDeck.length;
+            const lie = cx && d.xdecl != null && cx.v !== d.xdecl;
+            return `<div class="pv"><div>Metti <b>coperta</b> la carta che <b>decide il range</b>: da ${d.center.v} (la carta centrale) a ${d.center.v} + la tua carta. Si scopre al reveal. ${d.xdecl != null ? `Hai dichiarato <b>${d.xdecl}</b>: gli attivi giocheranno fidandosi (o no).` : '🤫 Silenzio: non hai dichiarato nulla.'} Carta alta = range largo (aiuti), carta bassa = range stretto (ostacoli). Conta anche per i punti della coppia e il tuo Fattore se la coppia non sfora.</div><div>${rows}</div>${cx ? `<div><b>Con il ${cx.v}</b>: range ${d.center.v}–${d.center.v + cx.v}.</div>` : ''}${lie ? `<div class="bad">🐍 Hai dichiarato ${d.xdecl} ma giochi ${cx.v}: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> (da 0 a 3 punti personali persi ciascuna; ${left > 0 ? `nel mazzetto ne restano ${left}` : 'mazzetto finito: ognuna vale ' + R.traitorOverflow}).</div>` : cx && d.xdecl != null ? '<div class="good">✔ Coerente con ciò che hai dichiarato: nessuna carta Traditore.</div>' : ''}</div>`;
           }
           if (excl) {
             const [lo, hi] = FF.rangeBase(R, d.center.v);
@@ -414,34 +494,35 @@
           }
           const effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null;
           const m = effc && EFFECTS[effc.k].mod;
-          const [min, max] = FF.rangeFor(R, d.center.v, m, d.xcard ? d.xcard.v : undefined);
+          const known = !!d.xcard, xk = known ? d.xcard.v : (d.xdecl != null ? d.xdecl : null);
           const cc = sel.couple != null ? cardById(sel.couple) : null;
           let h = '';
           if (cc) {
-            const lo = Math.max(1, min - cc.v), hi = Math.min(R.maxValue, max - cc.v);
-            if (X) {
-              h += `<div>Con il <b>${cc.v}</b> per la coppia, la somma delle altre due carte (compagno + escluso, entrambe coperte) deve essere tra <b>${min - cc.v}</b> e <b>${max - cc.v}</b> per stare nel range ${min}–${max}.</div>`;
-              if (pdecl && pdecl.num != null) {
-                const zl = Math.max(1, min - cc.v - pdecl.num), zh = Math.min(R.maxValue, max - cc.v - pdecl.num);
-                h += zl > zh ? `<div class="bad">Se ${esc(this.pname(partnerId))} gioca il ${pdecl.num} dichiarato, <b>nessuna</b> carta dell'escluso ti tiene nel range (ti salva solo il colore dominante).</div>`
-                  : `<div class="${(zh - zl + 1) >= 5 ? 'good' : 'bad'}">Se ${esc(this.pname(partnerId))} gioca il ${pdecl.num}, l'escluso (alla cieca) deve giocare tra <b>${zl}</b> e <b>${zh}</b>: ${zh - zl + 1} carte su ${R.maxValue}.</div>`;
-              }
-            } else h += lo > hi ? `<div class="bad">Con il ${cc.v} per la coppia nessuna carta (1–${R.maxValue}) del compagno ti tiene nel range ${min}–${max}: ti salva solo il colore dominante.</div>`
-              : `<div>Con il <b>${cc.v}</b> per la coppia, il compagno deve giocare tra <b>${lo}</b> e <b>${hi}</b> per stare nel range ${min}–${max}.</div>`;
-            h += cc.c === d.dominant ? `<div class="good">🛡 Il tuo ${cc.v} è del colore dominante: se anche il compagno gioca ${COLORS[d.dominant].n}, niente sforo.</div>` : `<div class="muted">Colore ${COLORS[cc.c].n}: non è il dominante (${COLORS[d.dominant].n}).</div>`;
-            if (!X && pdecl && pdecl.num != null) { const sum = cc.v + pdecl.num; h += `<div class="${sum >= min && sum <= max ? 'good' : 'bad'}">${esc(this.pname(partnerId))} ha dichiarato ${pdecl.num}: somma ${sum} → ${sum >= min && sum <= max ? 'dentro il range ✔' : 'FUORI dal range ✘ (se dice la verità)'}.</div>`; }
-            else if (pdecl && pdecl.num == null) h += `<div class="muted">${esc(this.pname(partnerId))} non ha dichiarato nessun numero.</div>`;
+            if (xk != null) {
+              const [min, max] = FF.rangeFor(R, d.center.v, m, xk);
+              const lo = Math.max(1, min - cc.v), hi = Math.min(R.maxValue, max - cc.v);
+              const cond = known ? '' : ` <span class="muted">(se l'escluso dice la verità: X=${xk})</span>`;
+              h += lo > hi ? `<div class="bad">Con il ${cc.v} per la coppia nessuna carta (1–${R.maxValue}) del compagno ti tiene nel range ${min}–${max}${cond}.</div>`
+                : `<div>Con il <b>${cc.v}</b> per la coppia, il compagno deve giocare tra <b>${lo}</b> e <b>${hi}</b> per stare nel range ${min}–${max}${cond}.</div>`;
+              if (pdecl && pdecl.num != null) { const sum = cc.v + pdecl.num; h += `<div class="${sum >= min && sum <= max ? 'good' : 'bad'}">${esc(this.pname(partnerId))} ha dichiarato ${pdecl.num}: somma ${sum} → ${sum >= min && sum <= max ? 'dentro il range ✔' : 'FUORI dal range ✘ (se dice la verità)'}.</div>`; }
+            } else h += `<div>La carta dell'escluso è <b>coperta e non dichiarata</b> (Silenzio): il range è da ${d.center.v} a ${d.center.v} + X, con X ignota. Più alta è la somma, più rischi di sforare.</div>`;
+            if (pdecl && pdecl.num == null && xk != null) h += `<div class="muted">${esc(this.pname(partnerId))} non ha dichiarato nessun numero.</div>`;
+            const pr = estProb(cc.v, pdecl && pdecl.num != null ? pdecl.num : null, xk, m);
+            h += `<div class="${pr >= 0.6 ? 'good' : pr < 0.35 ? 'bad' : ''}">🎲 Probabilità stimata di restare nel range: <b>${Math.round(100 * pr)}%</b> <span class="muted">(${pdecl && pdecl.num != null ? 'se ' + esc(this.pname(partnerId)) + ' gioca ' + pdecl.num : 'con una carta qualsiasi del compagno'}${xk != null ? (known ? '' : `, X=${xk}`) : ', X sconosciuta'})</span></div>`;
           }
-          if (sel.self != null) h += `<div>⭐ Il ${cardById(sel.self).v} per sé ti dà <b>+${cardById(sel.self).v}</b> punti personali, sempre.</div>`;
+          if (sel.self != null) {
+            const sv = cardById(sel.self).v;
+            h += `<div>⭐ Il ${sv} per sé ti dà <b>+${sv}</b> punti personali, sempre. <span class="muted">Ma i punti che togli alla coppia abbassano la tua quota: non giocare sempre le carte più alte.</span></div>`;
+          }
           return `<div class="pv">${h || 'Scegli le carte: nel riquadro vedrai cosa succederebbe.'}</div>`;
         };
         const render = () => {
           const slot = (key, label, c) => `<div class="slot ${c ? 'full' : ''}" data-slot="${key}"><div class="slab">${label}</div>${c ? UI.cardHTML(c, { cls: 'slotcard' }) : '<div class="emptyslot"></div>'}${c ? '<div class="small">tocca per togliere</div>' : ''}</div>`;
           const used = new Set([sel.couple, sel.self]);
           const cards = d.hand.map((c) => `<button class="cardbtn selectable ${used.has(c.id) ? 'used' : ''}" data-pick="${c.id}" aria-label="${esc(FF.cardName(c))}">${S.card(c)}</button>`).join('');
-          const effs = d.eff.map((e) => { const why = excl || EFFECTS[e.k].kind !== 'fila' ? effReason(e) : ''; return `<div class="effwrap ${why ? 'off' : ''}"><button class="cardbtn selectable ${sel.eff === e.id ? 'used' : ''}" data-eff="${e.id}" ${why ? 'disabled' : ''}>${S.effect(e.k)}</button>${why ? `<div class="why">${why}</div>` : `<button class="zoomlink" data-zoom="eff:${e.k}">ingrandisci</button>`}</div>`; }).join('') || '<span class="muted">Nessun effetto in mano.</span>';
+          const effs = d.eff.map((e) => { const why = excl || this.game.s.noEff || EFFECTS[e.k].kind !== 'fila' ? effReason(e) : ''; return `<div class="effwrap ${why ? 'off' : ''}"><button class="cardbtn selectable ${sel.eff === e.id ? 'used' : ''}" data-eff="${e.id}" ${why ? 'disabled' : ''}>${S.effect(e.k)}</button>${why ? `<div class="why">${why}</div>` : `<button class="zoomlink" data-zoom="eff:${e.k}">ingrandisci</button>`}</div>`; }).join('') || '<span class="muted">Nessun effetto in mano.</span>';
           const ready = excl ? sel.couple != null : sel.couple != null && sel.self != null;
-          this.setAction(`<h3>${excl ? '🚪' : '🂠'} ${esc(this.pname(me))}: ${excl ? (d.first ? `la tua carta (scoperta) decide il range` : `la tua carta per la coppia ${FF.pairLabel(d.excluded)}`) : 'scegli le tue carte (restano coperte fino al reveal)'}</h3>${this.ctxLine(d)}
+          this.setAction(`<h3>${excl ? '🚪' : '🂠'} ${esc(this.pname(me))}: ${excl ? (d.first ? `la tua carta (scoperta) decide il range` : d.early ? `la tua carta (coperta) decide il range` : `la tua carta per la coppia ${FF.pairLabel(d.excluded)}`) : 'scegli le tue carte (restano coperte fino al reveal)'}</h3>${this.ctxLine(d)}
             ${!excl && pdecl ? `<div class="infobox">${esc(this.pname(partnerId))} ha dichiarato: ${pdecl.num == null ? 'niente sulla carta' : `«ti gioco il ${pdecl.num}»`}${pdecl.mod ? ` · modificatore: ${esc(FF.modTxt(pdecl.mod))}` : ''}.</div>` : ''}
             <div class="lbl">La tua mano — tocca una carta per metterla nel primo spazio libero</div><div class="cardsrow big">${cards}</div>
             <div class="slots">${slot('couple', excl ? 'Per la coppia' : '1 · Per la coppia', sel.couple != null ? cardById(sel.couple) : null)}${excl ? '' : slot('self', '2 · Per sé', sel.self != null ? cardById(sel.self) : null)}
@@ -461,15 +542,19 @@
           const hint = $('#p-hint'); if (hint) hint.onclick = () => { const a = FF.AI.suggest(this.game, d); if (a) { sel.couple = a.couple; sel.self = a.self != null ? a.self : null; sel.eff = a.eff; render(); UI.toast('Suggerimento applicato: puoi cambiarlo.'); } };
           $('#p-ok').onclick = async () => {
             const warns = [];
+            if (excl && d.early) {
+              const cx = cardById(sel.couple);
+              if (d.xdecl != null && cx.v !== d.xdecl) { const nT = gs.oath ? 2 : 1; warns.push(`Hai dichiarato <b>${d.xdecl}</b> ma stai giocando <b>${cx.v}</b>: al reveal pescherai <b>${nT} ${nT === 1 ? 'carta Traditore' : 'carte Traditore'}</b> e perderai quei punti personali.`); }
+            }
             if (!excl) {
               const cc = cardById(sel.couple), effc = sel.eff != null ? d.eff.find((e) => e.id === sel.eff) : null, m = effc && EFFECTS[effc.k].mod;
-              const [mn, mx] = FF.rangeFor(R, d.center.v, m, d.xcard ? d.xcard.v : undefined);
-              if (R.xInSum && pdecl && pdecl.num != null && cc.c !== d.dominant) {
-                const zl = Math.max(1, mn - cc.v - pdecl.num), zh = Math.min(R.maxValue, mx - cc.v - pdecl.num), n = Math.max(0, zh - zl + 1);
-                if (n < 4) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))}, solo <b>${n} carte su ${R.maxValue}</b> dell'escluso (tra ${zl} e ${zh}) tengono la coppia nel range ${mn}–${mx}: <b>rischio alto di sforo</b>.`);
-              } else if (!R.xInSum && pdecl && pdecl.num != null && !(cc.v + pdecl.num >= mn && cc.v + pdecl.num <= mx) && cc.c !== d.dominant) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))} la somma è ${cc.v + pdecl.num}, <b>fuori dal range ${mn}–${mx}</b>: la coppia farebbe 0 (se lui dice la verità).`);
-              if (m && d.sincero) { const dm = mydecl && mydecl.mod; if (!dm || (R.modMode !== 'widen' && dm.dir !== m.dir) || dm.n !== m.n) warns.push(`Sincero è attivo e hai dichiarato «${esc(FF.modTxt(dm))}», ma giochi ${esc(EFFECTS[effc.k].n)}: <b>quel modificatore varrà 0</b>.`); }
-              if (effc && effc.k === 'swap') warns.push(`<b>Scambio forzato</b>: scambi le tue carte in mano con quelle dell'escluso, senza vederle prima.`);
+              const known = !!d.xcard, xk = known ? d.xcard.v : (d.xdecl != null ? d.xdecl : null);
+              if (xk != null) {
+                const [mn, mx] = FF.rangeFor(R, d.center.v, m, xk);
+                if (pdecl && pdecl.num != null && !(cc.v + pdecl.num >= mn && cc.v + pdecl.num <= mx)) warns.push(`Con il ${cc.v} e il ${pdecl.num} dichiarato da ${esc(this.pname(partnerId))} la somma è ${cc.v + pdecl.num}, <b>fuori dal range ${mn}–${mx}</b>: la coppia farebbe 0 (se lui dice la verità${known ? '' : ' e l\'escluso pure'}).`);
+              }
+              const pr = estProb(cc.v, pdecl && pdecl.num != null ? pdecl.num : null, xk, m);
+              if (pr < 0.3) warns.push(`Con questa carta per la coppia la probabilità stimata di restare nel range è solo del <b>${Math.round(100 * pr)}%</b>: <b>rischio alto di sforo</b> (la coppia farebbe 0).`);
               if (effc && effc.k === 'reverse') warns.push('<b>Reverse</b> inverte il verso: la prossima Zapd sposterà l\'escluso al contrario.');
             }
             if (warns.length && !(await UI.confirm('Mossa rischiosa', warns.map((w) => `<p>${w}</p>`).join('')))) return;

@@ -8,8 +8,8 @@ require('../js/ui/sprites.js');
 test('sprite: ogni carta del mazzo e ogni effetto ha uno sprite SVG ben formato', () => {
   const S = FF.Sprites;
   for (const c of FF.buildDeck()) assert.ok(S.defs[S.cardId(c)], 'manca lo sprite di ' + FF.cardName(c));
-  for (const k of FF.EFFECT_IDS) assert.ok(S.defs['eff-' + k], 'manca lo sprite dell\'effetto ' + k);
-  for (const id of ['back', 'back-effect', 'token', 'dir-cw', 'dir-ccw', 'bolt', 'seat-A', 'seat-B', 'seat-C']) assert.ok(S.defs[id], id);
+  for (const k of FF.EFFECT_IDS.filter((x) => !FF.EFFECTS[x].retired)) assert.ok(S.defs['eff-' + k], 'manca lo sprite dell\'effetto ' + k);
+  for (const id of ['back', 'back-effect', 'token', 'dir-cw', 'dir-ccw', 'bolt', 'zapd-cromo', 'seat-A', 'seat-B', 'seat-C']) assert.ok(S.defs[id], id);
   for (const d of S.symbols) {
     const svg = S.standalone(d.id);
     assert.ok(svg.includes('<svg') && svg.trim().endsWith('</svg>'));

@@ -111,23 +111,27 @@
 
   // ───────────────────────── legenda ─────────────────────────
   UI.legendHTML = function () {
-    const S = FF.Sprites;
+    const S = FF.Sprites, R = FF.DEFAULT_RULES;
     const row = (ico, txt) => `<div class="lrow"><span class="lico">${ico}</span><span>${txt}</span></div>`;
-    let h = '<div class="lgroup">Colori</div>' + COLORS.map((c, i) => row(S.color(i), `<b>${c.n}</b> ${c.sym}`)).join('');
+    let h = '<div class="lgroup">Il senso del gioco</div>';
+    h += row('⚖️', '<b>Non tirare la corda.</b> La carta per sé è sempre tua, ma ogni punto che togli alla coppia abbassa la tua quota. Una coppia che sfora fa 0: una carta alta in coppia è un rischio, non un regalo.');
+    h += '<div class="lgroup">Colori = regole</div>';
+    h += COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return row(S.color(i), `<b>${c.n}</b> ${c.sym}${rl ? ` → ${rl.i} <b>${rl.n}</b>: ${rl.d}` : ''}`); }).join('');
     h += '<div class="lgroup">Carte e segni</div>';
-    h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande.');
-    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante, fa avanzare l\'escluso di un altro posto e inverte il verso. 12 in tutto.');
-    h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno e gioca 1 carta per la coppia degli altri due.');
+    h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande. Il colore non conta (contano solo i colori delle Zapd).');
+    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante (cioè la regola in vigore), fa avanzare l\'escluso di un altro posto e inverte il verso. 12 colorate (3 per colore).');
+    h += row(S.card({ z: true, cromo: true, c: -1 }, 'tiny'), '<b>Cromozapd</b> (la 13ª Zapd): tutti passano la mano al giocatore successivo, poi chi l\'ha pescata sceglie il colore dominante, cioè la regola. Se esce come carta centrale sceglie chi la scopre.');
+    h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno: dichiara un numero e gioca coperta 1 carta che <b>decide il range</b>.');
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
-    h += row('🎯', '<b>Carta centrale</b> e <b>range</b>: la somma delle due carte-coppia ' + (FF.DEFAULT_RULES.xInSum ? '<b>più la carta dell\'escluso</b> ' : '') + (FF.xFirst(FF.DEFAULT_RULES) ? 'deve stare tra V e V + X, dove X è la carta che l\'escluso gioca per prima, scoperta.' : 'deve stare tra Perno−V e Perno+V (perno ' + FF.DEFAULT_RULES.pivot + ').'));
+    h += row('🎯', '<b>Range</b>: la somma delle due carte-coppia deve stare tra <b>V</b> (carta centrale) e <b>V + X</b>, dove X è la carta dell\'escluso (si scopre al reveal, salvo la regola Luce).');
     h += row('💥', '<b>Sforo</b>: somma fuori range → la coppia fa 0 (anche la carta dell\'escluso non conta).');
-    h += row('🛡️', '<b>Immunità</b>: se le due carte-coppia sono del colore dominante, niente sforo.');
+    h += row('🐍', '<b>Carta Traditore</b>: se l\'escluso gioca un numero diverso da quello dichiarato ne pesca una (2 col Giuramento): toglie da 0 a 3 punti personali. Finito il mazzetto di 12, ogni tradimento costa 3.');
     h += row('⭐', '<b>Carta per sé</b>: conta sempre per i tuoi punti personali.');
     h += row('📊', '<b>Fattore coppie</b>: media della tua quota nei punti delle 3 coppie. Punteggio = personali × Fattore.');
-    h += '<div class="lgroup">Carte-effetto</div>';
-    h += FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].mod || k.endsWith('1')).map((k) => {
+    h += '<div class="lgroup">Carte-effetto (15)</div>';
+    h += FF.EFFECT_IDS.filter((k) => !FF.EFFECTS[k].retired && (!FF.EFFECTS[k].mod || k.endsWith('1'))).map((k) => {
       const e = EFFECTS[k];
-      return row(S.effect(k, 'tiny'), e.mod ? (FF.DEFAULT_RULES.modMode === 'widen' ? '<b>±1/±2/±3</b>: allargano il range di 2·n da entrambi i lati, in fila (coperti).' : '<b>−1/−2/−3 · +1/+2/+3</b>: abbassano il minimo / alzano il massimo del range, in fila.') : `<b>${e.n}</b>: ${e.d}`);
+      return row(S.effect(k, 'tiny'), e.mod ? '<b>±1/±2/±3</b> (6 carte): allargano il range di 2·n da entrambi i lati, in fila (coperti).' : `<b>${e.n}</b>: ${e.d}`);
     }).join('');
     return h;
   };

@@ -317,6 +317,8 @@
         s.xFirstCard = xh.splice(xi, 1)[0];
         const [xr0, xr1] = FF.rangeBase(R, s.center.v, s.xFirstCard.v);
         b = this.say('center', `🂡 ${this.pn(ex)} (escluso) gioca per primo, scoperto, ${FF.cardName(s.xFirstCard)}: range da ${xr0} a ${xr1}.`, ex, { card: s.xFirstCard, x: true });
+      } else if (s.xmode === 'hidden') {
+        b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)}. Il range andrà da ${s.center.v} a ${s.center.v} + X, dove X è la carta che l'escluso metterà coperta (si scopre al reveal). Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       } else
       b = this.say('center', `🎯 Carta centrale: ${FF.cardName(s.center)} → range da ${FF.rangeBase(R, s.center.v)[0]} a ${FF.rangeBase(R, s.center.v)[1]} (${R.rangeMode === 'pivot' ? 'centrato su ' + R.pivot : 'Base ' + R.base}): la somma delle due carte-per-la-coppia${R.xInSum ? ' + la carta dell\'escluso' : ''} deve starci dentro. Colore dominante: ${this.col(s.dominant)}.`, -1, { center: s.center });
       if (b) yield b;
