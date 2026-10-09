@@ -153,3 +153,14 @@ Correzione (penalità SEMPRE quando gioca un numero diverso dal dichiarato, sfor
 | 1,1,2,2,2,3,3,4 | 2,25 | 0,63 (circa 1 turno su 19) | 1,48 | 30,2% |
 | 1,2,2,3,3,4,5,6 | 3,4 | 0,18 (circa 1 turno su 67) | 0,65 | 30,5% |
 Per far mentire ogni tanto (1 turno su 5–6) il mazzetto 0,1,1,1,2,2,2,3 è il candidato. Lo 0 dà il caso "ti è andata bene" voluto da Niky.
+
+## Decisioni di Niky sul mazzetto Traditore (non ancora nell'app)
+Mazzetto da 12 carte (0,0,1,1,1,1,2,2,2,2,3,3), penalità sempre quando il numero giocato ≠ dichiarato; finito il mazzetto, ogni nuovo tradimento costa 3.
+
+## Il principio "non tirare la corda" è vero? (hard ×2 contro un giocatore A estremo, 200 partite, regole attuali)
+| A gioca | Vince | Personali | Fattore | Punteggio |
+|---|---|---|---|---|
+| sempre le carte più alte (coppia = la più alta, sé = la seconda) | 10,0% | 31,6 | 38% | 12,27 |
+| coppia = la più bassa, sé = la più alta (egoista) | 14,5% | 67,0 | 25% | 16,65 |
+| equilibrato (IA difficile) | ~33% | ~58 | ~33% | ~18 |
+Entrambi gli estremi perdono molto: il gioco punisce sia chi spreme la coppia sia chi spreme sé stesso.
