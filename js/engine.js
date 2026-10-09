@@ -352,16 +352,19 @@
       for (const pid of this.actives()) {
         const p = s.players[pid];
         const bar = p.eff.find((e) => e.k === 'baratto');
-        if (bar) {   // VARIANTE: Baratto — peschi alla cieca una carta dall'escluso e gliene dai una tua
-          const give = yield* this.ask(this._dec('baratto', pid, {}));
-          const gc = give != null ? p.hand.find((h) => h.id === give) : null;
+        if (bar) {   // VARIANTE: Baratto — prendi una carta dall'escluso (alla cieca, o scelta se barattoSee) e gliene dai una tua
           const xh = s.players[s.excluded].hand, pool = xh.filter((c) => !s.xPick || c.id !== s.xPick.id);
+          const see = !!this.rules.barattoSee;
+          const raw = yield* this.ask(this._dec('baratto', pid, see ? { see: true, xhand: pool.slice() } : {}));
+          const give = raw && typeof raw === 'object' ? raw.give : raw;
+          const gc = give != null ? p.hand.find((h) => h.id === give) : null;
           if (gc && pool.length) {
-            const tk = pool[this.randInt(pool.length)];
+            const wanted = see && raw && typeof raw === 'object' ? pool.find((c) => c.id === raw.take) : null;
+            const tk = wanted || (see ? pool[0] : pool[this.randInt(pool.length)]);
             p.eff.splice(p.eff.indexOf(bar), 1); s.effDiscard.push(bar);
             p.hand.splice(p.hand.indexOf(gc), 1, tk); xh.splice(xh.indexOf(tk), 1, gc);
             this.stat('effetto_giocato:baratto', pid); this.stat('baratto', pid);
-            b = this.say('effect', `🤝 ${this.pn(pid)} gioca BARATTO: pesca alla cieca una carta dalla mano di ${this.pn(s.excluded)} e gliene dà una sua.`, pid, { k: 'baratto' });
+            b = this.say('effect', `🤝 ${this.pn(pid)} gioca BARATTO: ${see ? `l'escluso gli mostra la mano e ${this.pn(pid)} sceglie una carta` : `pesca alla cieca una carta`} dalla mano di ${this.pn(s.excluded)} e gliene dà una sua.`, pid, { k: 'baratto' });
             if (b) yield b;
           }
         }
@@ -649,7 +652,7 @@
           case 'xplay': return pick(d.hand).id;
           case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
           case 'cambio': return rng() < 0.3 ? pick(d.hand).id : null;
-          case 'baratto': return rng() < 0.3 ? pick(d.hand).id : null;
+          case 'baratto': { if (rng() >= 0.3) return null; const gv = pick(d.hand).id; return d.see ? { give: gv, take: pick(d.xhand).id } : gv; }
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;
           case 'correct': return rng() < 0.5 ? (game.rules.modFlex ? { id: d.opts[0].id, delta: d.opts[0].delta } : d.opts[0].id) : null;

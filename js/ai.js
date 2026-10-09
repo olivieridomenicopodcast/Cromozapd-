@@ -318,28 +318,40 @@
 
     // variante: carta "Baratto" — peschi alla cieca una carta dall'escluso e gli dai una tua
     function decideBaratto(game, d) {
-      const pid = d.player, s = game.s, hand = d.hand, ex = s.excluded;
-      if (P.samples <= 0 || rng() < P.random) return rng() < 0.3 ? hand[rnd(hand.length)].id : null;
+      const pid = d.player, s = game.s, hand = d.hand, ex = s.excluded, see = !!d.see;
+      if (P.samples <= 0 || rng() < P.random) { if (rng() >= 0.3) return null; const gv = hand[rnd(hand.length)].id; return see ? { give: gv, take: d.xhand[rnd(d.xhand.length)].id } : gv; }
       const act = [0, 1, 2].filter((i) => i !== ex);
-      const tot = new Array(hand.length + 1).fill(0); let n = 0;
+      const nTake = see ? d.xhand.length : 1;
+      const nOpt = 1 + hand.length * nTake;
+      const tot = new Array(nOpt).fill(0); let n = 0;
       for (let k = 0; k < Math.max(4, Math.ceil(P.samples / 2)); k++) {
         const g2 = AI.determinize(game, pid, rng);
-        const eh = g2.s.players[ex].hand;
+        const xo2 = g2.s.players[ex];
         let xcard = s.xFirstCard;
-        if (!xcard) {
-          if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
-          if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
+        if (see) {   // la mano dell'escluso (tolta la carta già giocata) è NOTA: ce la mostra
+          const poolIds = new Set(d.xhand.map((c) => c.id));
+          const fixed = d.xhand.slice();
+          if (!xcard) {
+            let cand = xo2.hand.find((c) => !poolIds.has(c.id) && s.xDecl != null && c.v === s.xDecl && rng() < P.trust) || xo2.hand.find((c) => !poolIds.has(c.id)) || g2.s.deck.find((c) => !c.z && !poolIds.has(c.id));
+            if (!cand) continue;
+            xcard = cand; xo2.hand = [cand, ...fixed];
+          } else xo2.hand = fixed;
+        } else if (!xcard) {
+          if (s.xDecl != null && rng() < P.trust) xcard = xo2.hand.find((c) => c.v === s.xDecl);
+          if (!xcard) xcard = xo2.hand.find((c) => c.id === heurX(g2, ex, rng, 0.1));
         }
         if (!xcard) continue;
-        const pool = eh.filter((c) => c.id !== xcard.id);
+        const pool = see ? d.xhand.map((c) => c.id) : xo2.hand.filter((c) => c.id !== xcard.id).map((c) => c.id);
         if (!pool.length) continue;
         n++;
-        const tk = pool[Math.floor(rng() * pool.length)];
-        for (let i = 0; i <= hand.length; i++) {
+        const blindTake = pool[Math.floor(rng() * pool.length)];
+        for (let i = 0; i < nOpt; i++) {
           const g3 = g2.clone();
           if (i > 0) {
+            const gIdx = Math.floor((i - 1) / nTake), tIdx = (i - 1) % nTake;
+            const tid = see ? pool[tIdx] : blindTake;
             const me = g3.s.players[pid], xo = g3.s.players[ex];
-            const gi = me.hand.findIndex((c) => c.id === hand[i - 1].id), ti = xo.hand.findIndex((c) => c.id === tk.id);
+            const gi = me.hand.findIndex((c) => c.id === hand[gIdx].id), ti = xo.hand.findIndex((c) => c.id === tid);
             if (gi < 0 || ti < 0) continue;
             const gc = me.hand[gi]; me.hand.splice(gi, 1, xo.hand[ti]); xo.hand.splice(ti, 1, gc);
             const ei = me.eff.findIndex((e) => e.k === 'baratto'); if (ei >= 0) me.eff.splice(ei, 1);
@@ -353,7 +365,9 @@
       if (!n) return null;
       let bi = 0, bv = -Infinity;
       tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
-      return bi === 0 ? null : hand[bi - 1].id;
+      if (bi === 0) return null;
+      const gIdx = Math.floor((bi - 1) / nTake), tIdx = (bi - 1) % nTake;
+      return see ? { give: hand[gIdx].id, take: d.xhand[tIdx].id } : hand[gIdx].id;
     }
 
     // variante: carta "Cambio centrale"
