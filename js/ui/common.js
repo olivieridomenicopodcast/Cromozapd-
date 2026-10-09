@@ -120,8 +120,8 @@
     h += COLORS.map((c, i) => { const rl = FF.COLOR_RULES[FF.ruleOf(R, i)]; return row(S.color(i), `<b>${c.n}</b> ${c.sym}${rl ? ` → ${rl.i} <b>${rl.n}</b>: ${rl.d}` : ''}`); }).join('');
     h += '<div class="lgroup">Carte e segni</div>';
     h += row(S.card({ v: 7, c: 1 }, 'tiny'), '<b>Numerica</b>: il valore è il numero grande. Il colore serve per la regola: se la carta centrale ha il colore dominante, la regola è attiva.');
-    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante (cioè quale regola è in vigore), fa avanzare l\'escluso di un altro posto e inverte il verso. 12 colorate (3 per colore).');
-    h += row(S.card({ z: true, cromo: true, c: -1 }, 'tiny'), '<b>Cromozapd</b> (la 13ª Zapd): tutti passano la mano al giocatore successivo, poi chi l\'ha pescata sceglie il colore dominante, cioè la regola. Se esce come carta centrale sceglie chi la scopre.');
+    h += row(S.card({ z: true, c: 0 }, 'tiny'), '<b>Zapd</b>: si risolve subito. Cambia il colore dominante (cioè quale regola è in vigore), fa avanzare l\'escluso di un altro posto e inverte il verso. 4 colorate (una per colore).');
+    h += row(S.card({ z: true, cromo: true, c: -1 }, 'tiny'), '<b>Cromozapd</b> (la 5ª Zapd): tutti passano la mano al giocatore successivo, poi chi l\'ha pescata sceglie il colore dominante, cioè la regola. Se esce come carta centrale sceglie chi la scopre.');
     h += row(S.token('tiny'), '<b>Gettone escluso</b>: chi lo ha non fa coppia in questo turno: dichiara un numero e gioca coperta 1 carta che <b>decide il range</b>.');
     h += row(S.dir(1, 'tiny'), '<b>Verso</b> di rotazione dell\'escluso (↻ A→B→C): il gettone avanza di un posto a ogni turno e a ogni Zapd; ogni Zapd inverte il verso.');
     h += row('🎯', '<b>Range</b>: la somma delle due carte-coppia deve stare tra <b>V</b> (carta centrale) e <b>V + X</b>, dove X è la carta dell\'escluso (si scopre al reveal, salvo la regola Luce).');

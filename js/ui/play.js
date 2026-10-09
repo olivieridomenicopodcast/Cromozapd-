@@ -10,7 +10,7 @@
   // ───────────────────────── regole modificabili ─────────────────────────
   const RULE_FIELDS = [
     ['handSize', 'Carte numeriche in mano'], ['effectHandMax', 'Effetti in mano al massimo'],
-    ['zapPerColor', 'Zapd per colore'], ['cromozapd', 'Carta Cromozapd (13ª Zapd)'], ['colorRules', 'Il colore dominante è la regola in vigore'], ['immunity', 'Immunità del colore dominante (vecchia regola)'],
+    ['zapPerColor', 'Zapd per colore'], ['cromozapd', 'Carta Cromozapd (5ª Zapd)'], ['colorRules', 'Il colore dominante è la regola in vigore'], ['immunity', 'Immunità del colore dominante (vecchia regola)'],
     ['traitor', 'Carte Traditore (X coperta)'], ['traitorOverflow', 'Valore di ogni Traditore dopo il mazzetto'], ['barattoSee', 'Baratto: chi lo gioca vede la mano dell\'escluso'],
     ['startExcluded', 'Escluso iniziale (−1 = a sorte, 0 = A, 1 = B, 2 = C)'], ['startDir', 'Verso iniziale (1 = A→B→C, −1 = inverso)'], ['rotateEachTurn', 'L\'escluso avanza a ogni turno (oltre che a ogni Zapd)'], ['zapFlipsDir', 'Ogni Zapd inverte anche il verso'],
   ];

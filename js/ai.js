@@ -84,8 +84,10 @@
   // Punteggio PROIETTATO a fine partita: i punti personali e la quota in ogni coppia si diluiscono con i turni che restano.
   // (Senza proiezione, una carta alta data alla coppia sembra aumentare il Fattore molto più di quanto farà davvero.)
   const PROJ = { selfAvg: 6.3, pairPerTurn: 4.1 };
+  // turni che restano (stima): la partita finisce quando esce l'ultima Zapd, che sta verso la fine del mazzo; ~6,2 carte a turno
+  const turnsLeftEst = (g) => (g.s.zapsDrawn >= g.totalZaps ? 0 : Math.max(0.5, (g.s.deck.length * 0.9) / 6.2));
   function projScore(g, p) {
-    const s = g.s, turnsLeft = Math.max(0, g.totalZaps - s.zapsDrawn) * 1.03 + (s.zapsDrawn >= g.totalZaps ? 0 : 0.5);
+    const s = g.s, turnsLeft = turnsLeftEst(g);
     const Tf = turnsLeft * PROJ.pairPerTurn;
     let sum = 0;
     for (let e = 0; e < 3; e++) { const sh = (s.contrib[p][e] + Tf / 3) / (s.pairPts[e] + Tf || 1); sum += g.rules.scoring === 'podio' ? shareToPodio(sh) / 6 : sh; }
@@ -99,7 +101,7 @@
     useProj = P.proj !== false;
     const s = g.s, opp = [0, 1, 2].filter((i) => i !== pid);
     const f = softFactor(g, pid);
-    const left = Math.max(0, Math.min(1, (g.totalZaps - s.zapsDrawn) / 12));
+    const left = Math.max(0, Math.min(1, turnsLeftEst(g) / 12));
     let hand = 0;
     for (const c of s.players[pid].hand) hand += c.v - 5.5;
     let u = softScore(g, pid) - P.oppW * 0.5 * (softScore(g, opp[0]) + softScore(g, opp[1]));
@@ -520,7 +522,7 @@
             const g0 = game.clone(), g1 = game.clone(), s1 = g1.s, ex = d.excluded, lp = s1.lastPlay;
             const act = [0, 1, 2].filter((i) => i !== ex);
             s1.pairPts[ex] += d.pts; s1.contrib[act[0]][ex] += lp.plays[act[0]].couple.v; s1.contrib[act[1]][ex] += lp.plays[act[1]].couple.v; s1.contrib[ex][ex] += lp.xcard.v;
-            const left = Math.max(0, Math.min(1, (game.totalZaps - game.s.zapsDrawn) / 12));
+            const left = Math.max(0, Math.min(1, turnsLeftEst(game) / 12));
             const gain = evalU(g1, d.player, P) - evalU(g0, d.player, P), cost = (P.holdW || 0.2) * left + 0.1;
             if (gain <= cost) return null;
             const best = d.opts.slice().sort((x, y) => Math.abs(x.delta) - Math.abs(y.delta))[0]; // la carta più piccola che basta

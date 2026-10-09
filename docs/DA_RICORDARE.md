@@ -221,3 +221,7 @@ Controllo dei posti con il podio su 1000 partite (hard×3): A 31,3% / B 33,1% / 
 
 ## Podio: pari merito = vince chi ha messo MENO CARTE (deciso da Niky); foglio punti stampabile
 Il motore conta anche il numero di carte messe in ogni coppia (contribN); a pari punti vale chi ne ha messe meno; se anche le carte sono uguali si divide. `foglio-punti.html` (2 facciate A4 da compilare + 2 di esempio già compilato, link dalla schermata iniziale) guida la conta passo per passo.
+
+## 1 Zapd per colore + Cromozapd (5 Zapd in tutto, deciso da Niky dopo aver visto che con 13 ne usciva ~1 a turno)
+Frequenza (100 partite, media): 13 Zapd → 0,94 a turno, 50% delle partite con almeno 4 turni di fila con Zapd; 9 Zapd → 0,67, 29%; 5 Zapd → 0,41, 1%. La durata resta ~11–12 turni (la partita finisce quando esce l'ultima Zapd, sempre verso la fine del mazzo): con 5 Zapd la durata media è 11,1 turni ma più variabile (5%: ≤7 turni; minimo 3; massimo 13).
+Misure (hard×3, 300 partite): sforo 31,5%, punti coppia 121,7, posti A/B/C 36,1/32,1/31,8%, modificatori decisivi 1,22, egoista semplice 10,9%, difficile vs 2 medie 39,1% (34,7–43,7), media vs 2 facili 50,9% (46,3–55,5). L'IA stima i turni che restano dalle carte rimaste nel mazzo (non più dalle Zapd mancanti).

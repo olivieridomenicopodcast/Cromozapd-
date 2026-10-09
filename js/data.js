@@ -51,7 +51,7 @@
     base: 12,               // ampiezza del range: da V a V+base (la somma controllata è di 3 carte; deciso da Niky dopo le simulazioni)
     handSize: 3,            // carte numeriche in mano
     effectHandMax: 2,       // carte-effetto in mano al massimo
-    zapPerColor: 3,         // Zapd per colore (totale = 4 × questo = fine partita)
+    zapPerColor: 1,         // Zapd per colore (totale = 4 × questo + la Cromozapd = fine partita)
     scales: 2,              // scale da 1 a 10 per colore
     maxValue: 10,
     startExcluded: -1,      // escluso iniziale: -1 = a sorte (dal seed), 0 = A, 1 = B, 2 = C
@@ -63,7 +63,7 @@
     colorTrigger: true,     // la regola del colore dominante si attiva SOLO nei turni in cui la carta centrale è di quel colore (false = sempre)
     colorRuleMap: ['silenzio', 'carnevale', 'luce', 'effetti'],   // regola per colore: Rosso, Blu, Verde, Giallo
     immunity: false,        // VARIANTE (vecchia regola): la coppia con entrambe le carte del colore dominante non sfora mai
-    cromozapd: true,        // 13ª Zapd speciale: chi la pesca sceglie il colore (la regola) e tutti passano la mano
+    cromozapd: true,        // Zapd speciale (l'ultima delle 5): chi la pesca sceglie il colore (la regola) e tutti passano la mano
     rangeMode: 'xsum',      // 'xsum' (default, deciso da Niky) = l'escluso gioca per primo, scoperta, la carta X e il range è da V a V+X; varianti solo-simulazione: 'xcard' = V−X..V+X, 'pivot' = pivot−V..pivot+V, 'double' = V..2V, 'base' = V..V+Base
     pivot: 15,              // VARIANTE: valore centrale del range con rangeMode 'pivot'
     barattoSee: true,       // VARIANTE (carta Baratto): true = l'escluso mostra le carte rimaste in mano e chi gioca la carta SCEGLIE quale prendere (altrimenti alla cieca)

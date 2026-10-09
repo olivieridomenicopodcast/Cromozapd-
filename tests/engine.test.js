@@ -11,7 +11,7 @@ let uid = 1000;
 /* Tavolo costruito a mano. hands = [[v,c]…] per A, B, C; center = [v,c];
    top = carte pescate per prime (in ordine di pesca) prima della centrale; after = pescate dopo la centrale. */
 function mk(o = {}) {
-  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1, colorRules: false, immunity: true, cromozapd: false, xHidden: false, traitor: false, scoring: 'fattore' }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
+  const g = new FF.Game({ seed: 1, rules: Object.assign({ base: 10, xInSum: false, rangeMode: 'base', modMode: 'range', modScale: 1, colorRules: false, immunity: true, cromozapd: false, xHidden: false, traitor: false, scoring: 'fattore', zapPerColor: 3 }, o.rules), log: true }); // i test di regola usano Base 10 e la vecchia regola dell'escluso (riferimento delle cifre); il default vero è provato a parte
   FF.drive(g, g.setupGen(), () => null);
   const s = g.s; let id = 1;
   const hands = o.hands || [[[6, 1], [2, 1], [1, 1]], [[9, 1], [3, 1], [1, 1]], [[4, 1], [8, 2], [9, 2]]];
@@ -53,16 +53,16 @@ function pol(o = {}) {
 const turn = (g, o = {}) => { FF.drive(g, g.turnGen(), pol(o)); return o; };
 const pts = (g, e = 2) => g.s.pairPts[e];
 
-test('mazzi: 93 carte (80 numeriche + 12 Zapd colorate + la Cromozapd), ogni colore-valore due volte; Mazzetto Effetti da 15', () => {
+test('mazzi: 85 carte (80 numeriche + 4 Zapd colorate + la Cromozapd), ogni colore-valore due volte; Mazzetto Effetti da 15', () => {
   const d = FF.buildDeck();
-  assert.equal(d.length, 93);
-  assert.equal(d.filter((c) => c.z).length, 13);
+  assert.equal(d.length, 85);
+  assert.equal(d.filter((c) => c.z).length, 5);
   assert.equal(d.filter((c) => c.cromo).length, 1);
   for (let c = 0; c < 4; c++) {
-    assert.equal(d.filter((x) => x.z && x.c === c).length, 3);
+    assert.equal(d.filter((x) => x.z && x.c === c).length, 1);
     for (let v = 1; v <= 10; v++) assert.equal(d.filter((x) => !x.z && x.c === c && x.v === v).length, 2);
   }
-  assert.equal(new Set(d.map((c) => c.id)).size, 93);
+  assert.equal(new Set(d.map((c) => c.id)).size, 85);
   const e = FF.buildEffectDeck();
   assert.equal(e.length, 15);
   assert.equal(e.filter((x) => x.k === 'reverse').length, 3);
@@ -76,7 +76,7 @@ test('setup: 3 carte numeriche a testa, colore di partenza = colore di una Zapd,
   for (const p of g.s.players) { assert.equal(p.hand.length, 3); assert.ok(p.hand.every((c) => !c.z)); }
   assert.ok(g.s.dominant >= 0 && g.s.dominant < 4);
   assert.equal(g.s.zapPile.length, g.s.zapsDrawn);
-  assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 93);
+  assert.equal(g.s.deck.length + 9 + g.s.zapPile.length, 85);
 });
 
 test('escluso iniziale a sorte: riproducibile dal seed, tutti e tre i posti possibili; con un valore fisso viene rispettato', () => {
@@ -132,7 +132,7 @@ test('regole predefinite: range da V a V+X, colore = regola, Cromozapd, carte Tr
   const g = new FF.Game({ seed: 1, log: true }), R = g.rules;
   assert.deepEqual(FF.rangeBase(R, 6, 7), [6, 13]); assert.deepEqual(FF.rangeBase(R, 3, 1), [3, 4]);
   assert.deepEqual(FF.rangeFor(R, 6, { dir: 'lo', n: 2 }, 7), [2, 17]); assert.deepEqual(FF.rangeFor(R, 6, { dir: 'hi', n: 1 }, 7), [4, 15]);
-  assert.equal(g.totalZaps, 13);
+  assert.equal(g.totalZaps, 5);
   assert.equal(FF.xmodeFor(R, 'luce'), 'first'); assert.equal(FF.xmodeFor(R, 'silenzio'), 'hidden'); assert.equal(FF.xmodeFor(R, 'carnevale'), 'hidden');
   // l'escluso gioca PER PRIMO, scoperto (prima di ogni dichiarazione): centro 6, X=7 → range 6–13
   const m = (xi) => mk({ rules: { rangeMode: 'xsum', xInSum: false, modMode: 'widen', modScale: 2 }, center: [6, 0], hands: [[[3, 1], [2, 1], [1, 1]], [[4, 1], [3, 1], [1, 1]], [[7, 1], [1, 2], [9, 2]]] });
@@ -372,20 +372,20 @@ test('fuzz: invarianti su 300 partite (carte non si perdono né si duplicano, li
       if (s.nextCenter) ids.push(s.nextCenter.id);
       if (s.center && !s.discard.includes(s.center)) ids.push(s.center.id);
       if (s.xFirstCard && !s.discard.includes(s.xFirstCard)) ids.push(s.xFirstCard.id);
-      assert.equal(ids.length, 93, 'carte numeriche+Zapd: ' + ids.length);
-      assert.equal(new Set(ids).size, 93, 'duplicati');
+      assert.equal(ids.length, 85, 'carte numeriche+Zapd: ' + ids.length);
+      assert.equal(new Set(ids).size, 85, 'duplicati');
       const eids = [...s.effDeck, ...s.effDiscard, ...s.players.flatMap((p) => p.eff)].map((e) => e.id);
       assert.equal(eids.length, 15); assert.equal(new Set(eids).size, 15);
       for (const p of s.players) { assert.ok(p.hand.length <= 3 && p.eff.length <= 2); }
       assert.ok(s.zapPile.length === s.zapsDrawn);
       return bots[d.player].decide(game, d);
     });
-    assert.ok(g.result.turns >= 5 && g.result.turns <= 14, 'turni ' + g.result.turns);
-    assert.equal(g.s.zapsDrawn, 13);
+    assert.ok(g.result.turns >= 2 && g.result.turns <= 14, 'turni ' + g.result.turns);
+    assert.equal(g.s.zapsDrawn, 5);
     tot += g.result.turns;
   }
   const avg = tot / 300;
-  assert.ok(avg > 10 && avg < 14, 'durata media ' + avg);
+  assert.ok(avg > 9.5 && avg < 13.5, 'durata media ' + avg);
 });
 
 test('Zapd: cambia colore, fa avanzare l\'escluso e inverte il verso (prima avanza, poi inverte)', () => {
@@ -446,7 +446,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Effetti in mano al massimo'), String(R.effectHandMax));
   assert.equal(val('Zapd per colore'), String(R.zapPerColor));
   assert.equal(val('Punteggio'), R.scoring === 'podio' ? 'podio (3/2/1 per coppia, quota = somma dei tre podi)' : 'fattore');
-  assert.equal(val('Cromozapd (13ª Zapd)'), R.cromozapd ? 'sì' : 'no');
+  assert.equal(val('Cromozapd (5ª Zapd)'), R.cromozapd ? 'sì' : 'no');
   assert.equal(val('Colore dominante = regola in vigore'), R.colorRules ? 'sì' : 'no');
   assert.equal(val('La regola si attiva solo se la carta centrale ha il colore dominante'), R.colorTrigger ? 'sì' : 'no');
   assert.equal(val('Immunità del colore dominante'), R.immunity ? 'sì' : 'no');
@@ -460,7 +460,7 @@ test('regolamento (docs/REGOLAMENTO.md): parametri coerenti con il codice, ruleb
   assert.equal(val('Escluso iniziale'), R.startExcluded < 0 ? 'a sorte' : String(R.startExcluded));
   assert.equal(val('L\'escluso avanza a ogni turno'), R.rotateEachTurn ? 'sì' : 'no');
   assert.equal(val('Ogni Zapd inverte il verso'), R.zapFlipsDir ? 'sì' : 'no');
-  assert.ok(md.includes('93 carte') && md.includes('13 carte Zapd') && md.includes('15 carte'));
+  assert.ok(md.includes('85 carte') && md.includes('5 carte Zapd') && md.includes('15 carte'));
   // le regole di colore descritte nel regolamento sono quelle del codice
   FF.COLORS.forEach((c, i) => { const rl = FF.COLOR_RULES[R.colorRuleMap[i]]; assert.ok(md.includes('| ' + c.n + ' | **' + rl.n + '**'), c.n + ' → ' + rl.n); });
   assert.equal(R.effectCopies.sincero + R.effectCopies.swap + R.effectCopies.annulla, 0);

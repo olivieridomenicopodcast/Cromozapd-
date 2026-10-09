@@ -6,12 +6,12 @@
 
 ## 1. In breve
 **Esattamente 3 giocatori**: A, B, C (nell'ordine in cui siedono, in senso orario). Ogni turno due giocatori sono **attivi** e formano una **coppia**; il terzo è l'**escluso**. Le coppie possibili sono **AB, BC, AC**.
-La partita finisce quando esce l'ultima delle 13 carte **Zapd** (12 colorate + la **Cromozapd**): si gioca l'ultima mano, poi si conta.
+La partita finisce quando esce l'ultima delle 5 carte **Zapd** (4 colorate, una per colore, + la **Cromozapd**): si gioca l'ultima mano, poi si conta.
 Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadra) e **vincitore individuale** (punti personali × quota a podio).
 **Il senso del gioco:** la carta per sé è sempre tua, ma ogni punto che togli alla coppia ti fa scendere sul podio e abbassa la tua quota; una coppia che sfora fa 0. Giocare sempre carte alte non conviene, e nemmeno pensare solo a sé stessi (§11).
 
 ## 2. Componenti
-- **Mazzo principale: 93 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **12 carte Zapd** colorate (3 per colore) + **la Cromozapd** (in tutto 13 carte Zapd). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**. Il **colore della carta centrale** serve ad attivare la regola di colore (§7); per il resto il colore delle carte numeriche non conta.
+- **Mazzo principale: 85 carte** = 80 numeriche (4 colori × 2 scale da 1 a 10) + **4 carte Zapd** colorate (1 per colore) + **la Cromozapd** (in tutto 5 carte Zapd). I 4 colori sono Rosso, Blu, Verde, Giallo **[interpretazione: nomi provvisori]**. Il **colore della carta centrale** serve ad attivare la regola di colore (§7); per il resto il colore delle carte numeriche non conta.
 - **Mazzetto Effetti**, separato, solo funzione (nessun valore numerico): vedi §9. **15 carte**.
 - **Mazzetto Traditore**: 12 carte con un valore da 0 a 3 (0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3), vedi §5.
 - **Carta centrale**: la carta numerica scoperta che definisce il range del turno.
@@ -34,7 +34,7 @@ Si vince **due volte**: **vincitore di coppia** (la coppia con più punti squadr
 6. **Reveal.** Si scoprono le carte coperte degli attivi **e la X dell'escluso**.
 7. **Risoluzione**: effetti in fila (Reverse, Prossima carta, modificatori), range e punti (§5), eventuale carta Traditore, poi, solo per l'escluso, la scelta di **pescare una carta-effetto** (§9).
 
-Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si gioca per intero e si conta.
+Il turno in cui esce la **5ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si gioca per intero e si conta.
 
 ## 5. Range, punti e carte Traditore
 - **Range = carta centrale + carta dell'escluso** **[chiarito: idea di Niky, scelta dopo le simulazioni]**: va da *V* a *V + X*, dove *V* è il valore della carta centrale e *X* il valore della carta giocata dall'escluso. Esempio: centrale 6, l'escluso gioca 7 → range **6–13**. Gli estremi **sono inclusi**.
@@ -51,8 +51,8 @@ Il turno in cui esce la **13ª Zapd** (l'ultima, qualunque sia) è l'ultimo: si 
 - Quando una Zapd colorata viene **pescata** (da rimpiazzo, carta centrale o distribuzione) si **risolve subito**: il suo colore diventa il **nuovo colore dominante** (e quindi cambia la regola in vigore) e il **gettone escluso avanza di un altro posto nel verso di rotazione** (oltre alla rotazione del turno) **e poi il verso di rotazione si inverte** [chiarito]; l'ordine "prima avanza, poi inverte" è un'**[interpretazione]**. La Zapd va da parte, scoperta (serve a stimare quanto manca).
 - Se in un turno escono più Zapd, ognuna si risolve in ordine, ognuna con il verso che c'è in quel momento.
 - **Zapd da "Prossima carta"** **[chiarito]**: si risolve subito ma colore ed escluso valgono **dal turno dopo**; la partita finisce comunque se era l'ultima.
-- **Cromozapd** (la 13ª Zapd, una sola) **[chiarito: idea di Niky]**: sposta il gettone e inverte il verso come le altre Zapd, **non cambia il colore da sola**. A pesca finita **tutti passano la propria mano di carte numeriche al giocatore successivo** (nel verso di rotazione già invertito; le carte-effetto restano a chi le ha) e **chi l'ha pescata sceglie il colore dominante**, cioè quale regola è in vigore. Se esce come **carta centrale** sceglie chi la scopre (chi era escluso nel turno precedente); se esce da "Prossima carta" sceglie chi ha giocato l'effetto, dal turno dopo.
-- **Fine partita**: finisce al termine del turno in cui è uscita l'**ultima Zapd** (tutte e 13 sono nel mazzo).
+- **Cromozapd** (una sola, la 5ª Zapd del mazzo) **[chiarito: idea di Niky]**: sposta il gettone e inverte il verso come le altre Zapd, **non cambia il colore da sola**. A pesca finita **tutti passano la propria mano di carte numeriche al giocatore successivo** (nel verso di rotazione già invertito; le carte-effetto restano a chi le ha) e **chi l'ha pescata sceglie il colore dominante**, cioè quale regola è in vigore. Se esce come **carta centrale** sceglie chi la scopre (chi era escluso nel turno precedente); se esce da "Prossima carta" sceglie chi ha giocato l'effetto, dal turno dopo.
+- **Fine partita**: finisce al termine del turno in cui è uscita l'**ultima Zapd** (tutte e 5 sono nel mazzo).
 - Se il mazzo finisse, si rimescolano gli scarti numerici **[interpretazione]**.
 
 ## 7. Le regole di colore
@@ -100,7 +100,7 @@ Solo l'**escluso** può pescare una carta-effetto, **per scelta**, a fine del su
 *Carte tolte nei playtest* **[chiarito]**: Sincero, Scambio forzato, Annulla (quasi mai giocata), Cambio centrale e Lente (provate in simulazione e scartate). Restano nel codice a 0 copie.
 
 ## 10. Cosa vede l'app e modalità
-Sempre sul tavolo: carta centrale e range del turno, colore dominante e regola in vigore, escluso e verso, Zapd uscite (su 13), punti squadra delle 3 coppie, punti personali, podio nelle 3 coppie e quota di ognuno, carte Traditore, effetti in mano propri. Ogni evento ha un messaggio che spiega **cosa fa e perché**.
+Sempre sul tavolo: carta centrale e range del turno, colore dominante e regola in vigore, escluso e verso, Zapd uscite (su 5), punti squadra delle 3 coppie, punti personali, podio nelle 3 coppie e quota di ognuno, carte Traditore, effetti in mano propri. Ogni evento ha un messaggio che spiega **cosa fa e perché**.
 Ogni posto (A, B, C) è un **umano** o un'**AI** (facile, media, difficile). Si può giocare tu + 2 AI, 2 umani + 1 AI (hotseat con schermata di passaggio), 3 umani (hotseat) o 3 AI da guardare. Nel simulatore il profilo A occupa un posto che ruota e gli altri due hanno il profilo B.
 
 ## 11. Non tirare la corda (il senso del gioco)
@@ -128,9 +128,9 @@ Il punteggio è **personali × quota a podio**: due numeri che si muovono in dir
 | Escluso iniziale | **a sorte** |
 | Carte in mano | **3** |
 | Effetti in mano al massimo | **2** |
-| Zapd per colore | **3** |
+| Zapd per colore | **1** |
 | Punteggio | **podio** (3/2/1 per coppia, quota = somma dei tre podi) |
-| Cromozapd (13ª Zapd) | **sì** |
+| Cromozapd (5ª Zapd) | **sì** |
 | Colore dominante = regola in vigore | **sì** |
 | La regola si attiva solo se la carta centrale ha il colore dominante | **sì** |
 | Immunità del colore dominante | **no** |
@@ -156,7 +156,7 @@ Il punteggio è **personali × quota a podio**: due numeri che si muovono in dir
 | Range | V … V + Base | **V … V + X** (X = carta dell'escluso) |
 | Tradimento | Libero e senza effetti | L'escluso che gioca un numero diverso da quello dichiarato pesca una **carta Traditore** (toglie 0–3 punti personali) |
 | Colore dominante | Immunità allo sforo | **Regola in vigore** (Silenzio, Carnevale, Luce, Effetti vietati), attiva solo se la carta centrale è di quel colore; niente immunità |
-| Zapd | 12 | **13**: la Cromozapd fa passare le mani e fa scegliere il colore |
+| Zapd | 12 (3 per colore) | **5**: una per colore (le Zapd escono più di rado, circa 1 ogni 2,4 turni) + la Cromozapd, che fa passare le mani e fa scegliere il colore |
 | Modificatori −n / +n | Abbassano il minimo / alzano il massimo | **±n allargano il range di 2n per lato** |
 | Mazzetto Effetti | 20 carte (con Sincero, Scambio forzato, Annulla) | **15 carte** (Reverse, Prossima carta, ±n, Baratto) |
 | Pesca | "Attivo 2, escluso 1" | Si pesca fino a 3 |
