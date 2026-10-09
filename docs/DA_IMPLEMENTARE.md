@@ -39,3 +39,6 @@ Questo elenco è il lavoro **già deciso ma non ancora fatto**. Si implementa tu
 - Da definire: chi sceglie quando la Cromozapd esce come carta centrale / da "Prossima carta" (nessuno l'ha "pescata"); associazione colore→regola.
 
 ## 5. Carte effetto: da rivedere sulle regole nuove (in discussione)
+- DECISO: **Sincero e Scambio forzato sono TOLTI** dal mazzo effetti (5 carte da sostituire: 3 + 2). Restano Reverse (3), Prossima carta (3) e i 6 modificatori ±n.
+- DECISO: se la Cromozapd esce come carta centrale, **sceglie la regola chi scopre la carta centrale** (da definire chi scopre la carta centrale in ogni turno).
+- Sostituti in discussione: Lente (guardi la carta coperta dell'escluso prima di giocare), Ripesca (scarti una carta e ne pesci un'altra), altre.
