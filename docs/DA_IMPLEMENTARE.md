@@ -43,3 +43,5 @@ Questo elenco è il lavoro **già deciso ma non ancora fatto**. Si implementa tu
 - DECISO: se la Cromozapd esce come carta centrale, **sceglie la regola chi scopre la carta centrale** (da definire chi scopre la carta centrale in ogni turno).
 - Sostituti in discussione: Lente (guardi la carta coperta dell'escluso prima di giocare), Ripesca (scarti una carta e ne pesci un'altra), altre.
 - DECISO: **Cambio centrale scartata** (misure in DA_RICORDARE). Da ripensare: Lente (guardi la carta coperta dell'escluso, non puoi parlare) e un nuovo effetto di scambio con l'escluso (in discussione).
+- DECISO: **Baratto** = 2 copie. Dopo che l'escluso ha giocato la sua carta, chi lo gioca vede la mano rimasta all'escluso (solo lui la vede), sceglie una carta da prendere e gliene dà una sua (coperta). Misura: chi lo gioca +0,9/+1,1 punti.
+- In discussione: **Lente** (misure negative così com'è: chi guarda non parla). Mazzo effetti attuale: Reverse 3, Prossima carta 3, ±n 6, Baratto 2 = 14 carte; mancano carte per arrivare a 17 (o si riduce il mazzo).

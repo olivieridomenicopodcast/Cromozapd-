@@ -35,6 +35,7 @@
     if (s.nextCenter) known.add(s.nextCenter.id);
     if (s.center) known.add(s.center.id);
     if (s.xFirstCard) known.add(s.xFirstCard.id);
+    if (s.lensBy === pid && s.xPick) known.add(s.xPick.id);   // ho guardato la carta coperta dell'escluso
     const unknown = FF.buildDeck(game.rules).filter((c) => !known.has(c.id));
     // le Zapd non stanno mai in mano (si risolvono appena pescate): le mani ricampionate hanno solo carte numeriche
     const nums = shuffle(unknown.filter((c) => !c.z)), zaps = unknown.filter((c) => c.z);
@@ -43,6 +44,7 @@
       const n = game.s.players[q].hand.length;
       s.players[q].hand = nums.splice(0, n);
     }
+    if (s.lensBy === pid && s.xPick && s.players[s.excluded].hand.length) { const eh = s.players[s.excluded].hand; eh[0] = s.xPick; }
     s.deck = shuffle(nums.concat(zaps)); // il resto è il mazzo, in ordine casuale
     // carte-effetto: note = mie + giocate
     const eknown = new Set();
@@ -123,7 +125,7 @@
   }
   // giocata euristica per un attivo: carta-coppia che tiene la somma nel range (data la dichiarazione del compagno), carta-sé la più alta
   function heurPlay(g, pid, partnerNum, trust, rng, randomP) {
-    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : undefined), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
+    const s = g.s, p = s.players[pid], hand = p.hand, R = g.rules, xv = s.xFirstCard ? s.xFirstCard.v : (s.lensBy === pid && s.xPick ? s.xPick.v : s.xDecl != null ? (rng() < trust ? s.xDecl : 5) : undefined), c0 = FF.rangeBase(R, s.center.v, xv)[0], c1 = FF.rangeBase(R, s.center.v, xv)[1];
     if (hand.length < 2) return null;
     if (rng() < randomP) {
       const i = Math.floor(rng() * hand.length); let j = Math.floor(rng() * (hand.length - 1)); if (j >= i) j++;
@@ -162,6 +164,7 @@
       case 'sincero': return false;
       case 'cambio': return null;
       case 'baratto': return null;
+      case 'lente': return false;
       default: return null;
     }
   };
@@ -202,10 +205,10 @@
         // gli altri giocano secondo il modello
         const base = {};
         base[partner] = heurPlay(g2, partner, mydecl ? mydecl.num : null, P.trust, rng, 0.05);
-        let xid = s.xFirstCard ? s.xFirstCard.id : null;
+        let xid = s.xFirstCard ? s.xFirstCard.id : (s.lensBy === pid && s.xPick ? s.xPick.id : null);
         if (xid == null && s.xDecl != null && rng() < P.trust) { const hc = g2.s.players[ex].hand.find((c) => c.v === s.xDecl); if (hc) xid = hc.id; }   // l'escluso ha detto la verità (o così credo)
         if (xid == null) xid = heurX(g2, ex, rng, 0.1);
-        const xcard = s.xFirstCard || g2.s.players[ex].hand.find((c) => c.id === xid);
+        const xcard = s.xFirstCard || (s.lensBy === pid && s.xPick ? s.xPick : null) || g2.s.players[ex].hand.find((c) => c.id === xid);
         if (!base[partner] || !xcard) continue;
         // se il compagno ha dichiarato un numero, con probabilità `trust` gioca davvero quella carta
         if (pnum != null && rng() < P.trust) {
@@ -314,6 +317,36 @@
       let bi = 0, bv = -Infinity;
       tot.forEach((t, i) => { const v = t / n + (P.noise ? (rng() - 0.5) * P.noise * 2 : 0); if (v > bv) { bv = v; bi = i; } });
       return hand[bi].id;
+    }
+
+    // variante: carta "Lente" — conviene guardare la carta dell'escluso rinunciando a parlare?
+    function decideLente(game, d) {
+      const pid = d.player, s = game.s, ex = s.excluded;
+      if (P.samples <= 0 || rng() < P.random) return rng() < 0.3;
+      const act = [0, 1, 2].filter((i) => i !== ex), partner = act.find((x) => x !== pid);
+      let gain = 0, n = 0;
+      for (let k = 0; k < Math.max(4, Math.ceil(P.samples / 2)); k++) {
+        const g2 = AI.determinize(game, pid, rng);
+        const eh = g2.s.players[ex].hand;
+        let xcard = null;
+        if (s.xDecl != null && rng() < P.trust) xcard = eh.find((c) => c.v === s.xDecl);
+        if (!xcard) xcard = eh.find((c) => c.id === heurX(g2, ex, rng, 0.1));
+        if (!xcard) continue;
+        n++;
+        const run = (know) => {
+          const g3 = g2.clone(); g3.s.xPick = xcard;
+          const base = {};
+          if (know) g3.s.lensBy = pid;
+          base[pid] = heurPlay(g3, pid, null, P.trust, rng, 0.05);
+          base[partner] = heurPlay(g3, partner, know ? null : null, P.trust, rng, 0.05);
+          if (!base[pid] || !base[partner]) return null;
+          return simulate(g3, base, xcard, pid, P);
+        };
+        const a = run(false), b2 = run(true);
+        if (a == null || b2 == null) continue;
+        gain += b2 - a;
+      }
+      return n ? gain / n > 0.15 : false;   // soglia: il costo del silenzio e della carta
     }
 
     // variante: carta "Baratto" — peschi alla cieca una carta dall'escluso e gli dai una tua
@@ -462,6 +495,7 @@
           case 'xplay': return decideXplay(game, d);
           case 'cambio': return decideCambio(game, d);
           case 'baratto': return decideBaratto(game, d);
+          case 'lente': return decideLente(game, d);
           case 'xdecl': return planXHidden(game, d).decl;
           case 'correct': { // variante modTiming 'after': conviene spendere la carta per salvare i punti della coppia?
             if (level === 'easy' && rng() < 0.5) return null;

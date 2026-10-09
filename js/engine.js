@@ -254,7 +254,7 @@
     *turnGen() {
       const s = this.s, R = this.rules;
       let b;
-      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null; s.xPick = null;
+      s.sincero = null; s.decls = [null, null, null]; s.lastPlay = null; s.xDecl = null; s.xPick = null; s.lensBy = null;
       s.phase = 'draw';
       b = this.say('turn', `━━ Turno ${s.turn} · Zapd uscite ${s.zapsDrawn}/${this.totalZaps} ━━`);
       if (b) yield b;
@@ -325,6 +325,7 @@
       // 3) discussione: dichiarazioni (la seconda vede la prima)
       for (const pid of act) {
         const other = act.find((x) => x !== pid);
+        if (s.lensBy === pid) { s.decls[pid] = { num: null, mod: null }; b = this.say('declare', `🤐 ${this.pn(pid)} ha usato la Lente: non può fare dichiarazioni in questo turno.`, pid, { decl: s.decls[pid] }); if (b) yield b; continue; }
         const raw = yield* this.ask(this._dec('declare', pid, { partner: other, partnerDecl: s.decls[other] }));
         const d = this._sanitizeDecl(raw);
         s.decls[pid] = d;
@@ -351,6 +352,17 @@
       const s = this.s; let b;
       for (const pid of this.actives()) {
         const p = s.players[pid];
+        const lens = p.eff.find((e) => e.k === 'lente');
+        if (lens && s.xPick && s.lensBy == null) {   // VARIANTE: Lente — guardi la carta coperta dell'escluso, ma non parli
+          const use = yield* this.ask(this._dec('lente', pid, {}));
+          if (use) {
+            p.eff.splice(p.eff.indexOf(lens), 1); s.effDiscard.push(lens); s.lensBy = pid;
+            this.stat('effetto_giocato:lente', pid); this.stat('lente', pid);
+            if (s.xPick.v !== s.xDecl) this.stat('lente_smaschera', pid);
+            b = this.say('effect', `🔍 ${this.pn(pid)} gioca LENTE: guarda di nascosto la carta coperta dell'escluso. In questo turno non può fare dichiarazioni.`, pid, { k: 'lente' });
+            if (b) yield b;
+          }
+        }
         const bar = p.eff.find((e) => e.k === 'baratto');
         if (bar) {   // VARIANTE: Baratto — prendi una carta dall'escluso (alla cieca, o scelta se barattoSee) e gliene dai una tua
           const xh = s.players[s.excluded].hand, pool = xh.filter((c) => !s.xPick || c.id !== s.xPick.id);
@@ -587,7 +599,7 @@
       const s = this.s, p = s.players[pid];
       return Object.assign({
         type, player: pid, turn: s.turn, excluded: s.excluded, center: s.center, base: this.rules.base, range: FF.rangeFor(this.rules, s.center.v, null, s.xFirstCard ? s.xFirstCard.v : undefined),
-        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(), xcard: s.xFirstCard || null, xdecl: s.xDecl == null ? null : s.xDecl,
+        dominant: s.dominant, sincero: s.sincero != null, hand: p.hand.slice(), eff: p.eff.slice(), xcard: s.xFirstCard || null, xdecl: s.xDecl == null ? null : s.xDecl, xseen: s.lensBy === pid && s.xPick ? s.xPick : null,
       }, extra || {});
     }
 
@@ -652,6 +664,7 @@
           case 'xplay': return pick(d.hand).id;
           case 'xdecl': return 1 + Math.floor(rng() * game.rules.maxValue);
           case 'cambio': return rng() < 0.3 ? pick(d.hand).id : null;
+          case 'lente': return rng() < 0.2;
           case 'baratto': { if (rng() >= 0.3) return null; const gv = pick(d.hand).id; return d.see ? { give: gv, take: pick(d.xhand).id } : gv; }
           case 'annulla': return rng() < 0.5 ? pick(d.targets).idx : null;
           case 'effdraw': return rng() < 0.6;

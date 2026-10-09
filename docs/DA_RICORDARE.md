@@ -185,3 +185,11 @@ Istantanea, dopo che l'escluso ha giocato: un attivo pesca alla cieca una delle 
 | X coperta + Traditore, 160 partite (senza carta: 28,4%, 139,2) | 31,5% | 2,08 / 1,93 | 132,8 | 1,93 | +0,20 |
 Lettura: l'effetto è quasi neutro per chi lo gioca (+0,2/+0,4 su ~18 punti, nel rumore) e peggiora un po' i risultati della coppia (sforo +1/+3 punti): rimescolare le mani disturba la coordinazione. Come "riparare una mano scarsa" funziona poco con le IA.
 Baratto CON VISTA (`barattoSee:true`: l'escluso mostra le carte rimaste e chi gioca la carta sceglie quale prendere): X scoperta (200 partite): sforo 27,6%, punti coppia 139,3, 1,78 usi/partita, chi lo gioca fa +1,08 rispetto alla media degli altri; X coperta + Traditore (160 partite): sforo 30,4%, punti coppia 134,7, 1,83 usi/partita, vantaggio +0,88. (Alla cieca: +0,41 / +0,20.) Quindi vedere la mano rende la carta chiaramente utile (circa +5% di punteggio per chi la gioca) senza peggiorare lo sforo rispetto alla versione alla cieca.
+
+## Carta "Lente" (simulazione, solo X coperta; `effectCopies.lente`, 0 di default)
+Istantanea, dopo che l'escluso ha messo la sua carta coperta: chi la gioca la guarda di nascosto ma in quel turno non fa dichiarazioni. hard×3, 160 partite, traitor 0,1,1,1,2,2,2,3 (senza carta: sforo 28,4%, punti coppia 139,2):
+| Mazzo effetti (oltre a Reverse 3, Prossima 3, ±n 6) | Sforo | Sotto / sopra | Punti coppia | Lente a partita | Bugie smascherate | Vantaggio di chi la gioca |
+|---|---|---|---|---|---|---|
+| Lente 3 | 31,6% | 2,03 / 2,06 | 132,2 | 1,00 | 0,33 a partita | −0,10 |
+| Lente 3 + Baratto 2 (vista) | 30,7% | 1,88 / 2,08 | 135,8 | 1,03 | 0,40 a partita | −0,21 |
+Lettura: vedere la carta dell'escluso non compensa il costo di non poter parlare (la coppia si coordina peggio: sforo +2/+3 punti); un uso su tre smaschera davvero una bugia. Vantaggio personale nullo o leggermente negativo.
