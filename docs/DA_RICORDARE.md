@@ -229,3 +229,8 @@ Misure (hard×3, 300 partite): sforo 31,5%, punti coppia 121,7, posti A/B/C 36,1
 ## Correzioni (Niky): niente colore dominante prima della prima Zapd; l'escluso pesca sempre l'effetto
 - All'inizio `dominant = null`: nessuna regola finché non esce la prima Zapd colorata (o la Cromozapd, che fa scegliere il colore). Il tabellone mostra "Nessuno" e il messaggio spiega perché non c'è regola.
 - La pesca dell'effetto a fine turno non è più una domanda: l'escluso pesca sempre se ha meno di 2 effetti e il mazzetto non è vuoto (rifiutare non conveniva mai: gli effetti in mano sono privati e non costano nulla).
+
+## IA tarata sul podio (stima del rango)
+- Prima l'IA traduceva la quota % in un podio "morbido"; ora stima il rango atteso in ogni zona (1 + probabilità di stare sopra a ciascun avversario, logistica sulla differenza delle somme di valori, che si diluisce con i turni rimanenti). Zona a pari = 2 a testa, come nel regolamento.
+- Misura (600 partite, hard vs 2 medium): vittorie 44,2% → 45,7% (IC ~41,7–49,7%), punteggio A−B 29 → 39: miglioramento nel rumore statistico, non dimostrato. Hard×3 (400 partite): sforo 31,8%, posti 33,8/30,8/34,8%: gioco invariato.
+- Non modellati: pari merito per numero di carte, ordine delle carte.

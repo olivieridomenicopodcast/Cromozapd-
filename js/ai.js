@@ -75,23 +75,34 @@
   // ───────────────────────── valutazione ─────────────────────────
   // Fattore coppie "morbido": le coppie ancora a 0 contano 1/3 (quota neutra) così le prime mosse non valgono 0 per forza
   // con il punteggio a podio una quota % si traduce in un podio atteso (1..3) e il "fattore equivalente" è la somma dei podi / 18 (media 1/3)
-  const shareToPodio = (sh) => Math.max(1, Math.min(3, 2 + 6 * (sh - 1 / 3)));
-  function softFactor(g, p) {
+  // Podio atteso in una zona: 1 + somma delle probabilità di stare sopra a ciascun avversario (logistica sulla differenza delle somme di valori).
+  // Differenza 0 (anche zona mai segnata) → 2 a testa, come nel regolamento; più turni restano, più il vantaggio attuale si "diluisce".
+  const podioExp = (c, p, tl) => {
+    const sig = 1.4 + 3.2 * Math.sqrt(Math.max(0, tl) / 3);
+    let e = 1;
+    for (let q = 0; q < 3; q++) if (q !== p) e += 1 / (1 + Math.exp(-(c[p] - c[q]) / sig));
+    return e;
+  };
+  function zoneFactor(g, p, tl) {
     const s = g.s; let sum = 0;
-    for (let e = 0; e < 3; e++) { const sh = s.pairPts[e] > 0 ? s.contrib[p][e] / s.pairPts[e] : 1 / 3; sum += g.rules.scoring === 'podio' ? shareToPodio(sh) / 6 : sh; }
+    for (let e = 0; e < 3; e++) {
+      if (g.rules.scoring === 'podio') sum += podioExp([s.contrib[0][e], s.contrib[1][e], s.contrib[2][e]], p, tl) / 6;
+      else { const T = tl * PROJ.pairPerTurn; sum += (s.contrib[p][e] + T / 3) / (s.pairPts[e] + T || 1); }
+    }
     return sum / 3;
   }
-  // Punteggio PROIETTATO a fine partita: i punti personali e la quota in ogni coppia si diluiscono con i turni che restano.
-  // (Senza proiezione, una carta alta data alla coppia sembra aumentare il Fattore molto più di quanto farà davvero.)
   const PROJ = { selfAvg: 6.3, pairPerTurn: 4.1 };
-  // turni che restano (stima): la partita finisce quando esce l'ultima Zapd, che sta verso la fine del mazzo; ~6,2 carte a turno
+  // turni che restano (stima): ~6,2 carte a turno, la partita finisce con l'ultima Zapd
   const turnsLeftEst = (g) => (g.s.zapsDrawn >= g.totalZaps ? 0 : Math.max(0.5, (g.s.deck.length * 0.9) / 6.2));
+  function softFactor(g, p) {
+    const s = g.s; let sum = 0;
+    if (g.rules.scoring === 'podio') return zoneFactor(g, p, turnsLeftEst(g) * 0.5);
+    for (let e = 0; e < 3; e++) sum += s.pairPts[e] > 0 ? s.contrib[p][e] / s.pairPts[e] : 1 / 3;
+    return sum / 3;
+  }
   function projScore(g, p) {
-    const s = g.s, turnsLeft = turnsLeftEst(g);
-    const Tf = turnsLeft * PROJ.pairPerTurn;
-    let sum = 0;
-    for (let e = 0; e < 3; e++) { const sh = (s.contrib[p][e] + Tf / 3) / (s.pairPts[e] + Tf || 1); sum += g.rules.scoring === 'podio' ? shareToPodio(sh) / 6 : sh; }
-    return (s.players[p].personal + turnsLeft * (2 / 3) * PROJ.selfAvg) * (sum / 3);
+    const tl = turnsLeftEst(g);
+    return (g.s.players[p].personal + tl * (2 / 3) * PROJ.selfAvg) * zoneFactor(g, p, tl);
   }
   let useProj = true;
   const softScore = (g, p) => (useProj ? projScore(g, p) : g.s.players[p].personal * softFactor(g, p));
