@@ -131,3 +131,4 @@ Comportamento delle IA da escluso: giocano quasi sempre carte alte (X=8–10 in 
 Range = [V, V+X], con X la carta giocata per prima (scoperta) dall'escluso; somma controllata = 2 carte-coppia; la carta dell'escluso conta come ora per punti coppia e Fattore.
 Misure (hard×3, 200 partite): sforo 27,9% (sotto 2,10 / sopra 1,55 per partita: bilanciato), punti coppia 138, posti 25,0/38,0/37,0% (A basso: da ricontrollare con più partite), egoista vince 19,1%, difficile vs media 43,3%, media vs facile 52,0%, modificatori decisivi 1,43/partita.
 L'escluso gioca ancora per lo più carte alte (X=8–10 ~37% dei turni, X=1 ~7%); con X=1 la coppia sta nel range il 48%.
+- Controllo del posto A con 1000 partite (hard×3, seed sx0–sx999): xsum A 33,0% / B 32,6% / C 34,4%; perno 15 (regola attuale) A 35,9% / B 33,6% / C 30,5%. Il 25% visto con 200 partite era rumore.
